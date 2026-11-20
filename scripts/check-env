@@ -1,0 +1,2 @@
+const names = ["ANTHROPIC_API_KEY", "LANGSMITH_API_KEY", "LANGSMITH_TRACING", "LANGSMITH_PROJECT", "MDA_DEPLOYMENT_URL", "MDA_INGRESS_SECRET", "ELEVENLABS_API_KEY", "ELEVENLABS_VOICE_ID", "ELEVENLABS_TTS_MODEL", "INVITE_CODE", "SESSION_SECRET", "ADMIN_KEY", "ALERT_WEBHOOK_URL", "VERCEL_TOKEN"];
+for (const name of names) console.log(name + ": " + (process.env[name] ? "present" : "missing"));
