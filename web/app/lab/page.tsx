@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { EXERCISES } from "../../lib/pose/exercises/config";
-import { Landmarker } from "../../lib/pose/landmarker";
+import { Landmarker, type Model } from "../../lib/pose/landmarker";
 import { PosePipeline } from "../../lib/pose/pipeline";
 import { holdWakeLock } from "../../lib/pose/wakeLock";
 import type { Exercise, Fixture, Frame } from "../../lib/pose/types";
@@ -19,8 +19,10 @@ export default function Lab() {
   const cancel = useRef(false);
   const extracting = useRef(false);
   const processing = useRef(false);
+  const setStarted = useRef(false);
   const [exercise, setExercise] = useState<Exercise>("rdl");
   const [delegate, setDelegate] = useState<"GPU" | "CPU">("GPU");
+  const [model, setModel] = useState<Model | "auto">("auto");
   const [status, setStatus] = useState("Choose a demo, upload a video, or start the camera.");
   const [busy, setBusy] = useState(false);
   const [count, setCount] = useState(0);
@@ -38,10 +40,10 @@ export default function Lab() {
   }, []);
 
   async function ready() {
-    if (!detector.current) { setStatus("Loading on-device pose model…"); detector.current = await Landmarker.create("full", delegate); }
+    if (!detector.current) { setStatus("Loading on-device pose model…"); detector.current = await Landmarker.create(model === "auto" ? "full" : model, delegate); }
     setBackend(detector.current.model + " / " + detector.current.delegate);
   }
-  function reset() { pipeline.current = null; frames.current = []; setFixture(""); setCount(0); setPhase("IDLE"); setMetrics(""); }
+  function reset() { pipeline.current = null; frames.current = []; setStarted.current = false; setFixture(""); setCount(0); setPhase("IDLE"); setMetrics(""); }
   function stopSource() {
     video.current?.pause(); stream.current?.getTracks().forEach(track => track.stop()); stream.current = null;
     if (source.current.startsWith("blob:")) URL.revokeObjectURL(source.current);
@@ -60,6 +62,7 @@ export default function Lab() {
     pipeline.current ??= new PosePipeline(exercise, v.videoWidth, v.videoHeight);
     const result = pipeline.current.process(frame);
     if (!result) return;
+    if (result.phase !== "IDLE" && result.phase !== "READY") setStarted.current = true;
     frames.current.push(frame);
     setCount(result.count); setPhase(result.phase);
     const a = result.angles;
@@ -107,7 +110,7 @@ export default function Lab() {
           const before = performance.now(); const frame = detector.current!.detect(v); const ms = performance.now() - before;
           if (camera) frame.t = before;
           processFrame(frame); totalMs += ms; samples++; setRate(Math.round(1000 / (totalMs / samples)));
-          if (!switched && samples === 30 && totalMs / samples > 50 && detector.current!.model === "full") {
+          if (model === "auto" && !setStarted.current && !switched && samples === 30 && totalMs / samples > 50 && detector.current!.model === "full") {
             if (!stream.current) v.pause();
             detector.current!.close(); detector.current = await Landmarker.create("lite", delegate); switched = true;
             setBackend(detector.current.model + " / " + detector.current.delegate);
@@ -146,6 +149,7 @@ export default function Lab() {
   return <main className={styles.lab}><header><h1>Pose lab</h1><p>On-device only · no frames uploaded</p></header>
     <label>Exercise<select aria-label="Exercise" disabled={busy || camera} value={exercise} onChange={event => { video.current?.pause(); setExercise(event.target.value as Exercise); reset(); }}>{Object.entries(EXERCISES).map(([id, config]) => <option key={id} value={id}>{config.label}</option>)}</select></label>
     <label>Delegate<select aria-label="Delegate" disabled={busy || camera} value={delegate} onChange={event => { video.current?.pause(); detector.current?.close(); detector.current = null; setDelegate(event.target.value as "GPU" | "CPU"); reset(); }}><option value="GPU">Auto (GPU → CPU)</option><option value="CPU">CPU</option></select></label>
+    <label>Model<select aria-label="Model" disabled={busy || camera} value={model} onChange={event => { video.current?.pause(); detector.current?.close(); detector.current = null; setModel(event.target.value as Model | "auto"); reset(); }}><option value="auto">Auto</option><option value="full">full</option><option value="lite">lite</option></select></label>
     <div className={styles.buttons}><button disabled={busy || camera} onClick={() => load("/videos/" + exercise + ".mp4")}>Load demo</button><button disabled={busy || camera} onClick={cameraStart}>Start camera</button><button disabled={busy} onClick={() => { cancel.current = true; stopSource(); detector.current?.close(); detector.current = null; setStatus("Stopped"); }}>Stop</button></div>
     <label className={styles.upload}>Upload video<input aria-label="Upload video" type="file" accept="video/*" disabled={busy || camera} onChange={event => { const file = event.target.files?.[0]; if (file) load(URL.createObjectURL(file)); }} /></label>
     <div className={styles.picture} style={{ transform: camera ? "scaleX(-1)" : undefined }}><video ref={video} muted playsInline autoPlay={camera} controls={!busy && !camera} onPlay={play} /><canvas ref={canvas} /></div>
