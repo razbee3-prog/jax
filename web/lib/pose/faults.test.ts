@@ -8,9 +8,19 @@ import { countScores, faultEvidence, faultTable } from "../../../evals/evaluator
 import { analyzeRep } from "./faults";
 import { RepReporter } from "./repReport";
 import { CuePolicy } from "./cuePolicy";
+import { PosePipeline } from "./pipeline";
 
 const fixture=(id:string)=>FaultFixtureSchema.parse(JSON.parse(readFileSync(`evals/fixtures/faults/${id}.json`,"utf8")));
 describe("fault perturbations",()=>{
+  it("skips form claims when the decisive peak is off-profile despite good average view",()=>{
+    const f=profile("rdl_knee_squat"),p=new PosePipeline(f.exercise,f.width,f.height);
+    let peak=0,hip=Infinity;
+    f.frames.forEach((frame,i)=>{const r=p.process(frame);if(r?.angles && r.angles.hip<hip){hip=r.angles.hip;peak=i;}});
+    for(let i=peak-2;i<=peak+2;i++) f.frames[i].landmarks[12].x+=0.5;
+    const a=analyzeRep(f);
+    expect(a.quality.visibility).toBe(1);expect(a.quality.view_ok).toBe(false);
+    expect(a.observations).toEqual([]);
+  });
   for(const id of FAULT_IDS) it("detects synthetic "+id,()=>{
     const f=fixture(id),analysis=analyzeRep(f.window);
     expect(f.provenance).toBe("synthetic");expect(f.expected).toEqual([id]);
@@ -18,11 +28,12 @@ describe("fault perturbations",()=>{
     expect(analysis.observations.every(o=>Number.isFinite(o.value))).toBe(true);
   });
   it("loads all labels, without silently treating perturbation side effects as ground truth",async()=>{
-    const all=await loadFaultFixtures(); expect(all).toHaveLength(23);
-    expect(all.filter(f=>!f.expected.length)).toHaveLength(4);
+    const all=await loadFaultFixtures(); expect(all).toHaveLength(24);
+    expect(all.filter(f=>!f.expected.length)).toHaveLength(5);
     expect(all.every(f=>f.provenance==="synthetic")).toBe(true);
   });
   it("empty and stationary input produce no form claims",()=>{
+    expect(analyzeRep(fixture("rdl-off-profile").window).observations).toEqual([]);
     expect(analyzeRep({exercise:"curl",width:1280,height:720,frames:[]}).observations).toEqual([]);
     const f=fixture("curl-clean").window;
     const stationary={...f,frames:f.frames.map(fr=>({...fr,landmarks:f.frames[0].landmarks}))};

@@ -7,13 +7,18 @@ import type { Fixture, Frame } from "../web/lib/pose/types";
 const out="evals/fixtures/faults";
 await mkdir(out,{recursive:true});
 const bases = new Map<string,Fixture>();
+const projection="Synthetic profile projection: all landmark visibility set to 1 and right shoulder placed on left shoulder; left-side geometry otherwise preserved.";
+function profileFrames(frames:Frame[]):Frame[] {
+  return frames.map(frame=>{const landmarks=frame.landmarks.map(p=>({...p,visibility:1}));landmarks[12]={...landmarks[11]};return {...frame,landmarks};});
+}
 for(const exercise of ["rdl","push-press","curl","push-up"] as const){
   const f:Fixture=JSON.parse(await readFile(`evals/fixtures/${exercise}.json`,"utf8"));
   const p=new PosePipeline(exercise,f.width,f.height);
   const end=f.frames.findIndex(frame=>(p.process(frame)?.count ?? 0)>=1);
   if(end<0) throw new Error("No first rep: "+exercise);
   bases.set(exercise,{...f,frames:f.frames.slice(0,end+1),expected:1});
-  await writeFile(`${out}/${exercise}-clean.json`,JSON.stringify({version:1,id:exercise+"-clean",provenance:"synthetic",source:f.source,perturbation:"None: first demo rep, presumed clean negative (not real labeled form footage)",expected:[],evaluated:FAULT_IDS.filter(id=>FAULTS[id].exercise===exercise),window:{exercise,width:f.width,height:f.height,frames:f.frames.slice(0,end+1)}}));
+  if(exercise==="rdl") await writeFile(`${out}/rdl-off-profile.json`,JSON.stringify({version:1,id:"rdl-off-profile",provenance:"synthetic",source:f.source,perturbation:"Unmodified first demo rep: off-profile quality negative, no form claims expected.",expected:[],evaluated:FAULT_IDS.filter(id=>FAULTS[id].exercise===exercise),window:{exercise,width:f.width,height:f.height,frames:f.frames.slice(0,end+1)}}));
+  await writeFile(`${out}/${exercise}-clean.json`,JSON.stringify({version:1,id:exercise+"-clean",provenance:"synthetic",source:f.source,perturbation:"First demo rep, presumed clean negative (not real labeled form footage). "+projection,expected:[],evaluated:FAULT_IDS.filter(id=>FAULTS[id].exercise===exercise),window:{exercise,width:f.width,height:f.height,frames:profileFrames(f.frames.slice(0,end+1))}}));
 }
 for(const id of FAULT_IDS){
   const base=bases.get(FAULTS[id].exercise)!;
@@ -51,6 +56,6 @@ for(const id of FAULT_IDS){
     if(id==="curl_drop"){if(frame.t>pivot)frame.t=Math.round(pivot+(frame.t-pivot)*0.05);description="Only original post-top timestamps compressed to 5% duration.";}
   }
   const frames:Frame[]=f.frames.filter((frame,i,all)=>!i||frame.t>all[i-1].t);
-  await writeFile(`${out}/${id}.json`,JSON.stringify({version:1,id,provenance:"synthetic",source:base.source,perturbation:description,expected:[id],evaluated:[id],window:{exercise:f.exercise,width:f.width,height:f.height,frames}}));
+  await writeFile(`${out}/${id}.json`,JSON.stringify({version:1,id,provenance:"synthetic",source:base.source,perturbation:description+" "+projection,expected:[id],evaluated:[id],window:{exercise:f.exercise,width:f.width,height:f.height,frames:profileFrames(frames)}}));
 }
-console.log("Generated 19 single-target synthetic fault cases and 4 presumed-clean demo negatives.");
+console.log("Generated 19 synthetic profile fault cases, 4 projected clean negatives and 1 off-profile quality negative.");

@@ -31,6 +31,7 @@ export function analyzeRep(input: RepWindow) {
   const first = samples[0], end = samples.at(-1)!;
   const extreme = (fn:(s:Sample)=>number, max=false) => samples.reduce((a,b)=>(max ? fn(b)>fn(a) : fn(b)<fn(a)) ? b : a);
   const pivot = window.exercise === "rdl" ? extreme(s=>s.a.hip) : window.exercise === "push-press" ? extreme(s=>s.a.wristHeight,true) : extreme(s=>s.a.elbow);
+  if (!pivot.a.viewOk) { quality.view_ok = false; return { observations, quality, ms, metrics, keyframes:[] }; }
   const baseline = window.baselineTorsoLength ?? first.a.torsoLength;
   const min = (fn:(s:Sample)=>number) => Math.min(...samples.map(fn));
   const max = (fn:(s:Sample)=>number) => Math.max(...samples.map(fn));
