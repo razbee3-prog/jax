@@ -18,5 +18,14 @@ test("fake webcam counts two Romanian deadlifts", async () => {
     await page.screenshot({path:"test-results/fake-camera-count.png"});
     await page.getByRole("button", { name:"Stop",exact:true }).click();
     await expect(page.getByRole("status").filter({hasText:/^Stopped$/})).toBeVisible();
+    await expect(page.getByTestId("rep-count")).toHaveText("2");
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name:"Export JSON",exact:true }).click();
+    const exported = await download;
+    expect(exported.suggestedFilename()).toBe("rdl.json");
+    const fixture = JSON.parse(await page.getByLabel("Fixture JSON").inputValue());
+    expect(fixture.frames.length).toBeGreaterThan(100);
+    expect(fixture.expected).toBe(2);
+    expect(fixture.width).toBeGreaterThan(0); expect(fixture.height).toBeGreaterThan(0);
   } finally { await browser.close(); rmSync(clip, { force: true }); }
 });

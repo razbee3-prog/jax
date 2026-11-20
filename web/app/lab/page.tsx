@@ -46,10 +46,10 @@ export default function Lab() {
     video.current?.pause(); stream.current?.getTracks().forEach(track => track.stop()); stream.current = null;
     if (source.current.startsWith("blob:")) URL.revokeObjectURL(source.current);
     if (video.current) video.current.srcObject = null;
-    setCamera(false); reset();
+    setCamera(false);
   }
   function load(url: string) {
-    stopSource(); source.current = url;
+    stopSource(); reset(); source.current = url;
     if (video.current) { video.current.src = url; video.current.load(); }
     setStatus("Video ready. Play to count, or extract all frames.");
   }
@@ -72,11 +72,11 @@ export default function Lab() {
   }
   function serialize() {
     const v = video.current!;
-    const data: Fixture = { version: 1, exercise, width: v.videoWidth, height: v.videoHeight, expected: pipeline.current?.counter.count ?? 0, source: source.current, frames: frames.current };
+    const data: Fixture = { version: 1, exercise, width: pipeline.current?.width ?? v.videoWidth, height: pipeline.current?.height ?? v.videoHeight, expected: pipeline.current?.counter.count ?? 0, source: source.current, frames: frames.current };
     const json = JSON.stringify(data); setFixture(json); return json;
   }
   async function cameraStart() {
-    setBusy(true); setError(""); stopSource();
+    setBusy(true); setError(""); stopSource(); reset();
     try {
       await ready();
       stream.current = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
