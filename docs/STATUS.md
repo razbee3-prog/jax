@@ -5,7 +5,7 @@
 - Branch `devin/1795214320-m3-faults`, based on M2; M2 review fixes merged from its separate worktree. M1 remains paused; this work needs no Anthropic calls.
 - Added all 19 PLAN 7.2 detectors in `web/lib/pose/faults.ts`, using filtered aspect-correct near-side image landmarks and the existing `view_ok` check. Starting fault thresholds are unchanged. Rep-window timing, knee/arm excursion, ear/torso proxies, signed hip sag/pike, and wrist/shin/shoulder distances are evaluated without an LLM.
 - Added shared Zod `RepReport`/rep-window schemas, catalog and cue bank (three variants each of first/reminder/fixed for every fault), synced to `agent/shared/`. Added `RepReporter` (quality gates, consecutive-B streaks, separately logged observations) and one-fault correction/reminder/fixed selection with a two-cue cap. No actual voice/agent/UI events are emitted by M3.
-- All Tier B faults are **locked**: there are zero real labeled clips. Tier A results with synthetic precision >=0.85 are **provisional only**, not real-world validated; other A faults stay locked. Default report construction without explicit evidence fails closed. View/visibility gates still apply to provisional A. The caller must provide bounded rep/attempt windows and standing baseline where appropriate; live session wiring is deferred to M6.
+- All faults are **speech-ineligible**: there are zero real labeled clips. Tier A results with synthetic precision >=0.85 retain a **provisional research status only**; `RepReporter` requires real precision >=0.85 for either tier. There is no dev override. Default report construction without explicit evidence fails closed. The caller must provide bounded rep/attempt windows and standing baseline where appropriate; live session wiring is deferred to M6.
 - Generated 19 single-target synthetic perturbations and four presumed-clean demo negatives; documented exact operators per JSON and limitations in `evals/fixtures/faults/README.md`. Labels are not inferred from detector predictions. Only the intended positive fault is labeled on a perturbation; other fault truth is masked. All faults for the exercise are evaluated on clean negatives. Severe translations and compressed timestamps are predicate smoke tests, not realistic validation footage.
 - Dataset builders/evaluators now back `npm run evals` (perception subset; coach/session evals remain M7). LangSmith authentication succeeded with the explicitly bound secret. Both datasets uploaded and both experiments completed. Counting: **16/16 exact, total absolute error 0**. Faults: 23 examples, every targeted synthetic fault detected; seven false positives on presumed-clean demos are retained rather than tuned away. Counts are one labeled positive / one negative per fault; no statistical accuracy claims.
 
@@ -17,7 +17,7 @@ Experiments (SDK-generated URLs):
 
 Real precision/recall are N/A for **every** row. Provisional does not mean real-clip unlocked.
 
-| Fault | Tier | Precision | Recall | Speech status |
+| Fault | Tier | Precision | Recall | Research evidence status (all speech-ineligible) |
 |---|---|---:|---:|---|
 | rdl_back_round | B | 0.50 | 1.00 | locked |
 | rdl_knee_squat | A | 1.00 | 1.00 | provisional |

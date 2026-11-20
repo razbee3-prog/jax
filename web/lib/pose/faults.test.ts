@@ -44,6 +44,13 @@ function profile(id:string):RepWindow {
   return f;
 }
 describe("report and speech gates",()=>{
+  it("keeps synthetic-only tier A evidence out of speech reports",()=>{
+    for(const id of FAULT_IDS.filter(id=>FAULTS[id].tier==="A")){
+      const result=new RepReporter(evidence()).build(profile(id),1);
+      expect(result.observations.map(o=>o.id)).toContain(id);
+      expect(result.report.faults).toEqual([]);
+    }
+  });
   it("quality-gates degenerate limbs instead of serializing NaN",()=>{
     const f=profile("curl-clean");
     for(const frame of f.frames) for(const [elbow,wrist] of [[13,15],[14,16]]) frame.landmarks[wrist]={...frame.landmarks[elbow]};
@@ -65,9 +72,9 @@ describe("report and speech gates",()=>{
   });
   it("builds bounded schema-valid reports, keeping locked observations out of coach faults",()=>{
     const f=profile("rdl_knee_squat");
-    const r=new RepReporter(evidence()).build(f,1);
+    const r=new RepReporter(evidence(true)).build(f,1);
     expect(RepReportSchema.safeParse(r.report).success).toBe(true);
-    expect(r.report.faults.find(o=>o.id==="rdl_knee_squat")?.validation).toBe("provisional");
+    expect(r.report.faults.find(o=>o.id==="rdl_knee_squat")?.validation).toBe("validated");
     expect(new RepReporter().build(f,1).report.faults).toEqual([]);
     expect(r.observations.length).toBeGreaterThan(0);
     expect(JSON.stringify(r.report).length).toBeLessThan(2800);

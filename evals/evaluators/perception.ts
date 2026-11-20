@@ -15,5 +15,5 @@ export function faultEvidence(rows:FaultResult[]):Evidence {
 }
 export function faultTable(rows:FaultResult[]) {
   const evidence=faultEvidence(rows);
-  return FAULT_IDS.map(id=>({id,...evidence[id]!,precision:precision(evidence[id]!.synthetic),recall:recall(evidence[id]!.synthetic),real_precision:precision(evidence[id]!.real),status:speechStatus(id,evidence[id])}));
+  return FAULT_IDS.map(id=>({id,...evidence[id]!,precision:precision(evidence[id]!.synthetic),recall:recall(evidence[id]!.synthetic),real_precision:precision(evidence[id]!.real),status:speechStatus(id,evidence[id]),speech_eligible:speechStatus(id,evidence[id])==="validated"}));
 }

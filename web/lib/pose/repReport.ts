@@ -20,7 +20,7 @@ export class RepReporter {
       const streak = good ? (this.streaks[f.id] ?? 0)+1 : 0;
       this.streaks[f.id] = streak;
       const validation = speechStatus(f.id,this.evidence[f.id]);
-      return good && validation !== "locked" && (f.tier === "A" || streak >= 2) ? [{ id:f.id,value:f.value,threshold:f.threshold,tier:f.tier,streak,validation }] : [];
+      return good && validation === "validated" && (f.tier === "A" || streak >= 2) ? [{ id:f.id,value:f.value,threshold:f.threshold,tier:f.tier,streak,validation }] : [];
     });
     const report = RepReportSchema.parse({ exercise:window.exercise,rep,target,ms:{...analysis.ms,since_last_rep:sinceLastRep},metrics:analysis.metrics,faults,quality:analysis.quality,keyframes:analysis.keyframes });
     return { report, observations:analysis.observations };
