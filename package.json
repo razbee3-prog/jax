@@ -1,0 +1,42 @@
+{
+  "name": "jax-pilot",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check:env": "node scripts/check-env",
+    "dev": "next dev web --hostname 0.0.0.0",
+    "build": "next build web",
+    "start": "next start web --hostname 0.0.0.0",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p web/tsconfig.json",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "sync:shared": "node scripts/sync-shared.mjs",
+    "check:shared": "node scripts/sync-shared.mjs --check",
+    "agent:dev": "node scripts/not-implemented.mjs M1",
+    "agent:deploy": "node scripts/not-implemented.mjs M1",
+    "smoke:agent": "node scripts/not-implemented.mjs M1",
+    "smoke:session": "node scripts/not-implemented.mjs M6",
+    "evals": "node scripts/not-implemented.mjs M7"
+  },
+  "dependencies": {
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.4.6",
+    "tailwindcss": "4.3.5",
+    "typescript": "5.9.3",
+    "vitest": "5.1.1"
+  }
+}
