@@ -18,8 +18,9 @@ export class PosePipeline {
       this.filters.forEach(pair => pair.forEach(filter => filter.reset()));
     }
     this.lastTime = frame.t;
-    this.firstTime ??= frame.t;
-    if (frame.t - this.firstTime <= 500) {
+    const left = sideVisibility(frame.landmarks, "left"), right = sideVisibility(frame.landmarks, "right");
+    if (Math.max(left, right) >= 0.5) this.firstTime ??= frame.t;
+    if (this.firstTime !== undefined && frame.t - this.firstTime <= 500) {
       this.visibility.left += sideVisibility(frame.landmarks, "left");
       this.visibility.right += sideVisibility(frame.landmarks, "right");
       this.side = this.visibility.right > this.visibility.left ? "right" : "left";

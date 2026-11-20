@@ -33,6 +33,16 @@ describe("demo landmark fixtures", () => {
     for (let t=0; t<5000; t+=100) pipeline.process({ t, landmarks: [] });
     expect(pipeline.counter.count).toBe(0);
   });
+  it("selects the visible right side when the person arrives after setup would have expired", () => {
+    const fixture: Fixture = JSON.parse(readFileSync(resolve(fixtureDir, "curl.json"), "utf8"));
+    const frames = fixture.frames.map(frame => {
+      const landmarks = frame.landmarks.map(p => ({ ...p, visibility: 0 }));
+      for (const i of [11,13,15,23,25,27,29,31]) landmarks[i+1] = { ...frame.landmarks[i], visibility: 1 };
+      return { t: frame.t + 2000, landmarks };
+    });
+    const pipeline = replay({ ...fixture, frames: [{ t:0,landmarks:[] }, { t:1000,landmarks:[] }, ...frames] });
+    expect(pipeline.side).toBe("right"); expect(pipeline.counter.count).toBe(3);
+  });
   it("low visibility and duplicate timestamps cannot count", () => {
     const fixture: Fixture = JSON.parse(readFileSync(resolve(fixtureDir, "curl.json"), "utf8"));
     const hidden = { ...fixture, frames: fixture.frames.map(frame => ({ ...frame, landmarks: frame.landmarks.map(p => ({ ...p, visibility: 0.1 })) })) };
