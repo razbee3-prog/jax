@@ -55,10 +55,12 @@ export default function Lab() {
   }
   function processFrame(frame: Frame) {
     const v = video.current!;
+    if (frames.current.length && frame.t < frames.current[frames.current.length-1].t) reset();
+    if (frames.current.length && frame.t === frames.current[frames.current.length-1].t) return;
     pipeline.current ??= new PosePipeline(exercise, v.videoWidth, v.videoHeight);
-    frames.current.push(frame);
     const result = pipeline.current.process(frame);
     if (!result) return;
+    frames.current.push(frame);
     setCount(result.count); setPhase(result.phase);
     const a = result.angles;
     setMetrics(a ? JSON.stringify({ side: result.side, hip: +a.hip.toFixed(1), knee: +a.knee.toFixed(1), elbow: +a.elbow.toFixed(1), shoulder_flex: +a.shoulderFlex.toFixed(1), body_line: +a.bodyLine.toFixed(1), torso_lean: +a.torsoLean.toFixed(1), torso_len: +a.torsoLength.toFixed(1), wrist_height: +a.wristHeight.toFixed(2), view_ok: a.viewOk, tracking: a.valid }, null, 2) : "No pose detected");
