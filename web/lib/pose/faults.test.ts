@@ -9,9 +9,22 @@ import { analyzeRep } from "./faults";
 import { RepReporter } from "./repReport";
 import { CuePolicy } from "./cuePolicy";
 import { PosePipeline } from "./pipeline";
+import { EXERCISES } from "./exercises/config";
 
 const fixture=(id:string)=>FaultFixtureSchema.parse(JSON.parse(readFileSync(`evals/fixtures/faults/${id}.json`,"utf8")));
 describe("fault perturbations",()=>{
+  it("labels push-press ascent as lifting and return from lockout as lowering",()=>{
+    const f=profile("push-press-clean");
+    for(const frame of f.frames) frame.t=Math.round(frame.t<2000?frame.t*0.5:1000+(frame.t-2000)*3);
+    const p=new PosePipeline(f.exercise,f.width,f.height);
+    const samples=f.frames.flatMap(frame=>{const r=p.process(frame);return r?.angles?.valid?[{t:frame.t,a:r.angles}]:[];});
+    const peak=samples.reduce((a,b)=>b.a.wristHeight>a.a.wristHeight?b:a);
+    const motion=samples.find(s=>!EXERCISES["push-press"].near(s.a))!;
+    const ms=analyzeRep(f).ms;
+    expect(ms.lifting).toBe(peak.t-motion.t);
+    expect(ms.lowering).toBe(samples.at(-1)!.t-peak.t);
+    expect(ms.lowering).toBeGreaterThan(ms.lifting);
+  });
   it("skips form claims when the decisive peak is off-profile despite good average view",()=>{
     const f=profile("rdl_knee_squat"),p=new PosePipeline(f.exercise,f.width,f.height);
     let peak=0,hip=Infinity;

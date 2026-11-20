@@ -1,9 +1,9 @@
 {
-  "suite": "m3-perception-v1",
-  "created_at": "2026-11-20T22:49:39.245Z",
+  "suite": "m3-perception-v2",
+  "created_at": "2026-11-20T23:59:23.880Z",
   "urls": {
-    "counting": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/f51672c3-ba74-42f0-9318-55b631c174e2",
-    "faults": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/239761e1-043b-4e17-a3e2-9ec5ab648aca"
+    "counting": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/48de20a7-848b-4d7c-8564-f4c568e32518",
+    "faults": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/4e455a1e-9324-4fe2-a528-9c132daaa964"
   },
   "counting": {
     "examples": 16,
@@ -11,7 +11,7 @@
     "absolute_error": 0
   },
   "faults": {
-    "examples": 23,
+    "examples": 24,
     "real_labeled_clips": 0,
     "table": [
       {
@@ -29,7 +29,8 @@
         "precision": 0.5,
         "recall": 1,
         "real_precision": null,
-        "status": "locked"
+        "status": "locked",
+        "speech_eligible": false
       },
       {
         "id": "rdl_knee_squat",
@@ -46,7 +47,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "rdl_drift",
@@ -63,7 +65,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "rdl_shallow",
@@ -80,7 +83,8 @@
         "precision": 0.5,
         "recall": 1,
         "real_precision": null,
-        "status": "locked"
+        "status": "locked",
+        "speech_eligible": false
       },
       {
         "id": "rdl_fast",
@@ -97,13 +101,14 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "pp_chest_forward",
         "synthetic": {
           "tp": 1,
-          "fp": 1,
+          "fp": 0,
           "fn": 0
         },
         "real": {
@@ -111,16 +116,17 @@
           "fp": 0,
           "fn": 0
         },
-        "precision": 0.5,
+        "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "locked"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "pp_dip_deep",
         "synthetic": {
           "tp": 1,
-          "fp": 1,
+          "fp": 0,
           "fn": 0
         },
         "real": {
@@ -128,10 +134,11 @@
           "fp": 0,
           "fn": 0
         },
-        "precision": 0.5,
+        "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "locked"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "pp_no_legs",
@@ -148,13 +155,14 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "pp_soft_lockout",
         "synthetic": {
           "tp": 1,
-          "fp": 1,
+          "fp": 0,
           "fn": 0
         },
         "real": {
@@ -162,10 +170,11 @@
           "fp": 0,
           "fn": 0
         },
-        "precision": 0.5,
+        "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "locked"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "pp_lean_back",
@@ -182,7 +191,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "locked"
+        "status": "locked",
+        "speech_eligible": false
       },
       {
         "id": "pp_press_early",
@@ -199,7 +209,8 @@
         "precision": 0.5,
         "recall": 1,
         "real_precision": null,
-        "status": "locked"
+        "status": "locked",
+        "speech_eligible": false
       },
       {
         "id": "curl_swing",
@@ -216,7 +227,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "curl_elbow_drift",
@@ -233,7 +245,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "curl_partial",
@@ -250,7 +263,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "curl_drop",
@@ -267,7 +281,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "pu_hip_sag",
@@ -284,7 +299,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "pu_hip_pike",
@@ -301,7 +317,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "pu_shallow",
@@ -318,7 +335,8 @@
         "precision": 1,
         "recall": 1,
         "real_precision": null,
-        "status": "provisional"
+        "status": "provisional",
+        "speech_eligible": false
       },
       {
         "id": "pu_head_drop",
@@ -335,7 +353,8 @@
         "precision": 0.5,
         "recall": 1,
         "real_precision": null,
-        "status": "locked"
+        "status": "locked",
+        "speech_eligible": false
       }
     ]
   }

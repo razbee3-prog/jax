@@ -37,8 +37,9 @@ export function analyzeRep(input: RepWindow) {
   const max = (fn:(s:Sample)=>number) => Math.max(...samples.map(fn));
   const motion = samples.find(s=>!EXERCISES[window.exercise].near(s.a)) ?? first;
   const outbound = Math.max(0,pivot.t-motion.t), inbound = Math.max(0,end.t-pivot.t);
-  ms.lowering = window.exercise === "curl" ? inbound : outbound;
-  ms.lifting = window.exercise === "curl" ? outbound : inbound;
+  const liftsOutbound = window.exercise === "curl" || window.exercise === "push-press";
+  ms.lowering = liftsOutbound ? inbound : outbound;
+  ms.lifting = liftsOutbound ? outbound : inbound;
   Object.assign(metrics,{ hip_min:min(s=>s.a.hip), knee_min:min(s=>s.a.knee), elbow_min:min(s=>s.a.elbow), elbow_max:max(s=>s.a.elbow), torso_lean_max:max(s=>s.a.torsoLean), torso_len_ratio_min:min(s=>s.a.torsoLength/baseline) });
   const progress = EXERCISES[window.exercise].progress;
   const excursion = max(s=>progress(s.a))-min(s=>progress(s.a));

@@ -9,7 +9,7 @@ import type { FaultId } from "../shared/faults";
 
 if(!process.env.LANGSMITH_API_KEY) throw new Error("LANGSMITH_API_KEY is required");
 const client=new Client();
-const suite="m3-perception-v1";
+const suite="m3-perception-v2";
 async function upload(name:string,rows:DatasetRow[]) {
   const dataset=await client.hasDataset({datasetName:name}) ? await client.readDataset({datasetName:name}) : await client.createDataset(name,{description:"Jax M3 perception smoke evaluation. Synthetic fault fixtures are NOT real-clip validation."});
   const existing=new Set<string>();

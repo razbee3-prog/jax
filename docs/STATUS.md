@@ -2,17 +2,18 @@
 
 ## M3 — fault detectors and perception evals
 
-- Review follow-up: degenerate derived angles now reduce tracking quality instead of leaking NaN into reports; non-finite optional neck metrics are omitted. Both tiers require real-clip validation for speech. An off-profile decisive peak suppresses form claims even when average view passes. All original demo peaks failed the profile gate, so the revised synthetic positive/clean suite explicitly projects shoulders to side-on and sets visibility to 1; it is not raw model output or new accuracy evidence. An unmodified off-profile RDL window is retained as an additional quality negative. The original 23-example experiment below is historical; the revised suite has 24 examples.
+- Review follow-up: degenerate derived angles now reduce tracking quality instead of leaking NaN into reports; non-finite optional neck metrics are omitted. Both tiers require real-clip validation for speech. An off-profile decisive peak suppresses form claims even when average view passes. All original demo peaks failed the profile gate, so the revised synthetic positive/clean suite explicitly projects shoulders to side-on and sets visibility to 1; it is not raw model output or new accuracy evidence. An unmodified off-profile RDL window is retained as an additional quality negative. The revised suite below has 24 examples; earlier 23-example experiments remain historical in LangSmith.
+- Push-press phase labels now match curl direction: ascent to maximum wrist height is lifting, return is lowering. Dip/early-press predicates use explicit pre-lockout timestamps/knee angles, not these phase labels; their thresholds are unchanged. All four review fixes had a targeted failing-first test; final lint/typecheck, 83 tests in 4 files, shared-sync check and production build passed. The rejected cue acknowledgment/cap behavior was not changed.
 - Branch `devin/1795214320-m3-faults`, based on M2; M2 review fixes merged from its separate worktree. M1 remains paused; this work needs no Anthropic calls.
 - Added all 19 PLAN 7.2 detectors in `web/lib/pose/faults.ts`, using filtered aspect-correct near-side image landmarks and the existing `view_ok` check. Starting fault thresholds are unchanged. Rep-window timing, knee/arm excursion, ear/torso proxies, signed hip sag/pike, and wrist/shin/shoulder distances are evaluated without an LLM.
 - Added shared Zod `RepReport`/rep-window schemas, catalog and cue bank (three variants each of first/reminder/fixed for every fault), synced to `agent/shared/`. Added `RepReporter` (quality gates, consecutive-B streaks, separately logged observations) and one-fault correction/reminder/fixed selection with a two-cue cap. No actual voice/agent/UI events are emitted by M3.
 - All faults are **speech-ineligible**: there are zero real labeled clips. Tier A results with synthetic precision >=0.85 retain a **provisional research status only**; `RepReporter` requires real precision >=0.85 for either tier. There is no dev override. Default report construction without explicit evidence fails closed. The caller must provide bounded rep/attempt windows and standing baseline where appropriate; live session wiring is deferred to M6.
-- Generated 19 single-target synthetic perturbations and four presumed-clean demo negatives; documented exact operators per JSON and limitations in `evals/fixtures/faults/README.md`. Labels are not inferred from detector predictions. Only the intended positive fault is labeled on a perturbation; other fault truth is masked. All faults for the exercise are evaluated on clean negatives. Severe translations and compressed timestamps are predicate smoke tests, not realistic validation footage.
-- Dataset builders/evaluators now back `npm run evals` (perception subset; coach/session evals remain M7). LangSmith authentication succeeded with the explicitly bound secret. Both datasets uploaded and both experiments completed. Counting: **16/16 exact, total absolute error 0**. Faults: 23 examples, every targeted synthetic fault detected; seven false positives on presumed-clean demos are retained rather than tuned away. Counts are one labeled positive / one negative per fault; no statistical accuracy claims.
+- Generated 19 single-target synthetic profile perturbations, four projected presumed-clean demo negatives and one unmodified off-profile quality negative; documented exact operators per JSON and limitations in `evals/fixtures/faults/README.md`. Labels are not inferred from detector predictions. Only the intended positive fault is labeled on a perturbation; other fault truth is masked. All faults for the exercise are evaluated on clean/quality negatives. Severe translations, synthetic profile projection and compressed timestamps are predicate smoke tests, not realistic validation footage.
+- Dataset builders/evaluators now back `npm run evals` (perception subset; coach/session evals remain M7). LangSmith authentication succeeded with the explicitly bound secret. Revised v2 datasets uploaded and both experiments completed. Counting: **16/16 exact, total absolute error 0**. Faults: 24 examples, every targeted synthetic fault detected; four false positives on projected presumed-clean demos are retained. Each fault has one positive and one projected clean negative; RDL faults also have an off-profile quality negative. All 19 are speech-ineligible; no statistical accuracy claims.
 
 Experiments (SDK-generated URLs):
-- Rep counting: https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/f51672c3-ba74-42f0-9318-55b631c174e2
-- Form faults: https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/239761e1-043b-4e17-a3e2-9ec5ab648aca
+- Rep counting: https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/48de20a7-848b-4d7c-8564-f4c568e32518
+- Form faults: https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/4e455a1e-9324-4fe2-a528-9c132daaa964
 
 ### Per-fault synthetic results
 
@@ -25,10 +26,10 @@ Real precision/recall are N/A for **every** row. Provisional does not mean real-
 | rdl_drift | A | 1.00 | 1.00 | provisional |
 | rdl_shallow | A | 0.50 | 1.00 | locked |
 | rdl_fast | A | 1.00 | 1.00 | provisional |
-| pp_chest_forward | A | 0.50 | 1.00 | locked |
-| pp_dip_deep | A | 0.50 | 1.00 | locked |
+| pp_chest_forward | A | 1.00 | 1.00 | provisional |
+| pp_dip_deep | A | 1.00 | 1.00 | provisional |
 | pp_no_legs | A | 1.00 | 1.00 | provisional |
-| pp_soft_lockout | A | 0.50 | 1.00 | locked |
+| pp_soft_lockout | A | 1.00 | 1.00 | provisional |
 | pp_lean_back | B | 1.00 | 1.00 | locked |
 | pp_press_early | B | 0.50 | 1.00 | locked |
 | curl_swing | A | 1.00 | 1.00 | provisional |
@@ -40,8 +41,7 @@ Real precision/recall are N/A for **every** row. Provisional does not mean real-
 | pu_shallow | A | 1.00 | 1.00 | provisional |
 | pu_head_drop | B | 0.50 | 1.00 | locked |
 
-- Results artifact: `evals/results/m3-perception.json`. First local aggregation incorrectly iterated the already-consumed SDK experiment iterator; corrected to the SDK's public `.results` array and added an exact row-count assertion. Final results contain all 16/23 rows. The earlier experiment pair remains in LangSmith; links above are the corrected final pair.
-- Independent API readback confirmed 16 counting root runs and 23 fault root runs in the final projects, with zero errors or missing outputs in either.
+- Results artifact: `evals/results/m3-perception.json`, suite `m3-perception-v2`, includes all 16/24 rows and explicit `speech_eligible: false` for every detector. The first v1 aggregation incorrectly iterated the already-consumed SDK experiment iterator; the runner now reads `.results` and asserts exact row counts. Earlier experiments remain in LangSmith; links above are the revised v2 pair.
 - M3 checks: 4 files / 78 tests passed; shared copies match; lint/typecheck exit 0; production build passed; final Playwright suite 3 passed (17.2s), including fake webcam and rewind/export. Initial cue-loop regression exposed an inconsistent-input fixed acknowledgment after two nudges; corrected to check both eligible faults and observed faults before acknowledging a fix. Report arguments are validated before streak state can mutate.
 - No M3 visual surface changed: pure detector/report APIs and offline experiments only. `/lab` retains its M2 fault placeholder until live wiring; no new visual verification was requested/performed. Real fault clips, side-on/45-degree comparison, iPhone camera/framing, and real precision remain open. Received a PR #2 failed-check notification; CI-loop ownership was not delegated with the four review findings, so its remote failure has not been investigated here.
 
