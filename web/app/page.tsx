@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 export default function Home() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -7,6 +7,8 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const audio = useRef<AudioContext | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => { if (attempt > 0) input.current?.focus(); }, [attempt]);
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!audio.current) audio.current = new AudioContext();
@@ -23,9 +25,9 @@ export default function Home() {
     <div className="orb" aria-hidden="true" />
     <h1 id="title">Jax</h1><p className="subtitle">Your AI personal trainer</p>
     {accepted ? <p role="status">You&apos;re on the list. Coaching is coming soon.</p> :
-    <form onSubmit={submit}>
+    <form method="post" onSubmit={submit}>
       <label htmlFor="invite">Enter invite code to get started</label>
-      <input key={attempt} className={error ? "shake" : ""} id="invite" name="code" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="Invite code" required aria-invalid={!!error} aria-describedby="error" />
+      <input ref={input} key={attempt} className={error ? "shake" : ""} id="invite" name="code" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="Invite code" required aria-invalid={!!error} aria-describedby="error" />
       <button disabled={busy}>{busy ? "Checking…" : "Get started"}</button>
       <p id="error" className="error" role="alert">{error}</p>
     </form>}
