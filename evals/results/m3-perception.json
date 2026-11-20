@@ -1,0 +1,342 @@
+{
+  "suite": "m3-perception-v1",
+  "created_at": "2026-11-20T22:49:39.245Z",
+  "urls": {
+    "counting": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/f51672c3-ba74-42f0-9318-55b631c174e2",
+    "faults": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/239761e1-043b-4e17-a3e2-9ec5ab648aca"
+  },
+  "counting": {
+    "examples": 16,
+    "exact_matches": 16,
+    "absolute_error": 0
+  },
+  "faults": {
+    "examples": 23,
+    "real_labeled_clips": 0,
+    "table": [
+      {
+        "id": "rdl_back_round",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked"
+      },
+      {
+        "id": "rdl_knee_squat",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "rdl_drift",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "rdl_shallow",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked"
+      },
+      {
+        "id": "rdl_fast",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "pp_chest_forward",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked"
+      },
+      {
+        "id": "pp_dip_deep",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked"
+      },
+      {
+        "id": "pp_no_legs",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "pp_soft_lockout",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked"
+      },
+      {
+        "id": "pp_lean_back",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked"
+      },
+      {
+        "id": "pp_press_early",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked"
+      },
+      {
+        "id": "curl_swing",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "curl_elbow_drift",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "curl_partial",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "curl_drop",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "pu_hip_sag",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "pu_hip_pike",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "pu_shallow",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional"
+      },
+      {
+        "id": "pu_head_drop",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked"
+      }
+    ]
+  }
+}
