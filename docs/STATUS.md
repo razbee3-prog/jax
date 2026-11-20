@@ -1,5 +1,12 @@
 # Jax status — M0 bootstrap
 
+## M1 started — blocked on Anthropic authentication
+
+- Branch `devin/1795212712-m1-agent` created from the M0 branch. Installed pinned M1 packages and verified `managed-deepagents@0.10.5` (not 0.0.2); read the installed README and init CLI help. Zod pinned to 4.6.7 after npm audit flagged 4.3.6; updated install reports 0 vulnerabilities.
+- Anthropic `GET /v1/models` returned HTTP 401, `authentication_error: invalid x-api-key`, both with the inherited environment and an explicitly bound org ANTHROPIC_API_KEY. Request ID for explicit binding: `req_011ChEwvL9KCh3GpFxpwWi8R`. This blocks model selection, real agent turns, memory tests and the latency gate. No model fallback can resolve authentication failure.
+- LANGSMITH_API_KEY was explicitly bound; LangSmith `/info` returned HTTP 200 (this endpoint alone does not establish workspace authorization).
+- Per the standing missing-secret rule, stopped before scaffolding/deployment rather than incurring deployment changes with an unusable model credential. No ingress secret generated, no agent deployment, no droplet changes, no smoke measurements, and no commit or push yet. Dependency and status changes remain local pending a working Anthropic credential.
+
 ## Follow-up: authorized DigitalOcean deployment
 
 - PR #1 head a5c9d9b passed bootstrap and Devin Review before deployment work. Added `web/Dockerfile` (build from repository root with `docker build -f web/Dockerfile -t jax-web .`), root `.dockerignore`, and standalone Next output with repository tracing root.
