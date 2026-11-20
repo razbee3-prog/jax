@@ -20,7 +20,7 @@ export function analyzeRep(input: RepWindow) {
     if (frame.t <= last) throw new Error("Rep window timestamps must strictly increase");
     last = frame.t;
     const r = pipeline.process(frame);
-    if (r?.angles?.valid) samples.push({ t:frame.t, a:r.angles, points:r.points, side:r.side });
+    if (r?.angles?.valid && Object.values(r.angles).every(v=>typeof v !== "number" || Number.isFinite(v))) samples.push({ t:frame.t, a:r.angles, points:r.points, side:r.side });
   }
   const observations: Observation[] = [];
   const total = window.frames.length > 1 ? window.frames.at(-1)!.t-window.frames[0].t : 0;
@@ -43,6 +43,7 @@ export function analyzeRep(input: RepWindow) {
   const excursion = max(s=>progress(s.a))-min(s=>progress(s.a));
   if (excursion < (window.exercise === "push-press" ? 0.15 : 10)) return { observations, quality, ms, metrics, keyframes:[] };
   function flag(id:FaultId, metric:string, value:number, threshold:number, condition:boolean) {
+    if (!Number.isFinite(value)) return;
     metrics[metric] = value;
     if (condition && Number.isFinite(value)) observations.push({ id, metric, value, threshold, tier:FAULTS[id].tier });
   }

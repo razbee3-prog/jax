@@ -44,6 +44,20 @@ function profile(id:string):RepWindow {
   return f;
 }
 describe("report and speech gates",()=>{
+  it("quality-gates degenerate limbs instead of serializing NaN",()=>{
+    const f=profile("curl-clean");
+    for(const frame of f.frames) for(const [elbow,wrist] of [[13,15],[14,16]]) frame.landmarks[wrist]={...frame.landmarks[elbow]};
+    const {report,observations}=new RepReporter(evidence(true)).build(f,1);
+    expect(report.quality.visibility).toBe(0);expect(report.quality.view_ok).toBe(false);
+    expect(report.metrics).toEqual({});expect(report.faults).toEqual([]);expect(observations).toEqual([]);
+  });
+  it("omits non-finite optional neck measurements",()=>{
+    const f=profile("rdl-clean");f.baselineTorsoLength=1;
+    for(const frame of f.frames){frame.landmarks[7]={...frame.landmarks[11]};frame.landmarks[8]={...frame.landmarks[12]};}
+    const {report}=new RepReporter(evidence(true)).build(f,1);
+    expect(Object.values(report.metrics).every(Number.isFinite)).toBe(true);
+    expect(report.metrics).not.toHaveProperty("ear_shoulder_hip");
+  });
   it("does not unlock any B fault with synthetic precision, even 1.0",()=>{
     for(const id of FAULT_IDS)expect(speechStatus(id,evidence()[id])).toBe(FAULTS[id].tier==="A"?"provisional":"locked");
     expect(speechStatus("curl_swing")).toBe("locked");
