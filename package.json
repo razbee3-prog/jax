@@ -18,18 +18,21 @@
     "check:shared": "node scripts/sync-shared.mjs --check",
     "extract:landmarks": "node scripts/extract-landmarks",
     "fixtures:negative": "tsx scripts/generate-negative-fixtures.mts",
+    "fixtures:faults": "tsx scripts/generate-fault-fixtures.mts",
     "record:lab": "node scripts/record-lab.mjs",
     "agent:dev": "node scripts/not-implemented.mjs M1",
     "agent:deploy": "node scripts/not-implemented.mjs M1",
     "smoke:agent": "node scripts/not-implemented.mjs M1",
     "smoke:session": "node scripts/not-implemented.mjs M6",
-    "evals": "node scripts/not-implemented.mjs M7"
+    "evals": "tsx scripts/eval-perception.mts"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "1.2.3",
+    "langsmith": "0.13.1",
     "next": "16.4.6",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@playwright/test": "1.65.1",

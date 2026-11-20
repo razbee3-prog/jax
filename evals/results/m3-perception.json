@@ -1,0 +1,361 @@
+{
+  "suite": "m3-perception-v2",
+  "created_at": "2026-11-20T23:59:23.880Z",
+  "urls": {
+    "counting": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/48de20a7-848b-4d7c-8564-f4c568e32518",
+    "faults": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/4e455a1e-9324-4fe2-a528-9c132daaa964"
+  },
+  "counting": {
+    "examples": 16,
+    "exact_matches": 16,
+    "absolute_error": 0
+  },
+  "faults": {
+    "examples": 24,
+    "real_labeled_clips": 0,
+    "table": [
+      {
+        "id": "rdl_back_round",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked",
+        "speech_eligible": false
+      },
+      {
+        "id": "rdl_knee_squat",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "rdl_drift",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "rdl_shallow",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked",
+        "speech_eligible": false
+      },
+      {
+        "id": "rdl_fast",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "pp_chest_forward",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "pp_dip_deep",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "pp_no_legs",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "pp_soft_lockout",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "pp_lean_back",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked",
+        "speech_eligible": false
+      },
+      {
+        "id": "pp_press_early",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked",
+        "speech_eligible": false
+      },
+      {
+        "id": "curl_swing",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "curl_elbow_drift",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "curl_partial",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "curl_drop",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "pu_hip_sag",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "pu_hip_pike",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "pu_shallow",
+        "synthetic": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 1,
+        "recall": 1,
+        "real_precision": null,
+        "status": "provisional",
+        "speech_eligible": false
+      },
+      {
+        "id": "pu_head_drop",
+        "synthetic": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 0
+        },
+        "real": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "precision": 0.5,
+        "recall": 1,
+        "real_precision": null,
+        "status": "locked",
+        "speech_eligible": false
+      }
+    ]
+  }
+}
