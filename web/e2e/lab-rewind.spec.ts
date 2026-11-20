@@ -4,7 +4,11 @@ test("rewinding mid-video starts a new monotonic recording", async ({ page }) =>
   await page.goto("/lab");
   await page.getByLabel("Delegate",{exact:true}).selectOption("CPU");
   await page.getByRole("button",{name:"Load demo",exact:true}).click();
-  await page.locator("video").evaluate(async v=>{ await (v as HTMLVideoElement).play(); });
+  await page.locator("video").evaluate(async element=>{
+    const v=element as HTMLVideoElement;
+    if(v.readyState<2) await new Promise(resolve=>v.addEventListener("loadeddata",resolve,{once:true}));
+    await v.play();
+  });
   await expect.poll(()=>page.locator("video").evaluate(v=>(v as HTMLVideoElement).currentTime),{timeout:30000}).toBeGreaterThan(2.5);
   await page.locator("video").evaluate(v=>{(v as HTMLVideoElement).currentTime=1;});
   await expect.poll(()=>page.locator("video").evaluate(v=>(v as HTMLVideoElement).currentTime)).toBeGreaterThan(1.5);
