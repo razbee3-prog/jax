@@ -1,4 +1,50 @@
-# Jax status — M0 bootstrap
+# Jax status
+
+## M2 — pose engine and rep counting
+
+### Review follow-up
+
+- CI investigation: PR #2 job `136619497084` and PR #3 job `136621527420` both fail the fake-webcam assertion (expected 2, received 1 within 20 seconds). Reproduced with `CI=true taskset -c 0,1 npm run test:e2e`: two tests pass and camera counting fails. An instrumented local camera capture shows automatic full-to-lite switching during setup; the first hinge has a minimum measured hip angle around 137 degrees and never reaches the unchanged 125-degree RDL gate. The same demo's full-model fixture reaches about 114 degrees. CI artifacts/logs do not show the backend, so the corresponding model switch on the hosted runners remains unverified. Two camera warm-up experiments did not fix the constrained test; both changes were reverted. No threshold, timeout, or test expectation was relaxed. Resolving model-dependent counting versus making this test explicitly target a selected model needs a decision; no CI fix has been pushed.
+- Approved CI follow-up: `/lab` now exposes Auto/full/lite model selection, default Auto; the fake-webcam test explicitly selects full/CPU and verifies the backend. Auto can switch only during initial setup, before any movement phase has started; that latch stays set even after an aborted rep or between reps, and resets only for a new recording. Explicit full/lite never adapt. No counting thresholds or test timeouts changed.
+- Open M9 risk: lite never reaches the 125-degree hip gate on the first demo hinge in the constrained reproduction (minimum about 137 degrees), so only one of the two reps counts. Pinning this full-model smoke test does not resolve or validate lite accuracy; test/calibrate lite separately before relying on it for phone fallback.
+- Follow-up local verification: lint/typecheck exit 0; Vitest 3 files / 46 tests passed; production build passed; constrained `CI=true taskset -c 0,1 npm run test:e2e` passed all 3 tests in 18.9 seconds. The changed model selector/full-CPU count-2 state was visually inspected at 390x844 (`/home/ubuntu/jax-evidence/m2/full-model-camera-count.png`).
+- Fixed all four review findings with regressions: delayed right-only arrival after two seconds of empty frames now counts three curls; Stop retains capture/count/dimensions for export; a rewind to a nonzero timestamp starts a fresh monotonic recording; curl/push-up travel is measured from the last start pose, including the initial movement interval.
+- Focused browser checks passed for stop/export and nonzero rewind; final lint/typecheck exit 0 and Vitest 3 files / 46 tests passed. No counting thresholds changed. Post-Stop retained UI state is behavior-tested, not newly visually inspected.
+
+- Branch `devin/1795212767-m2-pose`, based on `devin/1795211338-m0`, independent of the paused M1 branch. M1 dependency/blocker WIP was committed and pushed separately as `b18d805` on `devin/1795212712-m1-agent`; M1 still needs a valid Anthropic key.
+- Added exact `@mediapipe/tasks-vision@1.2.3`, self-hosted full/lite models and matching package WASM (sources/hashes in their READMEs), GPU initialization with CPU fallback, strictly increasing inference timestamps, and model disposal. The lab starts full and switches to lite after 30 measured inferences if inference alone averages below 20/s. Actual iPhone sustained throughput is not verified.
+- Added aspect-correct 2D angles, near-side selection during setup, visibility >= 0.5, per-coordinate 1 Euro filters (min cutoff 1 Hz, beta 0.01), deterministic exercise hysteresis/timing/tracking-loss gates, and four exercise configurations. No language model or server receives camera frames.
+- `/lab` accepts uploads, demos and camera input; shows skeleton, angles, phase, count, inference rate and an explicit M3 fault-flag placeholder; exports landmark JSON. Added wake-lock acquisition/reacquisition. No actual form-fault detectors are implemented in M2.
+- `scripts/extract-landmarks` extracts raw landmark fixtures using headless local Chromium and 30 Hz video seeks. `scripts/generate-negative-fixtures.mts` generates deterministic negatives. `scripts/record-lab.mjs` records the visible lab at 390x844.
+
+### Truth labels and results
+
+Truth was determined by visually reviewing ffmpeg frame grabs at one-second intervals, not by trusting the counter. Montages: `/home/ubuntu/jax-evidence/m2/{exercise}-frames.jpg`. The visible cycles are stand/hinge/stand for RDL (approximately 0–5 and 6–12 seconds), rack/overhead/rack for push press (0–4 and 4–8), down/curl/down for curls (0–4, 4–8, 8–12), and top/bottom/top for push-ups (0–3, 3–6, 6–9). Detailed extraction provenance and limitations are in `evals/fixtures/README.md`.
+
+| Demo | Expected | Fixture replay | Live `/lab` recording |
+|---|---:|---:|---:|
+| rdl | 2 | 2 | 2 |
+| push-press | 2 | 2 | 2 |
+| curl | 3 | 3 | 3 |
+| push-up | 3 | 3 | 3 |
+
+Standing-still, walking-in and setup/picking-up synthetic fixtures each count **0 for all four exercises** (12 negative assertions). Empty and low-visibility sequences also count zero. These are not real-world false-positive measurements.
+
+### Evidence-backed tuning
+
+- Push press: rack/start threshold is now <= 0.35 torso lengths (PLAN <= 0.2), completion <= 0.35 (PLAN <= 0.3), and overhead >= 0.8 (PLAN >= 0.9). `variants/push-press-cpu.json` preserves a visible rack around 0.33 with the opposite setup-side selection; the GPU demo fixture peaks around 0.87 overhead. Both fixtures now replay to the two-rep visual truth. Elbow and torso gates are unchanged.
+- RDL: use the selected near wrist/hip for wrists-below-hips, not the occluded far wrist. The raw RDL fixture exposed a missed second rep with the both-wrists gate; selected-side gating restores the two frame-labelled reps.
+- Corrected the 250 ms return-phase timer to start at entry to `UP_PHASE`, not at the far threshold. Added a regression case for a long bottom hold followed by a too-fast return. Other exercise angle/travel thresholds and filter parameters are unchanged.
+
+### Verification and evidence
+
+- `npm run lint` and `npm run typecheck`: exit 0. `npm test`: 3 files / 43 tests passed, including four demo fixtures, CPU push-press variant, all negative/exercise combinations, timing/visibility/tracking-loss regressions and mocked landmarker GPU/CPU/error/close cases.
+- Final production `npm run build`: compiled successfully; routes include `/lab`. Final `npm run test:e2e`: 2 passed (17.5s); fake-webcam RDL reached count 2 (16.1s test duration). The fake webcam is a real ffmpeg-generated 640px y4m RDL clip, with three seconds of initial standing pose before movement; no counting is mocked.
+- Playwright now starts the built standalone server, not the dev server. `npm run build` is required before `npm run test:e2e`; `scripts/start-web.mjs` copies public/static assets into standalone output before launching it. CI installs ffmpeg for y4m generation. ESLint excludes vendor WASM runtime JavaScript.
+- First-party staged diff passes whitespace checks. The byte-for-byte copied upstream WASM JavaScript has trailing whitespace/blank EOF warnings from `git diff --check`; it is intentionally not reformatted so its recorded hashes still match the package.
+- CPU was selected for recordings and fake webcam because this VM's software GPU is not representative of phone acceleration and initially dropped reps in real-time playback. Default app delegate remains GPU with CPU creation fallback. Canonical fixtures were extracted with GPU/SwiftShader; this is deliberately separate from the CPU real-time check.
+- Animated recordings (each < 1 MB, below the requested 10 MB): `/home/ubuntu/jax-evidence/m2/rdl-lab.webp`, `push-press-lab.webp`, `curl-lab.webp`, `push-up-lab.webp` in that same directory. Source `.webm`, final 390x844 `.png`, raw `*-live.json`, truth montages and `fake-camera-count.png` are alongside them. Lab screenshots were visually inspected for skeleton/metrics/count; demo counts are 2/2/3/3.
+- Side-on versus 45-degree comparison is explicitly deferred until Raz supplies comparison clips. The generated demos change apparent angle and do not validate camera placement. No real iPhone, portrait-upload camera framing, sustained phone performance, or wake-lock behavior on iOS has been verified. M2 was not deployed; remote CI for this branch has not been checked.
 
 ## Follow-up: authorized DigitalOcean deployment
 
