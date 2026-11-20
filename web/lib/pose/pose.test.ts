@@ -63,6 +63,17 @@ function rdlCycle(counter: RepCounter, options: { far?: boolean; visible?: boole
   return counter;
 }
 describe("rep hysteresis and timing", () => {
+  for (const exercise of ["curl","push-up"] as const) it(exercise + " measures travel from the last start pose, not the first moving frame", () => {
+    const c = new RepCounter(exercise);
+    const start = {...normal,bodyHorizontal:0};
+    c.update(start,0); c.update(start,500);
+    c.update({...start,elbow:140,wristY:360,shoulderY:120},700);
+    c.update({...start,elbow:70,wristY:310,shoulderY:140},1000);
+    c.update({...start,elbow:60,wristY:310,shoulderY:140},1300);
+    c.update({...start,elbow:100,wristY:340,shoulderY:130},1400);
+    c.update(start,1800);
+    expect(c.count).toBe(1);
+  });
   it("requires excursion and return", () => { expect(rdlCycle(new RepCounter("rdl")).count).toBe(1); expect(rdlCycle(new RepCounter("rdl"),{far:false}).count).toBe(0); });
   it("rejects poor tracking and exercise gate failure", () => { expect(rdlCycle(new RepCounter("rdl"),{visible:false}).count).toBe(0); expect(rdlCycle(new RepCounter("rdl"),{gate:false}).count).toBe(0); });
   it("rejects too fast and too slow", () => { expect(rdlCycle(new RepCounter("rdl"),{speed:20}).count).toBe(0); expect(rdlCycle(new RepCounter("rdl"),{speed:1000}).count).toBe(0); });

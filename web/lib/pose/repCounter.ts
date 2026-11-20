@@ -31,14 +31,14 @@ export class RepCounter {
     if (this.phase === "IDLE") {
       if (config.near(a) && config.gate(a)) {
         this.heldSince ??= time;
-        if (time - this.heldSince >= 500) { this.phase = "READY"; this.baseline ||= a.torsoLength; }
+        if (time - this.heldSince >= 500) { this.phase = "READY"; this.baseline ||= a.torsoLength; this.startWrist = a.wristY; this.startShoulder = a.shoulderY; }
       } else this.heldSince = undefined;
       return this.count;
     }
     if (this.phase === "READY") {
       if (!config.gate(a)) { this.idle(); return this.count; }
-      this.startWrist = a.wristY; this.startShoulder = a.shoulderY;
-      if (!config.near(a)) {
+      if (config.near(a)) { this.startWrist = a.wristY; this.startShoulder = a.shoulderY; }
+      else {
         this.phase = "DOWN_PHASE"; this.startTime = time; this.totalFrames = 1; this.visibleFrames = 1;
         this.gatePassed = true; this.excursion = 0; this.peak = config.progress(a);
       }
