@@ -17,7 +17,15 @@ test("fake webcam counts two Romanian deadlifts", async () => {
     await page.getByLabel("Model", { exact: true }).selectOption("full");
     await page.getByLabel("Delegate", { exact: true }).selectOption("CPU");
     await page.getByRole("button", { name:"Start camera",exact:true }).click();
-    await expect(page.getByTestId("rep-count")).toHaveText("2", { timeout: 20000 });
+    try { await expect(page.getByTestId("rep-count")).toHaveText("2", { timeout: 20000 }); }
+    catch (error) {
+      try {
+        await page.getByRole("button", { name:"Stop",exact:true }).click({timeout:5000});
+        await page.getByRole("button", { name:"Export JSON",exact:true }).click({timeout:5000});
+        await test.info().attach("pose-failure.json", {body:JSON.stringify({backend:await page.locator("main > p").allTextContents(),fixture:JSON.parse(await page.getByLabel("Fixture JSON").inputValue())}),contentType:"application/json"});
+      } catch {}
+      throw error;
+    }
     await expect(page.locator("main > p").filter({hasText:/^full \/ CPU/})).toBeVisible();
     await page.screenshot({path:"test-results/fake-camera-count.png"});
     await page.getByRole("button", { name:"Stop",exact:true }).click();
