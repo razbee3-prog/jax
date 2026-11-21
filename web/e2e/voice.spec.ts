@@ -36,9 +36,11 @@ test("voice lab uses actual Web Audio and one orb; cached countdown is uninterru
     await page.goto("http://127.0.0.1:3000/lab/voice");await expect(page.locator("canvas")).toHaveCount(1);
     await page.getByRole("button",{name:"Enable audio"}).click();await expect(page.getByTestId("prefetch")).toHaveText("Ready");
     await page.getByRole("button",{name:"Speak line",exact:true}).click();await expect(page.getByTestId("orb-state")).toHaveText("talking");await expect(page.getByTestId("ttfa")).toContainText("HIT");
+    await page.evaluate(()=>{const history:string[]=[];(window as typeof window & {countdownSteps:string[]}).countdownSteps=history;const element=document.querySelector("[data-testid=countdown]")!;new MutationObserver(()=>{const text=element.textContent??"";if(text && history.at(-1)!==text)history.push(text);}).observe(element,{childList:true,characterData:true,subtree:true});});
     await page.getByRole("button",{name:"Countdown",exact:true}).click();await expect(page.getByTestId("countdown")).toHaveText("3");
-    await page.getByLabel("What should Jax say?").fill("A line after the countdown.");await page.getByRole("button",{name:"Speak line",exact:true}).click();await expect(page.getByTestId("countdown")).toHaveText("Go",{timeout:6000});
+    await page.getByLabel("What should Jax say?").fill("A line after the countdown.");await page.getByRole("button",{name:"Speak line",exact:true}).click();
     await expect.poll(async()=>JSON.parse((await page.getByTestId("voice-ledger").textContent())!).events.length).toBe(3);
+    const steps=await page.evaluate(()=>(window as typeof window & {countdownSteps:string[]}).countdownSteps);expect(steps).toEqual(["Get ready","3","2","1","Go"]);console.log("VOICE COUNTDOWN STEPS "+JSON.stringify(steps));
     await expect(page.getByTestId("ledger")).toHaveText("Trace ledger 3/3 acknowledged");
   }finally{await browser.close();}
 });
