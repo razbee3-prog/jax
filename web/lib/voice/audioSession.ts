@@ -34,7 +34,7 @@ export class AudioSession {
       if(version!==this.microphoneVersion){stream.getTracks().forEach(t=>t.stop());return;}
       this.microphone=stream;
       this.muteMicrophone(this.muted);
-      this.workletReady??=this.context.audioWorklet.addModule("/audio/scribeAudioProcessor.js");await this.workletReady;
+      this.workletReady??=this.context.audioWorklet.addModule("/audio/scribeAudioProcessor.js").catch(error=>{this.workletReady=undefined;throw error;});await this.workletReady;
       if(version!==this.microphoneVersion)return;
       this.processor=new AudioWorkletNode(this.context,"scribeAudioProcessor@bd293b92cef79b80");
       this.processor.port.postMessage({type:"configure",inputSampleRate:this.context.sampleRate,outputSampleRate:16000});

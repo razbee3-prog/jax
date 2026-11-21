@@ -15,3 +15,12 @@ it("releases a late permission grant instead of reopening the mic after setup",a
   const stop=vi.fn();let grant!:(value:unknown)=>void;vi.stubGlobal("navigator",{audioSession:{type:"playback"},mediaDevices:{getUserMedia:()=>new Promise(resolve=>{grant=resolve;})}});
   const session=new AudioSession(),pending=session.startMicrophone(()=>{});session.stopMicrophone();grant({getTracks:()=>[{stop}]});await pending;expect(stop).toHaveBeenCalledOnce();
 });
+it("retries a failed worklet download and reuses the successful load",async()=>{
+  const tracks=Array.from({length:3},()=>({enabled:true,stop:vi.fn()}));let index=0;
+  vi.stubGlobal("navigator",{audioSession:{type:"playback"},mediaDevices:{getUserMedia:vi.fn(async()=>{const track=tracks[index++];return {getTracks:()=>[track],getAudioTracks:()=>[track]};})}});
+  context.audioWorklet.addModule.mockRejectedValueOnce(new Error("Download failed"));
+  const session=new AudioSession();
+  await expect(session.startMicrophone(()=>{})).rejects.toThrow("Download failed");expect(tracks[0].stop).toHaveBeenCalledOnce();
+  await session.startMicrophone(()=>{});await session.startMicrophone(()=>{});
+  expect(context.audioWorklet.addModule).toHaveBeenCalledTimes(2);session.stopMicrophone();
+});
