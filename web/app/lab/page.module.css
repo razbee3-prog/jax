@@ -1,0 +1,15 @@
+.lab { display: flex; align-items: stretch; flex-direction: column; gap: 8px; max-width: 760px; margin: auto; padding: 20px 16px; min-height: 100svh; }
+.lab h1 { font-size: 28px; letter-spacing: -1px; }
+.lab p, .lab label { font-size: 12px; color: #a1a1aa; margin: 0; }
+.lab select { background: #17171e; color: #f5f5f7; padding: 8px; border-radius: 12px; margin-left: 10px; }
+.buttons { display: flex; gap: 8px; }
+.lab button { min-height: 36px; margin: 0; font-size: 12px; }
+.upload input { min-height: 32px; font-size: 12px; border-radius: 8px; margin-top: 4px; }
+.picture { position: relative; width: 100%; background: #17171e; border-radius: 20px; overflow: hidden; }
+.picture video { display: block; width: 100%; }
+.picture canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+.counter { display: flex; align-items: center; gap: 24px; }
+.counter output { font-size: 64px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; }
+.counter span { color: #9af2cf; font-size: 14px; }
+.lab pre { font-size: 11px; white-space: pre-wrap; margin: 0; }
+.fixture { width: 100%; height: 32px; font-size: 10px; background: #17171e; color: #a1a1aa; }
