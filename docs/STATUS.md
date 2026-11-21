@@ -189,3 +189,164 @@ VERCEL_TOKEN: missing
 ```
 
 Missing secrets do not block bootstrap: no external services are invoked, and an unset INVITE_CODE fails closed with HTTP 503. Playwright supplies a synthetic invite only. Real invite value and service configuration are needed before integration/deployment. No secret values committed or printed.
+
+## M4 — Voice
+
+Implemented on `devin/1795223903-m4-voice`, based on M1. The existing M1 latency
+gate remains failed and unchanged; M4 makes no Anthropic calls.
+
+- `/api/tts`: authenticated streaming PCM proxy, configured voice/model, model-error
+  fallback to `eleven_flash_v2_5`. SHA-256(text, voice, actual model) cache:
+  process-local 16 MiB LRU, 24-hour sliding retention; partial/failed streams are
+  not cached. Model fallback resolution is remembered for five minutes.
+- `/api/stt-token`: authenticated, no-store, single-use `realtime_scribe` token;
+  provider contract expires unused tokens after 900 seconds.
+- Invite success now issues a signed HttpOnly, SameSite=Strict cookie (Secure in
+  production), using the existing `SESSION_SECRET`. Billable voice routes require
+  it and reject cross-origin browser requests. Local HTTP E2E seeds the returned
+  signed cookie without its HTTPS-only flag; deployed cookies retain Secure.
+- One shared AudioContext, unlocked by the invite tap or lab Enable audio gesture;
+  gain and output analyser, mic analyser, track-level half-duplex, playback session
+  type after setup, silent looping HTML audio fallback where audioSession is absent.
+  Scribe uses `@elevenlabs/react@1.23.1` with VAD, `scribe_v3_live`, and a fresh-token
+  `scribe_v2_realtime` fallback on model errors. Its manual-audio mode receives
+  16 kHz PCM from the SDK worklet in the existing context, avoiding a second context.
+- One real ElevenLabs Orb, manual volumes from both analysers; idle, thinking,
+  listening (only after capture opens), talking. `/lab/voice` provides text speech,
+  live/committed transcript, countdown, meters, TTFA, and an event ledger.
+- Speech queue: one active and one pending item; 3.5-second end-to-start in-set
+  gap, 14-word cap, >3-second stale drop, newer-rep fault-clear drop. Freshness is
+  checked again before scheduling first PCM after network preparation. Priority
+  wins pending arbitration; newest replaces within equal priority. Active lines,
+  including fixed countdown/milestones, are never interrupted by another line.
+- Fixed onboarding/setup/transition/milestone lines are prefetched. Countdown clips
+  are scheduled one second apart on the AudioContext clock, with matching screen
+  numerals; clips longer than 0.95 s are time-compressed to avoid overlap.
+- `/api/voice-events` traces utterance outcomes/reasons/TTFA and committed transcripts
+  with the UUID-v7 lab session ID, then flushes. The client ledger tracks server
+  acknowledgments. `scripts/audit-voice.mts` independently checks LangSmith run IDs.
+
+### Desktop evidence
+
+Real generated WAV (`evals/fixtures/voice/known-phrase.wav`), fake microphone capture,
+real single-use token and real Scribe WebSocket; no transcript mocking:
+
+```text
+Expected: I would like a full body workout.
+Actual:   I would like a full body workout.
+Voice trace audit: PASS (7/7 event IDs, 7 root runs).
+```
+
+Session: `01a1fbca-bc9c-773c-8811-18f65a5a4ff4`, six played utterances and one VAD
+commit. The browser test also verifies one AudioContext and ended mic tracks after
+Setup. An intentionally absent eighth ID produces the expected negative audit:
+`FAIL (7/8 event IDs, 7 root runs)` with the missing sentinel explicitly listed.
+
+TTFA is TTS-play invocation to first nonzero output-analyser samples, not an
+acoustic speaker measurement. Desktop headless Chrome against the local production
+Next server and real ElevenLabs, after fixed prefetch; three samples per cache state:
+
+| Server cache | p50 | Maximum |
+|---|---:|---:|
+| Miss | 337.8 ms | 350.3 ms |
+| Hit | 53.9 ms | 54.8 ms |
+
+Evidence under `/home/ubuntu/jax-evidence/m4/`: `voice-results.json`,
+`trace-audit.json`, `trace-audit-negative.json`, `voice-lab-390x844.png` (visually
+inspected, 390×844). No audio is sent to LangSmith.
+
+### Checks
+
+Lint and web/agent typechecks exited 0. Unit tests cover governor, queue, token,
+stream/cache/fallback, invite access, microphone lifetime, and trace acknowledgment.
+
+```text
+Test Files  8 passed (8)
+     Tests  121 passed (121)
+✓ Compiled successfully in 1587ms
+✓ Generating static pages using 7 workers (9/9) in 164ms
+```
+
+The full E2E run passed existing invite, rewind, and fake-camera regressions. Both
+new voice tests initially exposed a test-harness bug reading innerText from a closed
+details element; fixed to textContent. Final focused voice rerun:
+
+```text
+✓ voice lab uses actual Web Audio and one orb; cached countdown is uninterrupted (7.5s)
+✓ real realtime Scribe transcribes fake WAV; streaming TTS reports miss/hit TTFA (42.7s)
+2 passed (51.0s)
+Browser secret scan: PASS (17 static assets; no bound ElevenLabs/LangSmith or local key/secret bytes).
+```
+
+Live E2E is explicitly skipped without ElevenLabs AND LangSmith credentials; the
+offline Web Audio/countdown test always runs. Dependency check verified MDA 0.10.5
+and React voice SDK 1.23.1. All new direct dependencies are exact-pinned.
+
+### Deployment
+
+Rebuilt/recreated only `jax-web` on `noa_edge`, restart `unless-stopped`. Refreshed
+the three existing ElevenLabs variables using the explicitly bound org credential;
+no new variable names were needed. Preserved `/opt/jax/.env` mode 600 and all other
+variables, including M1. Other container IDs were unchanged. Verification from VM:
+
+```text
+Container /api/health: HTTP 200
+Public /api/health: HTTP 200 {"status":"ok"}
+Public /lab/voice: HTTP 200, Voice lab present
+Public unauthenticated /api/tts: HTTP 401
+Public invited /api/tts: HTTP 200, PCM bytes=30720, model=eleven_v4_turbo
+Public /api/stt-token: HTTP 200, single-use token present, expires_in=900
+strongr: HTTP 200
+```
+
+### Deviations / remaining QA
+
+- Shadcn init cannot detect the nonstandard `web/` layout: used its documented
+  manual configuration. ElevenLabs CLI was invoked but its registry returned 429;
+  installed the same official MIT Orb from upstream commit
+  `1909af6b522dc97f2ec8f49230be2e9a1a7f6e7e`, with licenses/provenance. Adapted
+  imperative scene ownership for existing React lint rules; no rules disabled.
+- Cache is in-process, not distributed or persistent across restarts. TTFA above
+  is local-proxy desktop timing, not the deployed droplet or iPhone audio route.
+- Agent wiring and agent-timeout fallback (PLAN 9.4) belong to M6; full-session
+  ledger/audit integration remains M7. This milestone has a voice-specific audit.
+- iPhone silent switch, earpiece/speaker routing, Bluetooth, interruptions and
+  real permission prompts remain unverified and require Raz's M9 checklist.
+- The upstream Orb shader retains five trailing-whitespace warnings; first-party
+  diff whitespace checks are clean. Shader bytes were otherwise preserved.
+
+### PR #5 review follow-up
+
+Confirmed review baseline HEAD `231f8bb3`; all three findings reproduced with
+failing-first tests and were fixed in separate commits:
+
+- Failed AudioWorklet downloads now clear the rejected cached promise. Regression
+  covers failure releasing tracks, a successful retry, and reuse of that success.
+- Voice Lab now displays committed history plus the current partial, rather than
+  hiding all later partials. Browser regression drives mocked Scribe WebSocket
+  messages through the real hook and checks empty, committed, partial and next
+  committed states. Before the fix it received only `Full body please.` instead
+  of `Full body please. My shoulder`.
+- Each TTS playback owns its fetch AbortController, forwards caller cancellation,
+  cancels/releases its response reader and aborts its request in finally. A stale
+  pre-audio rejection retains the original drop reason and does not abort the
+  caller or shared prefetch. Tests cover stale rejection, empty stream, caller
+  cancellation and reuse of cached clips. Before the fix reader cancellation was
+  never called, its lock remained held, and the request signal was not aborted.
+
+Lint and web/agent typechecks exited 0; final local checks:
+
+```text
+Test Files  9 passed (9)
+     Tests  126 passed (126)
+✓ Compiled successfully in 1537ms
+✓ Generating static pages using 7 workers (9/9) in 163ms
+2 passed (8.9s)
+1 skipped
+```
+
+The focused voice E2E run skips the live-provider case without credentials, just
+as CI does; no new real-provider measurements were made in this review loop.
+Partial transcript screenshot visually inspected at 390×844:
+`/home/ubuntu/jax-evidence/m4-review/partial-transcript-390x844.png`.
+Review fixes are pushed for CI only, not redeployed. Real-device QA remains open.

@@ -1,3 +1,4 @@
+import { inviteCookie } from "../../../lib/voice/access.server";
 export async function POST(request: Request) {
   const expected = process.env.INVITE_CODE;
   if (!expected) return Response.json({ error: "Invite service unavailable" }, { status: 503 });
@@ -7,5 +8,6 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invite code required" }, { status: 400 });
   }
   if (body.code.trim().toLowerCase() !== expected.trim().toLowerCase()) return Response.json({ error: "That code didn't work." }, { status: 401 });
-  return Response.json({ ok: true });
+  if(!process.env.SESSION_SECRET)return Response.json({error:"Invite service unavailable"},{status:503});
+  return Response.json({ ok: true },{headers:{"Set-Cookie":inviteCookie()}});
 }

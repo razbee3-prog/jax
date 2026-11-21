@@ -1,18 +1,17 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { getAudioSession } from "../lib/voice/audioSession";
 export default function Home() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [accepted, setAccepted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const audio = useRef<AudioContext | null>(null);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => { if (attempt > 0) input.current?.focus(); }, [attempt]);
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!audio.current) audio.current = new AudioContext();
-    void audio.current.resume().catch(() => {});
+    void getAudioSession().unlock().catch(() => {});
     setBusy(true); setError("");
     try {
       const response = await fetch("/api/invite", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });

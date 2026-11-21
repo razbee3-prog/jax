@@ -1,0 +1,27 @@
+.voice-lab { padding: 24px 24px 32px; place-items: start center; }
+.voice-lab section { max-width: 440px; }
+.voice-lab header { display:flex; justify-content:space-between; align-items:center; }
+.voice-lab header a { font-size:24px; font-weight:650; text-decoration:none; color:var(--foreground); }
+.voice-lab header span { font-size:10px; letter-spacing:2px; color:var(--secondary); }
+.voice-orb { width:168px; height:168px; margin:8px auto 0; }
+.voice-lab h1 { font-size:25px; letter-spacing:-.6px; margin:0; }
+.voice-state { text-transform:uppercase; letter-spacing:2px; color:#b6a5ee; font-size:10px; margin:10px 0; }
+.voice-caption { color:var(--secondary); font-size:13px; margin:0 0 12px; }
+.voice-meter-row { display:flex; justify-content:space-between; margin:14px 0; gap:16px; font-size:9px; color:var(--secondary); letter-spacing:1px; }
+.voice-meter-row span { display:flex; align-items:center; gap:6px; width:50%; }
+.voice-meter-row meter { width:100%; height:7px; accent-color:#b6a5ee; }
+.voice-lab label { text-align:left; font-size:12px; margin-bottom:7px; }
+.voice-lab textarea { resize:vertical; width:100%; background:#17171e; border:1px solid #33333e; border-radius:16px; padding:12px; color:var(--foreground); font:inherit; font-size:14px; }
+.voice-actions { display:flex; gap:8px; }
+.voice-actions button { width:50%; min-height:43px; font-size:12px; border-radius:15px; margin-top:8px; }
+.voice-actions button:nth-child(2) { background:#252530; color:var(--foreground); }
+.voice-lab .voice-toggle { display:flex; gap:8px; align-items:center; color:var(--secondary); font-size:11px; margin:12px 0 4px; }
+.voice-toggle input { width:14px; min-height:14px; height:14px; accent-color:#b6a5ee; }
+.voice-transcript { min-height:46px; margin:14px 0 4px; padding:12px; background:#17171e; border-radius:16px; text-align:left; color:#d4d4dc; font-size:13px; line-height:1.5; }
+.voice-countdown:empty { display:none; }
+.voice-countdown { font-size:30px; margin:8px; font-variant-numeric:tabular-nums; }
+.voice-stats { font-size:10px; color:var(--secondary); margin:7px 0; }
+.voice-error { color:#ffaaaa; font-size:11px; margin:4px 0; }
+.voice-lab details { color:var(--secondary); font-size:10px; margin-top:12px; }
+.voice-lab pre { text-align:left; overflow:auto; max-height:240px; font-size:10px; }
+.voice-lab footer { color:var(--secondary); font-size:9px; line-height:1.7; margin-top:14px; }
