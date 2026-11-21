@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 import { GET } from "../health/route";
 afterEach(() => vi.unstubAllEnvs());
+beforeEach(() => vi.stubEnv("SESSION_SECRET","test-session-secret"));
 const request = (body: unknown) => new Request("http://localhost/api/invite", { method: "POST", body: JSON.stringify(body) });
 describe("invite", () => {
   it("accepts a case-insensitive code", async () => { vi.stubEnv("INVITE_CODE", "JAX"); expect((await POST(request({ code: "jax" }))).status).toBe(200); });

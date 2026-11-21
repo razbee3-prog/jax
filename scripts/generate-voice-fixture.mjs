@@ -1,0 +1,11 @@
+import { mkdir,writeFile,unlink } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+const key=process.env.ELEVENLABS_API_KEY;
+if(!key)throw new Error("ELEVENLABS_API_KEY is required");
+const directory=new URL("../evals/fixtures/voice/",import.meta.url);await mkdir(directory,{recursive:true});
+const response=await fetch("https://api.elevenlabs.io/v1/text-to-speech/SYXbTJsLE7zmSjr1DchT/stream?output_format=pcm_24000",{method:"POST",headers:{"xi-api-key":key,"Content-Type":"application/json"},body:JSON.stringify({text:"I would like a full body workout.",model_id:process.env.ELEVENLABS_TTS_MODEL||"eleven_v4_turbo"})});
+if(!response.ok)throw new Error(`Voice fixture generation HTTP ${response.status}`);
+const pcm=new URL("phrase.pcm",directory),wav=new URL("known-phrase.wav",directory);await writeFile(pcm,new Uint8Array(await response.arrayBuffer()));
+const conversion=spawnSync("ffmpeg",["-v","error","-y","-f","s16le","-ar","24000","-ac","1","-i",pcm.pathname,"-af","adelay=2000,apad=pad_dur=4","-ar","16000",wav.pathname],{encoding:"utf8"});
+await unlink(pcm);if(conversion.status!==0)throw new Error("Fixture conversion failed");
+console.log("Generated evals/fixtures/voice/known-phrase.wav: 16 kHz mono, 2 s lead-in, 4 s silence for VAD.");
