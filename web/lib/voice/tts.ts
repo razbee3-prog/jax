@@ -13,11 +13,19 @@ export class TTS {
   async prefetchAll(lines:readonly string[]){const remaining=[...new Set(lines)];await Promise.all([0,1].map(async()=>{while(remaining.length)await this.prefetch(remaining.shift()!);}));}
   async play(text:string,signal:AbortSignal,onAudio:()=>void,beforeAudio=()=>{}):Promise<AudioResult>{
     const start=performance.now();
-    const cached=this.clips.get(text),response=cached ? null : await this.response(text,signal);
-    const clip=cached ? await cached : null;
-    const reader=response?.body!.getReader();
-    const iterator=reader ? {read:()=>reader.read()} : {read:(()=>{let read=false;return async()=>{if(read)return {done:true,value:undefined};read=true;return {done:false,value:clip!.pcm};};})()};
-    return this.render(iterator,signal,start,clip ? "MEMORY" : response!.headers.get("X-TTS-Cache")??"MISS",onAudio,beforeAudio);
+    const controller=new AbortController(),abort=()=>controller.abort(signal.reason);
+    signal.addEventListener("abort",abort,{once:true});if(signal.aborted)abort();
+    let reader:ReadableStreamDefaultReader<Uint8Array>|undefined;
+    try{
+      const cached=this.clips.get(text),response=cached ? null : await this.response(text,controller.signal);
+      const clip=cached ? await cached : null;
+      reader=response?.body!.getReader();
+      const iterator=reader ? {read:()=>reader!.read()} : {read:(()=>{let read=false;return async()=>{if(read)return {done:true,value:undefined};read=true;return {done:false,value:clip!.pcm};};})()};
+      return await this.render(iterator,controller.signal,start,clip ? "MEMORY" : response!.headers.get("X-TTS-Cache")??"MISS",onAudio,beforeAudio);
+    }finally{
+      signal.removeEventListener("abort",abort);
+      const cancelled=reader?.cancel().catch(()=>{});controller.abort();await cancelled;reader?.releaseLock();
+    }
   }
   private async render(reader:{read:()=>Promise<{done:boolean;value?:Uint8Array}>},signal:AbortSignal,start:number,cache:string,onAudio:()=>void,beforeAudio:()=>void):Promise<AudioResult>{
     const context=this.session.context,sources=new Set<AudioBufferSourceNode>(),notBefore=context.currentTime+0.03;let next=notBefore,carry=new Uint8Array(0),first:number|undefined;

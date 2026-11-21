@@ -314,3 +314,39 @@ strongr: HTTP 200
   real permission prompts remain unverified and require Raz's M9 checklist.
 - The upstream Orb shader retains five trailing-whitespace warnings; first-party
   diff whitespace checks are clean. Shader bytes were otherwise preserved.
+
+### PR #5 review follow-up
+
+Confirmed review baseline HEAD `231f8bb3`; all three findings reproduced with
+failing-first tests and were fixed in separate commits:
+
+- Failed AudioWorklet downloads now clear the rejected cached promise. Regression
+  covers failure releasing tracks, a successful retry, and reuse of that success.
+- Voice Lab now displays committed history plus the current partial, rather than
+  hiding all later partials. Browser regression drives mocked Scribe WebSocket
+  messages through the real hook and checks empty, committed, partial and next
+  committed states. Before the fix it received only `Full body please.` instead
+  of `Full body please. My shoulder`.
+- Each TTS playback owns its fetch AbortController, forwards caller cancellation,
+  cancels/releases its response reader and aborts its request in finally. A stale
+  pre-audio rejection retains the original drop reason and does not abort the
+  caller or shared prefetch. Tests cover stale rejection, empty stream, caller
+  cancellation and reuse of cached clips. Before the fix reader cancellation was
+  never called, its lock remained held, and the request signal was not aborted.
+
+Lint and web/agent typechecks exited 0; final local checks:
+
+```text
+Test Files  9 passed (9)
+     Tests  126 passed (126)
+✓ Compiled successfully in 1537ms
+✓ Generating static pages using 7 workers (9/9) in 163ms
+2 passed (8.9s)
+1 skipped
+```
+
+The focused voice E2E run skips the live-provider case without credentials, just
+as CI does; no new real-provider measurements were made in this review loop.
+Partial transcript screenshot visually inspected at 390×844:
+`/home/ubuntu/jax-evidence/m4-review/partial-transcript-390x844.png`.
+Review fixes are pushed for CI only, not redeployed. Real-device QA remains open.
