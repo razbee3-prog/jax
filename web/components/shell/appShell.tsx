@@ -8,7 +8,7 @@ import { SelfView } from "./selfView";
 import { getAudioSession,type AudioSession } from "../../lib/voice/audioSession";
 import { TTS } from "../../lib/voice/tts";
 import { SpeechQueue } from "../../lib/voice/speechQueue";
-import { FIXED_LINES } from "../../lib/voice/fixedLines";
+import { COUNTDOWN,COUNTDOWN_LINE,FIXED_LINES } from "../../lib/voice/fixedLines";
 import { holdWakeLock } from "../../lib/pose/wakeLock";
 import { EXERCISES } from "../../lib/pose/exercises/config";
 import { initialShell,previewState,shellReducer,caption,MOVES,FLOOR,kcal,type ShellState,type Screen } from "../../lib/session/shell";
@@ -25,21 +25,21 @@ function tickSound(audio:AudioSession|null){if(!audio)return;try{const oscillato
 export default function AppShell({sessionId,fake,simulateDenial=false,preview}:{sessionId:string;fake:boolean;simulateDenial?:boolean;preview?:Screen}){
   const router=useRouter();
   const [s,dispatch]=useReducer(shellReducer,preview,previewState),[code,setCode]=useState(""),[error,setError]=useState(""),[busy,setBusy]=useState(false),[attempt,setAttempt]=useState(0),[denied,setDenied]=useState(!!preview && simulateDenial),[camera,setCamera]=useState<MediaStream|null>(null),[talking,setTalking]=useState(false),[repeat,setRepeat]=useState(""),[pulse,setPulse]=useState(""),[feedback,setFeedback]=useState(""),[rating,setRating]=useState<number|null>(null);
-  const audio=useRef<AudioSession|null>(null),queue=useRef<SpeechQueue|null>(null),capture=useRef<MediaStream|null>(null),permissionVersion=useRef(0),denials=useRef(0),input=useRef<HTMLInputElement>(null),previous=useRef<ShellState>(initialShell);
+  const audio=useRef<AudioSession|null>(null),queue=useRef<SpeechQueue|null>(null),capture=useRef<MediaStream|null>(null),permissionVersion=useRef(0),denials=useRef(0),input=useRef<HTMLInputElement>(null),previous=useRef<ShellState>(initialShell),introFallback=useRef(false);
   const {emit,receipt,acknowledged,emitted}=useShellTrace(sessionId),reduce=!!useReducedMotion(),landscape=useSyncExternalStore(subscribe,landscapeSnapshot,()=>false);
   const line=caption(s),questionKey=`${s.screen}-${s.question}`,hasSession=s.screen!=="S0",compact=["S3","S5","S6","S7"].includes(s.screen);
   const wakeEnabled=hasSession && s.screen!=="S8";
   const width=useSyncExternalStore(subscribeWidth,widthSnapshot,()=>390);
   const orbSize=compact ? 48:({S0:88,S1:116,S2:260,S4:140,S8:112} as Partial<Record<Screen,number>>)[s.screen]??200;
   const orbY=compact ? 24:({S0:92,S1:72,S2:102,S4:26,S8:20} as Partial<Record<Screen,number>>)[s.screen]??100;
-  const speak=useCallback((text:string,inSet=false)=>{queue.current?.enqueue({id:crypto.randomUUID(),text,priority:"fixed",fixed:true,inSet,repAt:performance.now(),speak:!fake});},[fake]);
+  const speak=useCallback((text:string,inSet=false,countdown=false)=>{queue.current?.enqueue({id:crypto.randomUUID(),text:countdown ? `${text} ${COUNTDOWN_LINE}`:text,leadIn:countdown ? text:undefined,countdown,priority:"fixed",fixed:true,inSet,repAt:performance.now(),speak:!fake});},[fake]);
   useEffect(()=>{const root=document.documentElement,wasDark=root.classList.contains("dark");root.classList.add("dark");return()=>{if(!wasDark)root.classList.remove("dark");};},[]);
   useEffect(()=>{if(attempt)input.current?.focus();},[attempt]);
-  useEffect(()=>{if(preview)return;let last=performance.now();const timer=setInterval(()=>{const now=performance.now(),ms=now-last;last=now;if(document.visibilityState==="visible" && !landscapeSnapshot())dispatch({type:"tick",ms});},100);const hide=()=>{if(document.visibilityState!=="visible")dispatch({type:"pause"});};document.addEventListener("visibilitychange",hide);return()=>{clearInterval(timer);document.removeEventListener("visibilitychange",hide);};},[preview]);
+  useEffect(()=>{if(preview)return;let last=performance.now();const timer=setInterval(()=>{const now=performance.now(),ms=now-last;last=now;if(document.visibilityState==="visible" && !landscapeSnapshot())dispatch({type:"tick",ms,introClock:fake || introFallback.current});},100);const hide=()=>{if(document.visibilityState!=="visible")dispatch({type:"pause"});};document.addEventListener("visibilitychange",hide);return()=>{clearInterval(timer);document.removeEventListener("visibilitychange",hide);};},[preview,fake]);
   useEffect(()=>{if(!wakeEnabled)return;const release=holdWakeLock();return()=>{void release.then(stop=>stop());};},[wakeEnabled]);
   useEffect(()=>()=>{permissionVersion.current++;capture.current?.getTracks().forEach(track=>track.stop());queue.current?.close();},[]);
   useEffect(()=>{if(s.screen==="S3"){capture.current?.getAudioTracks().forEach(track=>track.stop());audio.current?.stopMicrophone();}if(s.screen==="S8")capture.current?.getTracks().forEach(track=>track.stop());},[s.screen]);
-  useEffect(()=>{if(line)speak(line,s.screen==="S6");},[line,s.screen,speak]);
+  useEffect(()=>{if(s.screen==="S5")introFallback.current=false;if(line)speak(line,s.screen==="S6",s.screen==="S5");},[line,s.screen,speak]);
   useEffect(()=>{if(s.screen!=="S2")return;const first=setTimeout(()=>{setRepeat(questionKey);speak(line);},8000),second=setTimeout(()=>setPulse(questionKey),16000);return()=>{clearTimeout(first);clearTimeout(second);};},[s.screen,questionKey,speak,line]);
   useEffect(()=>{
     const old=previous.current;previous.current=s;if(s.screen==="S0")return;
@@ -51,14 +51,22 @@ export default function AppShell({sessionId,fake,simulateDenial=false,preview}:{
     if(old.screen==="S6" && s.screen!=="S6")emit("set.end",{exercise:MOVES[old.exercise].id,reps:s.reps[old.exercise]});
     if(s.screen==="S8" && old.screen!=="S8")emit("session.end",{reps:s.reps.reduce((a,b)=>a+b,0),elapsed_ms:s.elapsedMs,kcal:kcal(s.elapsedMs),scripted:true});
   },[s,line,emit,fake]);
-  async function invite(event:React.FormEvent){event.preventDefault();setBusy(true);setError("");try{audio.current=getAudioSession();void audio.current.unlock().catch(()=>{});const response=await fetch("/api/invite",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code})});if(!response.ok){setAttempt(n=>n+1);setError(response.status===401 ? "That code didn't work.":"Jax is unavailable. Please try again.");return;}const tts=new TTS(audio.current);queue.current=new SpeechQueue(async(item,signal,before)=>{capture.current?.getAudioTracks().forEach(track=>{track.enabled=false;});try{return await tts.play(item.text,signal,()=>setTalking(true),before);}finally{capture.current?.getAudioTracks().forEach(track=>{track.enabled=true;});setTalking(false);}},event=>emit("utterance",{text:event.line.text,outcome:event.outcome,reason:event.reason,ttfa_ms:event.ttfa_ms??0}));if(!fake)void tts.prefetchAll(FIXED_LINES).catch(()=>{});dispatch({type:"invite"});}catch{setError("Could not connect. Please try again.");}finally{setBusy(false);}}
+  async function invite(event:React.FormEvent){event.preventDefault();setBusy(true);setError("");try{audio.current=getAudioSession();void audio.current.unlock().catch(()=>{});const response=await fetch("/api/invite",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code})});if(!response.ok){setAttempt(n=>n+1);setError(response.status===401 ? "That code didn't work.":"Jax is unavailable. Please try again.");return;}const tts=new TTS(audio.current);queue.current=new SpeechQueue(async(item,signal,before)=>{
+      capture.current?.getAudioTracks().forEach(track=>{track.enabled=false;});
+      try{
+        const result=await tts.play(item.leadIn??item.text,signal,()=>setTalking(true),before);
+        if(item.countdown){await tts.countdown(signal,text=>dispatch({type:"intro-step",value:COUNTDOWN.findIndex(label=>label===text)}),()=>setTalking(true));dispatch({type:"intro-complete"});}
+        return result;
+      }catch(error){if(item.countdown)introFallback.current=true;throw error;}
+      finally{capture.current?.getAudioTracks().forEach(track=>{track.enabled=true;});setTalking(false);}
+    },event=>emit("utterance",{text:event.line.text,outcome:event.outcome,reason:event.reason,ttfa_ms:event.ttfa_ms??0}));if(!fake)void tts.prefetchAll(FIXED_LINES).catch(()=>{});dispatch({type:"invite"});}catch{setError("Could not connect. Please try again.");}finally{setBusy(false);}}
   async function permissions(){const version=++permissionVersion.current;setBusy(true);setDenied(false);try{if(fake){if(simulateDenial && denials.current++===0)throw new Error("Simulated denial");}else{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:true});if(version!==permissionVersion.current){stream.getTracks().forEach(track=>track.stop());return;}capture.current=stream;setCamera(stream);}emit("permissions",{outcome:"granted",simulated:fake});dispatch({type:"permissions"});}catch{if(version===permissionVersion.current){setDenied(true);emit("permissions",{outcome:"denied",simulated:fake});}}finally{if(version===permissionVersion.current)setBusy(false);}}
   function answer(value:string){emit("onboarding.answer",{question:s.question,answer:value});dispatch({type:"answer",value});}
   function continueSetup(){emit("setup.pass",{simulated:true,floor:s.floor});dispatch({type:"continue"});}
   function end(){permissionVersion.current++;capture.current?.getTracks().forEach(track=>track.stop());audio.current?.stopMicrophone();dispatch({type:"end"});}
   function restart(){router.push("/?fake=1");router.refresh();}
   async function rate(score:number){if(!receipt){setFeedback("Feedback is not connected yet. Please try again.");return;}setFeedback("Sending feedback…");try{const response=await fetch("/api/session/feedback",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({thread_id:sessionId,...receipt,score})});if(!response.ok)throw new Error("Not recorded");setRating(score);setFeedback("Thanks for your feedback.");}catch{setFeedback("Feedback was not recorded. Please try again.");}}
-  const next=Math.min(3,s.exercise+1),total=s.reps.reduce((a,b)=>a+b,0),countdown=["Get ready","3","2","1","Go"][Math.min(4,Math.floor(s.introMs/1000))];
+  const next=Math.min(3,s.exercise+1),total=s.reps.reduce((a,b)=>a+b,0),countdown=COUNTDOWN[Math.min(4,Math.floor(s.introMs/1000))];
   return <MotionConfig reducedMotion="user"><main className={`shell ${compact ? "is-compact":""}`} data-screen={s.screen} data-testid="app-shell">
     <div className="shell-landscape" role="alertdialog" aria-modal="true" aria-labelledby="portrait-title"><span aria-hidden="true">↻</span><h1 id="portrait-title">Turn your phone upright</h1><p>Jax works in portrait. Your workout is waiting.</p></div>
     <div className="shell-stage" inert={landscape} aria-hidden={landscape}>

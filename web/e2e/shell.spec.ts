@@ -12,6 +12,49 @@ async function mocks(page:Page){
 async function screen(page:Page,name:string){await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen",name);}
 async function shot(page:Page,name:string){mkdirSync(folder,{recursive:true});await expect(page.locator(".shell-screen")).toHaveCount(1);await expect(page.locator(".shell-screen")).toHaveCSS("opacity","1");await page.screenshot({path:resolve(folder,`${name}.png`)});}
 async function invite(page:Page,url="/?fake=1") {await page.goto(url);await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();await screen(page,"S1");}
+test("real shell speaks the countdown after the cue, synchronized to scheduled audio",async()=>{
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  try{
+    await mocks(page);
+    await page.addInitScript(()=>{
+      Object.defineProperty(navigator.mediaDevices,"getUserMedia",{value:async()=>new MediaStream()});
+      const root=window as typeof window & {countdownAudio:{label:string;at:number}[];countdownUI:{label:string;at:number}[]};root.countdownAudio=[];root.countdownUI=[];
+      const original=AudioContext.prototype.createBufferSource;let observing=false;
+      AudioContext.prototype.createBufferSource=function(){
+        const source=original.call(this),start=source.start.bind(source),context=source.context;
+        source.start=(...args:Parameters<AudioBufferSourceNode["start"]>)=>{
+          const index=Math.round((source.buffer?.getChannelData(0)[0]??0)*32768/3000)-1,label=["Get ready","3","2","1","Go"][index];
+          if(label)root.countdownAudio.push({label,at:args[0]??context.currentTime});
+          start(...args);
+        };
+        const observe=()=>{const label=document.querySelector("[data-testid=intro-count]")?.textContent;if(root.countdownAudio.length && context.currentTime>=root.countdownAudio[0].at && label && root.countdownUI.at(-1)?.label!==label)root.countdownUI.push({label,at:context.currentTime});requestAnimationFrame(observe);};
+        if(!observing){observing=true;requestAnimationFrame(observe);}
+        return source;
+      };
+    });
+    await page.route("**/api/tts",route=>{const text=route.request().postDataJSON().text,index=["Get ready","3","2","1","Go"].indexOf(text),samples=text.startsWith("Feet hip-width") ? 36000:4800,pcm=Buffer.alloc(samples*2);for(let i=0;i<samples;i++)pcm.writeInt16LE(index>=0 ? (index+1)*3000 : Math.round(Math.cos(i*2*Math.PI*440/24000)*1000),i*2);return route.fulfill({contentType:"audio/pcm",body:pcm});});
+    await invite(page,"/");await page.getByRole("button",{name:"Turn on camera and mic"}).click();
+    for(const answer of ["full body","10","No injuries","Yes"])await page.getByRole("button",{name:answer,exact:true}).click();
+    await expect(page.getByRole("button",{name:"Continue",exact:true})).toBeEnabled();await page.getByRole("button",{name:"Continue",exact:true}).click();await page.getByRole("button",{name:"Let’s get started"}).click();
+    await expect.poll(()=>page.evaluate(()=>(window as typeof window & {countdownAudio:unknown[]}).countdownAudio.length)).toBe(5);
+    await expect(page.getByTestId("intro-count")).toHaveText("3");await shot(page,"S5-spoken-countdown");
+    await screenEventually(page,"S6");
+    const result=await page.evaluate(()=>{const root=window as typeof window & {countdownAudio:{label:string;at:number}[];countdownUI:{label:string;at:number}[]};return {audio:root.countdownAudio,ui:root.countdownUI};});
+    expect(result.audio.map(item=>item.label)).toEqual(["Get ready","3","2","1","Go"]);expect(result.ui.map(item=>item.label)).toEqual(["Get ready","3","2","1","Go"]);
+    for(const item of result.ui){const skew=item.at-result.audio.find(audio=>audio.label===item.label)!.at;expect(skew).toBeGreaterThanOrEqual(0);expect(skew).toBeLessThan(0.25);}
+    console.log("SHELL SPOKEN COUNTDOWN "+JSON.stringify(result));
+  }finally{await browser.close();}
+});
+test("real shell falls back to the visual countdown when audio is unavailable",async()=>{
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  try{
+    await mocks(page);await page.addInitScript(()=>Object.defineProperty(navigator.mediaDevices,"getUserMedia",{value:async()=>new MediaStream()}));
+    await invite(page,"/");await page.getByRole("button",{name:"Turn on camera and mic"}).click();
+    for(const answer of ["full body","10","No injuries","Yes"])await page.getByRole("button",{name:answer,exact:true}).click();
+    await expect(page.getByRole("button",{name:"Continue",exact:true})).toBeEnabled();await page.getByRole("button",{name:"Continue",exact:true}).click();await page.getByRole("button",{name:"Let’s get started"}).click();
+    await screen(page,"S5");await screenEventually(page,"S6");
+  }finally{await browser.close();}
+});
 test("full scripted session at 390x844: all screens, pauses, rest, floor setup and feedback",async()=>{
   test.setTimeout(240000);
   const browser=await chromium.launch({args:flags}),context=await browser.newContext({viewport:{width:390,height:844},recordVideo:process.env.SHELL_RECORD ? {dir:folder,size:{width:390,height:844}}:undefined}),page=await context.newPage();

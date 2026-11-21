@@ -13,7 +13,7 @@ export type Screen="S0"|"S1"|"S2"|"S3"|"S4"|"S5"|"S6"|"S7"|"S8";
 export type ShellState={screen:Screen;question:number;answers:string[];exercise:number;reps:number[];paused:boolean;pauseReason:string;inFrame:boolean;fakeReps:boolean;missingMs:number;holdMs:number;floor:boolean;introMs:number;restMs:number;repMs:number;idleMs:number;elapsedMs:number;started:boolean};
 export const initialShell:ShellState={screen:"S0",question:0,answers:[],exercise:0,reps:[0,0,0,0],paused:false,pauseReason:"",inFrame:true,fakeReps:true,missingMs:0,holdMs:0,floor:false,introMs:0,restMs:20000,repMs:0,idleMs:0,elapsedMs:0,started:false};
 export function previewState(screen?:Screen):ShellState{return !screen ? initialShell:{...initialShell,screen,answers:["full body","10","No injuries","Yes"],holdMs:screen==="S3" ? 1500:0,reps:screen==="S8" ? [10,10,10,10]:screen==="S6" ? [3,0,0,0]:[0,0,0,0],elapsedMs:screen==="S8" ? 135000:0};}
-export type ShellAction={type:"invite"|"permissions"|"continue"|"skip"|"end"|"pause"|"resume"|"floor"}|{type:"answer";value:string}|{type:"frame"|"source";value:boolean}|{type:"tick";ms:number};
+export type ShellAction={type:"invite"|"permissions"|"continue"|"skip"|"end"|"pause"|"resume"|"floor"|"intro-complete"}|{type:"answer";value:string}|{type:"frame"|"source";value:boolean}|{type:"intro-step";value:number}|{type:"tick";ms:number;introClock?:boolean};
 function finishSet(s:ShellState):ShellState{return {...s,screen:s.exercise===3 ? "S8":"S7",restMs:20000,paused:false,repMs:0,idleMs:0};}
 function nextIntro(s:ShellState):ShellState{return {...s,screen:"S5",exercise:s.exercise+1,introMs:0,repMs:0,idleMs:0};}
 export function shellReducer(s:ShellState,a:ShellAction):ShellState{
@@ -31,12 +31,14 @@ export function shellReducer(s:ShellState,a:ShellAction):ShellState{
     case "resume":return s.screen==="S6" && s.inFrame ? {...s,paused:false,pauseReason:"",missingMs:0,repMs:0}:s;
     case "frame":return {...s,inFrame:a.value,holdMs:a.value ? s.holdMs:0,missingMs:a.value ? 0:s.missingMs};
     case "source":return {...s,fakeReps:a.value};
+    case "intro-step":return s.screen==="S5" && Number.isInteger(a.value) && a.value>=0 && a.value<5 ? {...s,introMs:a.value*1000}:s;
+    case "intro-complete":return s.screen==="S5" ? {...s,screen:"S6",started:true,repMs:0,idleMs:0}:s;
     case "tick":{
       if(!Number.isFinite(a.ms) || a.ms<=0 || s.screen==="S0" || s.screen==="S8")return s;
       if(!s.started && ["S1","S2","S4"].includes(s.screen))return s;
       let n={...s,elapsedMs:s.elapsedMs+(s.started ? a.ms:0)};
       if(n.screen==="S3")return {...n,holdMs:n.inFrame ? Math.min(1500,n.holdMs+a.ms):0};
-      if(n.screen==="S5"){n.introMs+=a.ms;if(n.introMs>=5000)n={...n,screen:"S6",started:true,repMs:0,idleMs:0};return n;}
+      if(n.screen==="S5"){if(a.introClock===false)return n;n.introMs+=a.ms;if(n.introMs>=5000)n={...n,screen:"S6",started:true,repMs:0,idleMs:0};return n;}
       if(n.screen==="S7"){n.restMs=Math.max(0,n.restMs-a.ms);return n.restMs===0 && n.exercise!==2 ? nextIntro(n):n;}
       if(n.screen!=="S6" || n.paused)return n;
       n.missingMs=n.inFrame ? 0:n.missingMs+a.ms;

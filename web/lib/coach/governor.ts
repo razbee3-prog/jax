@@ -1,5 +1,5 @@
 export type Priority="safety"|"correction"|"fixed"|"milestone"|"praise"|"pace";
-export type SpeechLine={id:string;text:string;priority:Priority;inSet:boolean;fixed?:boolean;repAt?:number;faultId?:string;speak?:boolean;countdown?:boolean};
+export type SpeechLine={id:string;text:string;priority:Priority;inSet:boolean;fixed?:boolean;repAt?:number;faultId?:string;speak?:boolean;countdown?:boolean;leadIn?:string};
 export type SpeechEvent={line:SpeechLine;outcome:"played"|"dropped"|"silent"|"error";reason:string;ttfa_ms:number|null;cache?:string};
 export class SpeechDropped extends Error {}
 const rank:Record<Priority,number>={safety:0,correction:1,fixed:2,milestone:3,praise:4,pace:5};
