@@ -1,0 +1,18 @@
+import { beforeEach,afterEach,it,expect,vi } from "vitest";
+const {trace,flush,feedback}=vi.hoisted(()=>({trace:vi.fn((fn:()=>Promise<unknown>,config?:unknown)=>{void config;return fn;}),flush:vi.fn(async()=>{}),feedback:vi.fn(async()=>({id:"feedback"}))}));
+vi.mock("langsmith",()=>({Client:class{awaitPendingTraceBatches=flush;createFeedback=feedback;readProject=async()=>({id:"project-id"});}}));
+vi.mock("langsmith/traceable",()=>({traceable:trace}));
+import { POST as event } from "../../app/api/session/event/route";
+import { POST as vote } from "../../app/api/session/feedback/route";
+import { inviteCookie } from "../voice/access.server";
+import { feedbackReceipt } from "./feedback.server";
+const thread="01a1fbca-bc9c-773c-8811-18f65a5a4ff4",run="ae484b73-682d-4fd8-9668-536c348362e5";
+const payload={thread_id:thread,event_id:run,type:"session.end",data:{reps:40,scripted:true}};
+const request=(body:unknown,auth=true)=>new Request("http://localhost/api/session",{method:"POST",headers:auth ? {cookie:inviteCookie().split(";")[0]}:{},body:JSON.stringify(body)});
+beforeEach(()=>{vi.stubEnv("SESSION_SECRET","test-secret");vi.stubEnv("LANGSMITH_API_KEY","test");vi.stubEnv("LANGSMITH_PROJECT","test-project");});
+afterEach(()=>{vi.unstubAllEnvs();vi.clearAllMocks();});
+it("traces the session.end run, flushes it and signs a feedback receipt",async()=>{const response=await event(request(payload));expect(response.status).toBe(200);expect(await response.json()).toEqual({event_id:run,run_id:run,receipt:feedbackReceipt(thread,run)});expect(trace.mock.calls[0][1]).toMatchObject({id:run,name:"session.end",metadata:{thread_id:thread,event_id:run,source:"shell"}});expect(flush).toHaveBeenCalledOnce();});
+it("records both thumbs on the signed session.end run",async()=>{for(const score of [0,1]){const response=await vote(request({thread_id:thread,run_id:run,receipt:feedbackReceipt(thread,run),score}));expect(response.status).toBe(200);expect(feedback).toHaveBeenLastCalledWith(expect.objectContaining({runId:run,traceId:run,sessionId:"project-id",key:"coaching_helpful",score,feedbackSourceType:"app"}));}});
+it("rejects unauthorized, empty, malformed and unavailable event submissions",async()=>{expect((await event(request(payload,false))).status).toBe(401);expect((await event(request({}))).status).toBe(400);expect((await event(request({...payload,data:{video:[1,2]}}))).status).toBe(400);vi.stubEnv("LANGSMITH_API_KEY","");expect((await event(request(payload))).status).toBe(503);vi.stubEnv("LANGSMITH_API_KEY","test");flush.mockRejectedValueOnce(new Error("offline"));expect((await event(request(payload))).status).toBe(502);});
+it("does not create receipts on ordinary screen events",async()=>{expect(await (await event(request({...payload,type:"screen.view"}))).json()).toEqual({event_id:run});});
+it("rejects feedback without a valid run-bound receipt, and reports service errors",async()=>{const body={thread_id:thread,run_id:run,receipt:feedbackReceipt(thread,run),score:1};expect((await vote(request(body,false))).status).toBe(401);expect((await vote(request({}))).status).toBe(400);expect((await vote(request({...body,score:3}))).status).toBe(400);expect((await vote(request({...body,receipt:"0".repeat(64)}))).status).toBe(403);expect((await vote(request({...body,run_id:"9cfe6b89-3990-4b71-919e-2893688b47e7"}))).status).toBe(403);vi.stubEnv("LANGSMITH_API_KEY","");expect((await vote(request(body))).status).toBe(503);vi.stubEnv("LANGSMITH_API_KEY","test");feedback.mockRejectedValueOnce(new Error("offline"));expect((await vote(request(body))).status).toBe(502);});

@@ -1,7 +1,7 @@
 import { test, expect, chromium } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
-import { mkdirSync, rmSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 test("fake webcam counts two Romanian deadlifts", async () => {
   test.setTimeout(90000);
   mkdirSync("test-results", { recursive: true });
@@ -17,7 +17,17 @@ test("fake webcam counts two Romanian deadlifts", async () => {
     await page.getByLabel("Model", { exact: true }).selectOption("full");
     await page.getByLabel("Delegate", { exact: true }).selectOption("CPU");
     await page.getByRole("button", { name:"Start camera",exact:true }).click();
-    await expect(page.getByTestId("rep-count")).toHaveText("2", { timeout: 20000 });
+    try { await expect(page.getByTestId("rep-count")).toHaveText("2", { timeout: 20000 }); }
+    catch (error) {
+      try {
+        writeFileSync(test.info().outputPath("pose-state.json"), JSON.stringify({url:page.url(),text:await page.locator("main").innerText()}));
+        await page.getByRole("button", { name:"Stop",exact:true }).click({timeout:5000});
+        await page.getByRole("button", { name:"Export JSON",exact:true }).click({timeout:5000});
+        await expect(page.getByLabel("Fixture JSON")).not.toHaveValue("");
+        writeFileSync(test.info().outputPath("pose-failure.json"), JSON.stringify({backend:await page.locator("main > p").allTextContents(),fixture:JSON.parse(await page.getByLabel("Fixture JSON").inputValue())}));
+      } catch (captureError) { console.error("Pose diagnostic capture failed",captureError); }
+      throw error;
+    }
     await expect(page.locator("main > p").filter({hasText:/^full \/ CPU/})).toBeVisible();
     await page.screenshot({path:"test-results/fake-camera-count.png"});
     await page.getByRole("button", { name:"Stop",exact:true }).click();
