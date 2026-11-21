@@ -56,7 +56,7 @@ export default function VoiceLab({sessionId}:{sessionId:string}){
     <div className="voice-actions"><button disabled={!enabled} onClick={()=>speak()}>Speak line</button><button disabled={!enabled || prefetch!=="Ready"} onClick={()=>speak(true)}>Countdown</button></div>
     <label className="voice-toggle"><input type="checkbox" checked={inSet} onChange={event=>setInSet(event.target.checked)}/>In-set limits: 14 words · 3.5 s gap</label>
     <div className="voice-actions"><button disabled={!enabled || state!==null || ["connecting","connected","transcribing"].includes(stt.status)} onClick={()=>void stt.start()}>Start microphone</button><button className="voice-secondary" disabled={!enabled} onClick={()=>stt.stop()}>Setup / stop mic</button></div>
-    <p className="voice-transcript" aria-live="polite" data-testid="transcript">{transcript || stt.partial || "Your answer will appear here."}</p>
+    <p className="voice-transcript" aria-live="polite" data-testid="transcript">{[transcript,stt.partial].filter(Boolean).join(" ") || "Your answer will appear here."}</p>
     <p className="voice-countdown" data-testid="countdown">{countdown}</p>
     <p className="voice-stats" data-testid="ttfa">{last ? `First audio ${Math.round(last.ttfa_ms!)} ms · ${last.cache}` : "First audio —"}</p>
     <p className="voice-stats">Fixed lines: <span data-testid="prefetch">{prefetch}</span> · STT: {stt.model}</p>
