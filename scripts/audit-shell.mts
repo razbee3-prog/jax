@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import { readFile,writeFile } from "node:fs/promises";
+import { dirname,join } from "node:path";
+import { Client } from "langsmith";
+import { z } from "zod";
+const file=process.argv[2];assert.ok(file,"Usage: tsx scripts/audit-shell.mts shell-ledger.json [audit-output.json]");
+const {ledger}=z.object({ledger:z.object({thread_id:z.uuidv7(),events:z.array(z.object({event_id:z.uuid(),type:z.enum(["session.start","screen.view","permissions","onboarding.answer","setup.pass","set.start","rep.detected","set.end","session.pause","session.resume","session.end","utterance"])}))})}).parse(JSON.parse(await readFile(file,"utf8")));
+assert.ok(process.env.LANGSMITH_API_KEY && process.env.LANGSMITH_PROJECT,"LangSmith configuration is required");
+const client=new Client(),project=await client.readProject({projectName:process.env.LANGSMITH_PROJECT});
+const runs:{id?:string;name?:string;error?:string|null;metadata?:Record<string,unknown>}[]=[];
+for await(const run of client.runs.query({project_ids:[project.id],is_root:true,selects:["ID","NAME","ERROR","METADATA"],filter:`and(eq(metadata_key, "thread_id"), eq(metadata_value, "${ledger.thread_id}"))`}))runs.push(run);
+const missing=ledger.events.filter(event=>!runs.some(run=>run.metadata?.event_id===event.event_id && !run.error && run.name===event.type)).map(event=>event.event_id);
+const result={pass:missing.length===0,thread_id:ledger.thread_id,expected:ledger.events.length,observed:runs.length,missing,runs};
+const output=process.argv[3]??join(dirname(file),"shell-trace-audit.json");await writeFile(output,JSON.stringify(result,null,2));
+console.log(`Shell trace audit: ${result.pass ? "PASS":"FAIL"} (${ledger.events.length-missing.length}/${ledger.events.length} event IDs, ${runs.length} root runs).`);
+if(missing.length)console.log("Missing event IDs: "+missing.join(", "));
+console.log("Evidence: "+output);if(!result.pass)process.exitCode=1;

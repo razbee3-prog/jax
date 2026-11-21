@@ -1,35 +1,10 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import { getAudioSession } from "../lib/voice/audioSession";
-export default function Home() {
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
-  const [accepted, setAccepted] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const input = useRef<HTMLInputElement>(null);
-  useEffect(() => { if (attempt > 0) input.current?.focus(); }, [attempt]);
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
-    void getAudioSession().unlock().catch(() => {});
-    setBusy(true); setError("");
-    try {
-      const response = await fetch("/api/invite", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
-      if (response.ok) setAccepted(true);
-      else { setAttempt(n => n + 1); setError(response.status === 401 ? "That code didn't work." : "Jax is unavailable. Please try again."); }
-    } catch { setError("Could not connect. Please try again."); }
-    finally { setBusy(false); }
-  }
-  return <main><section aria-labelledby="title">
-    <div className="orb" aria-hidden="true" />
-    <h1 id="title">Jax</h1><p className="subtitle">Your AI personal trainer</p>
-    {accepted ? <p role="status">You&apos;re on the list. Coaching is coming soon.</p> :
-    <form method="post" onSubmit={submit}>
-      <label htmlFor="invite">Enter invite code to get started</label>
-      <input ref={input} key={attempt} className={error ? "shake" : ""} id="invite" name="code" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="Invite code" required aria-invalid={!!error} aria-describedby="error" />
-      <button disabled={busy}>{busy ? "Checking…" : "Get started"}</button>
-      <p id="error" className="error" role="alert">{error}</p>
-    </form>}
-    <p className="disclaimer">Jax is not medical advice. Stop if anything hurts.</p>
-  </section></main>;
+import { uuid7 } from "langsmith";
+import AppShell from "../components/shell/appShell";
+import type { Screen } from "../lib/session/shell";
+export const dynamic="force-dynamic";
+export default async function Home({searchParams}:{searchParams:Promise<{fake?:string;deny?:string;preview?:string}>}){
+  const query=await searchParams;
+  const preview=query.fake==="1" && /^S[0-8]$/.test(query.preview??"") ? query.preview as Screen:undefined;
+  const sessionId=uuid7();
+  return <AppShell key={sessionId} sessionId={sessionId} fake={query.fake==="1"} simulateDenial={query.deny==="1"} preview={preview}/>;
 }

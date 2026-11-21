@@ -10,5 +10,5 @@ test("invite screen at iPhone viewport", async ({ page }) => {
   await expect(page.locator("#error")).toHaveText("That code didn't work.");
   await page.getByLabel("Enter invite code to get started").fill("E2E-INVITE");
   await page.getByRole("button", { name: "Get started" }).click();
-  await expect(page.getByRole("status")).toHaveText("You're on the list. Coaching is coming soon.");
+  await expect(page.getByText("Jax needs your camera and microphone to coach you. Video stays on your phone.")).toBeVisible();
 });
