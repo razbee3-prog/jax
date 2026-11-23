@@ -40,13 +40,13 @@ export class HybridCoach {
       const shape=cue.kind==="fixed" ? previousGuidance:guidance;
       const matching=shape?.fault_id===cue.fault_id && ((shape.action==="reminder" && cue.kind==="reminder") || (shape.action==="ack" && cue.kind==="fixed"));
       if(!this.outage && shape && (matching || guidance?.fault_id===cue.fault_id))source="agent";
-      this.enqueue({id:crypto.randomUUID(),text:matching ? shape!.text:cue.text,faultId:cue.fault_id,priority:cue.kind==="fixed" ? "fixed":"correction",inSet:true,repAt:at,cachedOnly:true,source});
+      this.enqueue({id:crypto.randomUUID(),text:matching ? shape!.text:cue.text,faultId:cue.fault_id,priority:cue.kind==="fixed" ? "fixed":"correction",inSet:true,repAt:at,rep:report.rep,exercise:report.exercise,cachedOnly:true,source});
     }else{
       if(guidance?.action==="quiet")source="agent";
-      this.enqueue({id:crypto.randomUUID(),text:"",priority:"pace",inSet:true,repAt:at,speak:false,source});
+      this.enqueue({id:crypto.randomUUID(),text:"",priority:"pace",inSet:true,repAt:at,rep:report.rep,exercise:report.exercise,speak:false,source});
     }
     const milestone=report.rep===5 ? "Five. Halfway.":report.rep===8 ? "Two more.":report.rep===10 ? "Ten. That's the set.":null;
-    if(milestone)this.enqueue({id:crypto.randomUUID(),text:milestone,priority:"milestone",fixed:true,inSet:true,repAt:at,cachedOnly:true,source:this.outage ? "fallback":"local"});
+    if(milestone)this.enqueue({id:crypto.randomUUID(),text:milestone,priority:"milestone",fixed:true,inSet:true,repAt:at,rep:report.rep,exercise:report.exercise,cachedOnly:true,source:this.outage ? "fallback":"local"});
     this.log({rep:report.rep,source,latency_ms:this.now()-at,reason:cue ? cue.kind:guidance?.action==="quiet" ? "agent requested quiet":"local silence"});
     const epochs=new Map(this.epochs);
     void this.serial.request({type:"rep",set_id:set,exercise:report.exercise,report,reports:[report]},result=>{

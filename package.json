@@ -11,7 +11,7 @@
     "build": "next build web",
     "start": "node scripts/start-web.mjs",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit -p web/tsconfig.json && tsc --noEmit -p agent/tsconfig.json",
+    "typecheck": "tsc --noEmit -p web/tsconfig.json && tsc --noEmit -p agent/tsconfig.json && tsc --noEmit -p evals/tsconfig.json",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "sync:shared": "node scripts/sync-shared.mjs",
@@ -24,7 +24,9 @@
     "agent:deploy": "npm run sync:shared && tsx scripts/sync-agent-instructions.mts && mda deploy agent --context-strategy overwrite --name jax-coach-dedicated --agent-server-type dedicated",
     "smoke:agent": "tsx scripts/smoke-agent.mts",
     "smoke:session": "tsx scripts/smoke-session.mts",
-    "evals": "tsx scripts/eval-perception.mts"
+    "evals": "tsx scripts/evals.mts",
+    "evals:perception": "tsx scripts/eval-perception.mts",
+    "evals:online": "tsx scripts/setup-online-evals.mts"
   },
   "dependencies": {
     "@elevenlabs/react": "1.23.1",

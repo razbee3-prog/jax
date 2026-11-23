@@ -1,0 +1,77 @@
+name: Coaching evaluations
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 7 * * *'
+permissions:
+  contents: read
+jobs:
+  perception:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+      LANGSMITH_PROJECT: jax-coach-dedicated-production
+    steps:
+      - id: secrets
+        run: |
+          if [ -n "$LANGSMITH_API_KEY" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "SKIP perception experiments: missing LANGSMITH_API_KEY"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ready == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        if: steps.secrets.outputs.ready == 'true'
+      - run: npm run evals -- --suite=perception --label=ci-perception
+        if: steps.secrets.outputs.ready == 'true'
+  offline:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+      LANGSMITH_PROJECT: jax-coach-dedicated-production
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      INVITE_CODE: ${{ secrets.INVITE_CODE }}
+      JAX_BASE_URL: ${{ secrets.JAX_BASE_URL }}
+      EVAL_EVIDENCE_DIR: eval-evidence
+    steps:
+      - id: secrets
+        run: |
+          missing=""
+          for name in LANGSMITH_API_KEY ANTHROPIC_API_KEY INVITE_CODE JAX_BASE_URL; do
+            if [ -z "${!name}" ]; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "SKIP coaching experiments: missing secrets:$missing"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ready == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        if: steps.secrets.outputs.ready == 'true'
+      - run: npx playwright install --with-deps chromium
+        if: steps.secrets.outputs.ready == 'true'
+      - run: npm run evals -- --label=nightly
+        if: steps.secrets.outputs.ready == 'true'
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.secrets.outputs.ready == 'true'
+        with:
+          name: coaching-evaluation-results
+          path: |
+            evals/results/
+            eval-evidence/

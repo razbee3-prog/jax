@@ -1,6 +1,6 @@
 import type { AudioSession } from "./audioSession";
 import {SpeechDropped} from "../coach/governor";
-export type AudioResult={ttfa_ms:number;cache:string};
+export type AudioResult={ttfa_ms:number;cache:string;audio_started_at_ms?:number};
 type Clip={pcm:Uint8Array;cache:string};
 export class TTS {
   private clips=new Map<string,Promise<Clip>>();
@@ -51,7 +51,7 @@ export class TTS {
       if(carry.length)throw new Error("Incomplete PCM stream");
       await last;if(signal.aborted)throw new Error("Playback cancelled");
       if(first===undefined)throw new Error("No audible audio received");
-      return {ttfa_ms:first,cache};
+      return {ttfa_ms:first,cache,audio_started_at_ms:start+first};
     }finally{clearInterval(timer);signal.removeEventListener("abort",abort);abort();}
   }
   async countdown(signal:AbortSignal,onTick:(text:string)=>void,onAudio:()=>void):Promise<AudioResult>{
@@ -65,7 +65,7 @@ export class TTS {
     const abort=()=>sources.forEach(s=>s.stop());signal.addEventListener("abort",abort,{once:true});
     try{
       await Promise.all(buffers.map((buffer,i)=>new Promise<void>(resolve=>{const source=context.createBufferSource();sources.push(source);source.buffer=buffer;source.playbackRate.value=Math.max(1,buffer.duration/0.95);source.connect(this.session.gain);source.onended=()=>{source.disconnect();resolve();};source.start(base+i);})));
-      if(signal.aborted)throw new Error("Playback cancelled");return {ttfa_ms:first??performance.now()-start,cache:"MEMORY"};
+      if(signal.aborted)throw new Error("Playback cancelled");return {ttfa_ms:first??performance.now()-start,cache:"MEMORY",...(first===undefined ? {}:{audio_started_at_ms:start+first})};
     }finally{cancelAnimationFrame(frame);signal.removeEventListener("abort",abort);}
   }
 }
