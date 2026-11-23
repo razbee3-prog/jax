@@ -1,6 +1,44 @@
 # Jax status
 
-## M8 — iteration 3 finished; quality gate FAILED
+## M8 — PR #9 review fixes; quality gate still FAILED
+
+Confirmed starting HEAD **a93e5666bd1b83f3aed1e026e6fa8cc479f36c9b**. All four findings were real, reproduced failing-first, then fixed separately. This round fixes measurement/evaluation correctness only: **no agent instructions, rubric, cue bank, detector thresholds, Tier-B gates or pass bars changed**. No agent redeployment was needed. Full verdicts, original failures and the 15 live precondition counts are in [pr9-review-verdicts.json](../evals/results/m8/pr9-review-verdicts.json).
+
+| Finding | Concrete wrong case and fix | Commit |
+| --- | --- | --- |
+| Tick contaminates speech onset | A rep tick remains audible after the 30ms gate while cue PCM is delayed/silent; shared RMS falsely calls onAudio. Per-play and countdown analysers now receive ONLY cue buffers upstream of the shared gain, read cue RMS and disconnect in finally. Regression keeps the global meter loud while cue audio is absent/zero, then verifies real cue onset. | `1f50e21` |
+| Unspoken rest text gets mention credit | `decision.text="Too much knee bend."`, `next_time="Rest for a moment."` used to pass although rest discards text. Mention checks now reuse client `restSpeech`; tests also cover selected/unselected went_well fallback and empty notes. | `464d89e` |
+| Third-cue setup unverified | First reply requests quiet; second correction never plays, yet final quiet was credited after only one correction. All 15 third inputs now declare exactly two required played corrections; target checks actual queue outcomes after history and throws **Invalid evaluation fixture** on missing/insufficient history before scoring a candidate. | `b99ed28` |
+| Missing next onboarding question passes | Correct injury slots plus “Have a great day” passed despite a supplied dumbbell question. Onboarding/session_start now require the supplied next question or a matching interrogative intent with its choices. Tests reject unrelated/empty speech, wrong equipment-weight questions and missing choices, while accepting exact/paraphrased questions. | `4a9a15f` |
+
+Follow-up **c3937b2** strengthens equipment availability versus weight-amount negatives and fixes the readonly AudioContext clock test mock caught by the first full typecheck (`TS2540`). Final code checks **after the last edit**: lint exit0, all three typechecks exit0, **261 tests / 29 files passed**, build compiled **1816ms**, **13/13 pages in 241ms**, **Shared copies match.** No code/scorer edits during or after the experiments; later changes are results/docs only.
+
+Deployed **jax-web only**, source **c3937b240f8436fccc610130e7f98fa1ed08cd69**. Other container IDs unchanged; only APP_VERSION changed, all other env bytes/credentials/webhook and mode600 preserved. **Container health HTTP200; Jax public health HTTP 200; strongr HTTP 200.** Private deployment log: `/home/ubuntu/jax-evidence/m8/pr9-review-deploy-web.log`.
+
+### Fresh deployed experiments after the review fixes
+
+[Coach experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/c070eb09-8dc6-41a7-9ff8-f01e773aae1b), [machine-readable scores](../evals/results/m8/pr9-review-coach.json), **exit1**:
+
+| Check | Result | Bar | Status |
+| --- | --- | --- | --- |
+| Aggregate hard examples | **68/78** | 100% | **FAIL** |
+| Haiku judge | **3.801282051**, 78/78 judged | ≥4 and all judged | **FAIL** |
+| Dataset coverage | 78/78 | All 78 | PASS |
+
+Zero target errors; **all 15 third-cue cases actually had two prior played corrections**, not just two submitted reports. All eight other coded hard metrics are **78/78**, behavior **68/78**. All onboarding next-question cases pass the stronger check. Remaining behavior failures: eight rest mentions (`pu_shallow`, `pu_hip_pike`, `curl_drop`, `pp_soft_lockout`, `pp_no_legs`, `curl_swing`, `rdl_fast`, `pp_chest_forward`), `summary` (structured summary null), `rdl_knee_squat-two-faults` (wrong priority). Finite keyword coverage still misses clear phrases such as “hips rose into a pike” and “legs didn't drive”; no aliases were changed or failures waived in this review round. These tightened evaluators are not a like-for-like comparison to older runs; the unchanged agent's judge variation is not an instruction improvement.
+
+[Session experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/25adf329-7a30-4eca-95f1-ff84dc3497d6), [machine-readable scores](../evals/results/m8/pr9-review-sessions.json), **exit0**, rerun because the cue-only meter changed web code. **All seven gates PASS 2/2**:
+
+| Case | Reps | Talk ratio each set | Cue-only rep→audio p50 / p95 | Min gap | Audit | Fallback rep turns |
+| --- | --- | --- | --- | --- | --- | --- |
+| Healthy | 40 | 30%, 30%, 30%, 30% | 64.3 / 152.5ms | 6128.7ms | PASS 281/281 | 0 |
+| Outage | 40 | 30%, 30%, 30%, 30% | 63.5 / 146.2ms | 6321.4ms | PASS 282/282 | 40 |
+
+Each case has **12/12 played in-set lines measured** with the isolated cue meter, persisted Helpful feedback and correct source mode. Healthy background guidance n=40 p50 **2263.7ms**, p95 **2968.9ms**, max **3643.8ms**. Trace end runs: healthy **50fc779c-a79d-4c4a-b0a9-c3670535d0b8**, outage **aefaa0be-4768-40a6-988a-3998dc959768**.
+
+Both **390×844** summaries viewed: Helpful confirmation and recorded counts visible; healthy 40 reps/4:45/20kcal, outage 40 reps/4:26/18kcal and fallback explanation. Screenshots: `/home/ubuntu/jax-evidence/m8/pr9-review-sessions/sessions/{healthy-agent,agent-outage}/summary.png`. Visual review also exposes remaining agent copy imprecision: healthy narrative calls it a session “in ten minutes” while the measured timer is 4:45; not retuned in this CI/measurement round. Screenshots verify summary state, not audio-source isolation (proved by graph/regression tests). **iPhone acoustic latency and real detector validation remain UNVERIFIED.**
+
+## M8 — iteration 3 (historical); quality gate FAILED
 
 **M8 is not complete.** The requested one additional round is finished: **67/78 hard examples**, **3.814102564 judge average (78/78 judged)**, both below **100% / ≥4**. Both redeployed full-session simulations pass. No fourth instruction round or after-run scorer edits were made; stopping and reporting as requested. Current machine-readable results: [coach](../evals/results/m8/iteration-3-coach.json), [sessions](../evals/results/m8/iteration-3-sessions.json). Iteration 2's full `npm run evals` also exited 1; perception inputs have not changed and were not rerun.
 

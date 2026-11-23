@@ -1,0 +1,100 @@
+{
+  "label": "pr9-review-coach",
+  "suite": "coach",
+  "created_at": "2026-11-23T23:24:49.740Z",
+  "links": {
+    "coach": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/c070eb09-8dc6-41a7-9ff8-f01e773aae1b"
+  },
+  "table": [
+    {
+      "check": "Coach hard checks",
+      "value": "68/78",
+      "bar": "100%",
+      "pass": false
+    },
+    {
+      "check": "Haiku judge",
+      "value": "3.801 (78/78)",
+      "bar": "average ≥4; all judged",
+      "pass": false
+    },
+    {
+      "check": "Decision coverage",
+      "value": "78/78",
+      "bar": "all 78 examples",
+      "pass": true
+    }
+  ],
+  "details": {
+    "coach": {
+      "examples": 78,
+      "hard_passed": 68,
+      "judge_average": 3.801282051282051,
+      "judged": 78,
+      "failures": [
+        {
+          "id": "pu_shallow-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "pu_hip_pike-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "curl_drop-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "pp_soft_lockout-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "pp_no_legs-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "curl_swing-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "rdl_fast-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "pp_chest_forward-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "summary",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "rdl_knee_squat-two-faults",
+          "failed": [
+            "hard_behavior"
+          ]
+        }
+      ],
+      "instructions_sha256": "73cc67f5574d41f2d879a0c428b46a0005817f0604bad2285b8832c23445ca17"
+    }
+  },
+  "iphone_acoustic_latency": "unverified"
+}

@@ -1,0 +1,290 @@
+{
+  "label": "pr9-review-sessions",
+  "suite": "sessions",
+  "created_at": "2026-11-23T23:39:18.194Z",
+  "links": {
+    "sessions": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/25adf329-7a30-4eca-95f1-ff84dc3497d6"
+  },
+  "table": [
+    {
+      "check": "Session forty_reps",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    },
+    {
+      "check": "Session talk_ratio",
+      "value": "2/2",
+      "bar": "25–55% in every set",
+      "pass": true
+    },
+    {
+      "check": "Session rep_latency",
+      "value": "2/2",
+      "bar": "browser meter p95 ≤2500 ms",
+      "pass": true
+    },
+    {
+      "check": "Session speech_gap",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    },
+    {
+      "check": "Session trace_complete",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    },
+    {
+      "check": "Session thumbs_feedback",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    },
+    {
+      "check": "Session expected_mode",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    }
+  ],
+  "details": {
+    "sessions": [
+      {
+        "id": "healthy-agent",
+        "scores": [
+          {
+            "key": "forty_reps",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37ae-7000-8000-02c94a201b0e"
+          },
+          {
+            "key": "talk_ratio",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37ae-7000-8000-02c94a201b0e"
+          },
+          {
+            "key": "rep_latency",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37ae-7000-8000-02c94a201b0e"
+          },
+          {
+            "key": "speech_gap",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37ae-7000-8000-02c94a201b0e"
+          },
+          {
+            "key": "trace_complete",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37ae-7000-8000-02c94a201b0e"
+          },
+          {
+            "key": "thumbs_feedback",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37ae-7000-8000-02c94a201b0e"
+          },
+          {
+            "key": "expected_mode",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37ae-7000-8000-02c94a201b0e"
+          }
+        ],
+        "output": {
+          "thread_id": "01a20abb-cad7-726f-9da1-7571d7ec4220",
+          "run_id": "50fc779c-a79d-4c4a-b0a9-c3670535d0b8",
+          "trace": {
+            "url": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/01a1fb80-0ac8-7811-8ba3-fb4377f4e01d/trace/50fc779c-a79d-4c4a-b0a9-c3670535d0b8/run/50fc779c-a79d-4c4a-b0a9-c3670535d0b8"
+          },
+          "metrics": {
+            "reps": 40,
+            "per_set": [
+              {
+                "exercise": "rdl",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "push-press",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "curl",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "push-up",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              }
+            ],
+            "played_inset_lines": 12,
+            "measured_inset_lines": 12,
+            "rep_to_audio": {
+              "n": 12,
+              "p50_ms": 64.30000001192093,
+              "p95_ms": 152.5,
+              "max_ms": 152.5
+            },
+            "ttfa": {
+              "n": 12,
+              "p50_ms": 64.30000001192093,
+              "p95_ms": 152.40000000596046,
+              "max_ms": 152.40000000596046
+            },
+            "local_decision": {
+              "n": 40,
+              "p50_ms": 0,
+              "p95_ms": 0.10000002384185791,
+              "max_ms": 0.20000001788139343
+            },
+            "background_guidance": {
+              "n": 40,
+              "p50_ms": 2263.7000000178814,
+              "p95_ms": 2968.9000000059605,
+              "max_ms": 3643.800000011921
+            },
+            "fallback_rep_turns": 0,
+            "min_gap_ms": 6128.700000017881,
+            "talk_ratio_pass": true,
+            "latency_pass": true,
+            "gap_pass": true,
+            "measurement": "browser output-volume meter; not iPhone acoustic latency"
+          },
+          "audit": {
+            "thread_id": "01a20abb-cad7-726f-9da1-7571d7ec4220",
+            "pass": true,
+            "expected": 281,
+            "recorded": 281,
+            "missing": []
+          },
+          "feedback_pass": true,
+          "mode_pass": true,
+          "trace_pass": true,
+          "iphone_latency_verified": false
+        }
+      },
+      {
+        "id": "agent-outage",
+        "scores": [
+          {
+            "key": "forty_reps",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37b4-7000-8000-023ac380925e"
+          },
+          {
+            "key": "talk_ratio",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37b4-7000-8000-023ac380925e"
+          },
+          {
+            "key": "rep_latency",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37b4-7000-8000-023ac380925e"
+          },
+          {
+            "key": "speech_gap",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37b4-7000-8000-023ac380925e"
+          },
+          {
+            "key": "trace_complete",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37b4-7000-8000-023ac380925e"
+          },
+          {
+            "key": "thumbs_feedback",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37b4-7000-8000-023ac380925e"
+          },
+          {
+            "key": "expected_mode",
+            "score": 1,
+            "sourceRunId": "01a20ac7-37b4-7000-8000-023ac380925e"
+          }
+        ],
+        "output": {
+          "thread_id": "01a20ac2-2674-737b-9980-456eb47d6ffc",
+          "run_id": "aefaa0be-4768-40a6-988a-3998dc959768",
+          "trace": {
+            "url": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/01a1fb80-0ac8-7811-8ba3-fb4377f4e01d/trace/aefaa0be-4768-40a6-988a-3998dc959768/run/aefaa0be-4768-40a6-988a-3998dc959768"
+          },
+          "metrics": {
+            "reps": 40,
+            "per_set": [
+              {
+                "exercise": "rdl",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "push-press",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "curl",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "push-up",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              }
+            ],
+            "played_inset_lines": 12,
+            "measured_inset_lines": 12,
+            "rep_to_audio": {
+              "n": 12,
+              "p50_ms": 63.5,
+              "p95_ms": 146.19999998807907,
+              "max_ms": 146.19999998807907
+            },
+            "ttfa": {
+              "n": 12,
+              "p50_ms": 63.5,
+              "p95_ms": 146.19999998807907,
+              "max_ms": 146.19999998807907
+            },
+            "local_decision": {
+              "n": 40,
+              "p50_ms": 0,
+              "p95_ms": 0.19999998807907104,
+              "max_ms": 0.19999998807907104
+            },
+            "background_guidance": null,
+            "fallback_rep_turns": 40,
+            "min_gap_ms": 6321.4000000059605,
+            "talk_ratio_pass": true,
+            "latency_pass": true,
+            "gap_pass": true,
+            "measurement": "browser output-volume meter; not iPhone acoustic latency"
+          },
+          "audit": {
+            "thread_id": "01a20ac2-2674-737b-9980-456eb47d6ffc",
+            "pass": true,
+            "expected": 282,
+            "recorded": 282,
+            "missing": []
+          },
+          "feedback_pass": true,
+          "mode_pass": true,
+          "trace_pass": true,
+          "iphone_latency_verified": false
+        }
+      }
+    ]
+  },
+  "iphone_acoustic_latency": "unverified"
+}

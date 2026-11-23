@@ -1,0 +1,155 @@
+{
+  "starting_head": "a93e5666bd1b83f3aed1e026e6fa8cc479f36c9b",
+  "runtime_commit": "c3937b240f8436fccc610130e7f98fa1ed08cd69",
+  "agent_instructions_changed": false,
+  "findings": [
+    {
+      "finding": 1,
+      "verdict": "real",
+      "case": "A rep tick stays audible past the 30ms gate while cue PCM is delayed or silent; the old shared meter called onAudio before any cue sound.",
+      "commit": "1f50e21",
+      "test": "web/lib/voice/tts.test.ts",
+      "failing_first": "expected vi.fn() to not be called at all, but actually been called 1 times",
+      "fix": "Per-playback analyser upstream of the shared gain receives cue buffers only; both render and countdown read it and disconnect it."
+    },
+    {
+      "finding": 2,
+      "verdict": "real",
+      "case": "Only decision.text mentions excess knee bend, while summary.next_time says Rest for a moment; the client discards decision.text at rest.",
+      "commit": "464d89e",
+      "test": "web/lib/coach/evals.test.ts",
+      "failing_first": "expected 1 to be +0",
+      "fix": "Rest mention checks reuse restSpeech(decision, empty fixed line); fallback went_well is credited only when actually selected."
+    },
+    {
+      "finding": 3,
+      "verdict": "real",
+      "case": "First history reply asks quiet, suppressing the second local correction; the old third-cue example resolves with prior_corrections equal to 1.",
+      "commit": "b99ed28",
+      "test": "web/lib/coach/eval-target.test.ts",
+      "failing_first": "promise resolved instead of rejecting; prior_corrections.rdl_knee_squat was 1",
+      "fix": "All 15 third-cue inputs declare exactly two required played corrections. Target checks actual real-queue played history outcomes before executing the candidate, otherwise throws Invalid evaluation fixture."
+    },
+    {
+      "finding": 4,
+      "verdict": "real",
+      "case": "An injury answer has correct injury slots but says Have a great day instead of asking the supplied dumbbell question; old behavior passed.",
+      "commit": "4a9a15f",
+      "followup_commit": "c3937b2",
+      "test": "web/lib/coach/evals.test.ts",
+      "failing_first": "expected 1 to be +0",
+      "fix": "Require the supplied onboarding/session-start next question or a matching interrogative intent with its choices. Equipment availability is distinct from weight amount. Exact, paraphrased, unrelated, empty and missing-choice cases covered."
+    }
+  ],
+  "verification": {
+    "lint": "exit 0",
+    "typecheck": "exit 0, web/agent/evals",
+    "unit": {
+      "files": 29,
+      "passed": 261
+    },
+    "build": {
+      "compile_ms": 1816,
+      "pages": "13/13",
+      "generation_ms": 241
+    },
+    "shared": "Shared copies match.",
+    "initial_typecheck_failure": "Readonly AudioContext.currentTime test assignment TS2540, corrected in c3937b2 before final checks."
+  },
+  "coach_experiment": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/c070eb09-8dc6-41a7-9ff8-f01e773aae1b",
+  "target_errors": 0,
+  "third_cue_preconditions": [
+    {
+      "id": "pu_hip_sag-third",
+      "played_prior_corrections": {
+        "pu_hip_sag": 2
+      }
+    },
+    {
+      "id": "pu_shallow-third",
+      "played_prior_corrections": {
+        "pu_shallow": 2
+      }
+    },
+    {
+      "id": "pu_hip_pike-third",
+      "played_prior_corrections": {
+        "pu_hip_pike": 2
+      }
+    },
+    {
+      "id": "curl_drop-third",
+      "played_prior_corrections": {
+        "curl_drop": 2
+      }
+    },
+    {
+      "id": "curl_partial-third",
+      "played_prior_corrections": {
+        "curl_partial": 2
+      }
+    },
+    {
+      "id": "curl_elbow_drift-third",
+      "played_prior_corrections": {
+        "curl_elbow_drift": 2
+      }
+    },
+    {
+      "id": "pp_soft_lockout-third",
+      "played_prior_corrections": {
+        "pp_soft_lockout": 2
+      }
+    },
+    {
+      "id": "pp_no_legs-third",
+      "played_prior_corrections": {
+        "pp_no_legs": 2
+      }
+    },
+    {
+      "id": "curl_swing-third",
+      "played_prior_corrections": {
+        "curl_swing": 2
+      }
+    },
+    {
+      "id": "rdl_fast-third",
+      "played_prior_corrections": {
+        "rdl_fast": 2
+      }
+    },
+    {
+      "id": "pp_chest_forward-third",
+      "played_prior_corrections": {
+        "pp_chest_forward": 2
+      }
+    },
+    {
+      "id": "pp_dip_deep-third",
+      "played_prior_corrections": {
+        "pp_dip_deep": 2
+      }
+    },
+    {
+      "id": "rdl_knee_squat-third",
+      "played_prior_corrections": {
+        "rdl_knee_squat": 2
+      }
+    },
+    {
+      "id": "rdl_drift-third",
+      "played_prior_corrections": {
+        "rdl_drift": 2
+      }
+    },
+    {
+      "id": "rdl_shallow-third",
+      "played_prior_corrections": {
+        "rdl_shallow": 2
+      }
+    }
+  ],
+  "correction_playback_provenance": "Real SpeechQueue/governor/hybrid policy replay with mock offline audio, not physical fault/audio validation.",
+  "limits": "No detector thresholds, Tier-B gates, instructions, cue bank, rubric or bars changed. Browser cue-meter timing is not iPhone acoustic latency."
+}
