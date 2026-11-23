@@ -4,7 +4,7 @@ import { dirname,join } from "node:path";
 import { Client } from "langsmith";
 import { z } from "zod";
 const file=process.argv[2];assert.ok(file,"Usage: tsx scripts/audit-shell.mts shell-ledger.json [audit-output.json]");
-const {ledger}=z.object({ledger:z.object({thread_id:z.uuidv7(),events:z.array(z.object({event_id:z.uuid(),type:z.enum(["session.start","screen.view","permissions","onboarding.answer","setup.pass","set.start","rep.detected","set.end","session.pause","session.resume","session.end","utterance"])}))})}).parse(JSON.parse(await readFile(file,"utf8")));
+const {ledger}=z.object({ledger:z.object({thread_id:z.uuidv7(),events:z.array(z.object({event_id:z.uuid(),type:z.enum(["session.start","screen.view","permissions","onboarding.answer","setup.pass","set.start","rep.detected","set.end","session.pause","session.resume","session.end","utterance","coach.turn","cue.decision","pose.status"])}))})}).parse(JSON.parse(await readFile(file,"utf8")));
 assert.ok(process.env.LANGSMITH_API_KEY && process.env.LANGSMITH_PROJECT,"LangSmith configuration is required");
 const client=new Client(),project=await client.readProject({projectName:process.env.LANGSMITH_PROJECT});
 const runs:{id?:string;name?:string;error?:string|null;metadata?:Record<string,unknown>}[]=[];

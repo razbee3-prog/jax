@@ -4,6 +4,12 @@ import type { AudioSession } from "./audioSession";
 import { SpeechDropped } from "../coach/governor";
 afterEach(()=>vi.unstubAllGlobals());
 const session={context:{currentTime:0},getOutputVolume:()=>0} as AudioSession;
+it("never waits for or starts a network request for cached-only in-set audio",async()=>{
+  let resolve!:(value:Response)=>void;const fetcher=vi.fn(()=>new Promise<Response>(r=>{resolve=r;}));vi.stubGlobal("fetch",fetcher);
+  const tts=new TTS(session);await expect(tts.play("Offline",new AbortController().signal,vi.fn(),()=>{},true)).rejects.toThrow("audio not prefetched");expect(fetcher).not.toHaveBeenCalled();
+  const pending=tts.prefetch("Offline");await expect(tts.play("Offline",new AbortController().signal,vi.fn(),()=>{},true)).rejects.toThrow("audio not prefetched");resolve(new Response(new Uint8Array([0,1])));await pending;
+  const stop=new SpeechDropped("test playback gate");await expect(tts.play("Offline",new AbortController().signal,vi.fn(),()=>{throw stop;},true)).rejects.toBe(stop);expect(fetcher).toHaveBeenCalledOnce();
+});
 it("cancels the reader and request when a prepared cue becomes stale",async()=>{
   const cancel=vi.fn(),stream=new ReadableStream<Uint8Array>({start(controller){controller.enqueue(new Uint8Array([0,1]));},cancel});
   let requestSignal:AbortSignal|undefined;

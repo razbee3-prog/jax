@@ -1,6 +1,7 @@
 import { test,expect,chromium,type Page } from "@playwright/test";
 import { mkdirSync,writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import {demoCamera} from "./coach-fixtures";
 const flags=["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"];
 const folder=process.env.SHELL_EVIDENCE_DIR||"test-results/shell";
 async function mocks(page:Page){
@@ -8,16 +9,17 @@ async function mocks(page:Page){
   await page.route("**/api/session/event",route=>{const data=route.request().postDataJSON();return route.fulfill({json:{event_id:data.event_id,...(data.type==="session.end" ? {run_id:data.event_id,receipt:"test-receipt"}:{})}});});
   await page.route("**/api/session/feedback",route=>route.fulfill({json:{ok:true}}));
   await page.route("**/api/tts",route=>route.abort());
+  await page.route("**/api/stt-token",route=>route.abort());
+  await page.route("**/api/coach",route=>{const {event}=route.request().postDataJSON();return route.fulfill({json:{decision:{speak:true,text:event.next_question??"Ready.",kind:"question",fault_id:null,slots:{focus:null,duration_min:null,injuries:[],has_dumbbells:null},reason:"Test coach",guidance:null,summary:null}}});});
 }
 async function screen(page:Page,name:string){await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen",name);}
 async function shot(page:Page,name:string){mkdirSync(folder,{recursive:true});await expect(page.locator(".shell-screen")).toHaveCount(1);await expect(page.locator(".shell-screen")).toHaveCSS("opacity","1");await page.screenshot({path:resolve(folder,`${name}.png`)});}
-async function invite(page:Page,url="/?fake=1") {await page.goto(url);await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();await screen(page,"S1");}
+async function invite(page:Page,url="/?fake=1") {if(url==="/"){await demoCamera(page);url="/?poseDelegate=CPU";}await page.goto(url);await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();await screen(page,"S1");}
 test("real shell speaks the countdown after the cue, synchronized to scheduled audio",async()=>{
   const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
   try{
     await mocks(page);
     await page.addInitScript(()=>{
-      Object.defineProperty(navigator.mediaDevices,"getUserMedia",{value:async()=>new MediaStream()});
       const root=window as typeof window & {countdownAudio:{label:string;at:number}[];countdownUI:{label:string;at:number}[]};root.countdownAudio=[];root.countdownUI=[];
       const original=AudioContext.prototype.createBufferSource;let observing=false;
       AudioContext.prototype.createBufferSource=function(){
@@ -48,7 +50,7 @@ test("real shell speaks the countdown after the cue, synchronized to scheduled a
 test("real shell falls back to the visual countdown when audio is unavailable",async()=>{
   const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
   try{
-    await mocks(page);await page.addInitScript(()=>Object.defineProperty(navigator.mediaDevices,"getUserMedia",{value:async()=>new MediaStream()}));
+    await mocks(page);
     await invite(page,"/");await page.getByRole("button",{name:"Turn on camera and mic"}).click();
     for(const answer of ["full body","10","No injuries","Yes"])await page.getByRole("button",{name:answer,exact:true}).click();
     await expect(page.getByRole("button",{name:"Continue",exact:true})).toBeEnabled();await page.getByRole("button",{name:"Continue",exact:true}).click();await page.getByRole("button",{name:"Let’s get started"}).click();

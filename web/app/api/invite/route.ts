@@ -1,4 +1,5 @@
 import { inviteCookie } from "../../../lib/voice/access.server";
+import {identifyUser} from "../../../lib/coach/identity.server";
 export async function POST(request: Request) {
   const expected = process.env.INVITE_CODE;
   if (!expected) return Response.json({ error: "Invite service unavailable" }, { status: 503 });
@@ -9,5 +10,6 @@ export async function POST(request: Request) {
   }
   if (body.code.trim().toLowerCase() !== expected.trim().toLowerCase()) return Response.json({ error: "That code didn't work." }, { status: 401 });
   if(!process.env.SESSION_SECRET)return Response.json({error:"Invite service unavailable"},{status:503});
-  return Response.json({ ok: true },{headers:{"Set-Cookie":inviteCookie()}});
+  const user=identifyUser(request),headers=new Headers();headers.append("Set-Cookie",inviteCookie());headers.append("Set-Cookie",user.cookie);
+  return Response.json({ ok:true,user_id:user.id },{headers});
 }

@@ -13,11 +13,12 @@ export type Screen="S0"|"S1"|"S2"|"S3"|"S4"|"S5"|"S6"|"S7"|"S8";
 export type ShellState={screen:Screen;question:number;answers:string[];exercise:number;reps:number[];paused:boolean;pauseReason:string;inFrame:boolean;fakeReps:boolean;missingMs:number;holdMs:number;floor:boolean;introMs:number;restMs:number;repMs:number;idleMs:number;elapsedMs:number;started:boolean};
 export const initialShell:ShellState={screen:"S0",question:0,answers:[],exercise:0,reps:[0,0,0,0],paused:false,pauseReason:"",inFrame:true,fakeReps:true,missingMs:0,holdMs:0,floor:false,introMs:0,restMs:20000,repMs:0,idleMs:0,elapsedMs:0,started:false};
 export function previewState(screen?:Screen):ShellState{return !screen ? initialShell:{...initialShell,screen,answers:["full body","10","No injuries","Yes"],holdMs:screen==="S3" ? 1500:0,reps:screen==="S8" ? [10,10,10,10]:screen==="S6" ? [3,0,0,0]:[0,0,0,0],elapsedMs:screen==="S8" ? 135000:0};}
-export type ShellAction={type:"invite"|"permissions"|"continue"|"skip"|"end"|"pause"|"resume"|"floor"|"intro-complete"}|{type:"answer";value:string}|{type:"frame"|"source";value:boolean}|{type:"intro-step";value:number}|{type:"tick";ms:number;introClock?:boolean};
+export type ShellAction={type:"invite"|"permissions"|"continue"|"skip"|"end"|"pause"|"resume"|"floor"|"intro-complete"|"rep"}|{type:"answer";value:string}|{type:"frame"|"source";value:boolean}|{type:"intro-step";value:number}|{type:"tick";ms:number;introClock?:boolean};
 function finishSet(s:ShellState):ShellState{return {...s,screen:s.exercise===3 ? "S8":"S7",restMs:20000,paused:false,repMs:0,idleMs:0};}
 function nextIntro(s:ShellState):ShellState{return {...s,screen:"S5",exercise:s.exercise+1,introMs:0,repMs:0,idleMs:0};}
 export function shellReducer(s:ShellState,a:ShellAction):ShellState{
   switch(a.type){
+    case "rep":{if(s.screen!=="S6" || s.paused || s.fakeReps)return s;const n={...s,reps:s.reps.map((r,i)=>i===s.exercise ? Math.min(10,r+1):r),idleMs:0};return n.reps[n.exercise]>=10 ? finishSet(n):n;}
     case "invite":return s.screen==="S0" ? {...s,screen:"S1"}:s;
     case "permissions":return s.screen==="S1" ? {...s,screen:"S2"}:s;
     case "answer":{if(s.screen!=="S2" || !a.value.trim())return s;const answers=[...s.answers,a.value.trim()];return {...s,answers,question:Math.min(3,s.question+1),screen:s.question===3 ? "S3":"S2",holdMs:0};}
