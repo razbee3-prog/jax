@@ -21,7 +21,7 @@ for(const [index,exercise] of ["rdl","push-press","curl","push-up"].entries()){
   const frames=fixture.frames.filter(f=>f.t<=fixture.frames[0].t+3000),reporter=new RepReporter();
   for(let rep=1;rep<=10;rep++){
     const {report}=reporter.build({...fixture,frames},rep,10,3000);
-    ledger.emit("rep",{report,landmark_series:landmarkSeries(frames),landmark_ids:JSON.stringify(LANDMARK_IDS),sample_hz:10,scripted:true,resampling:"linear fixture replay"});
+    ledger.emit("rep",{report,frame_width:fixture.width,frame_height:fixture.height,coordinate_space:"normalized-image",landmark_series:landmarkSeries(frames),landmark_ids:JSON.stringify(LANDMARK_IDS),sample_hz:10,scripted:true,resampling:"linear fixture replay"});
     ledger.emit("coach.turn",{event:{type:"rep",report,reports:[report]},decision:{speak:false,text:"",kind:"silence",fault_id:null,slots:null,guidance:null,summary:null,reason:"Fixture event"},latency_ms:0,source:"fallback",reason:"Fixture transport; no agent call",scripted:true});
     ledger.emit("utterance",{text:rep%2 ? "Nice work.":"",outcome:rep%2 ? "played":"dropped",reason:rep%2 ? "fixture playback":"silent decision",ttfa_ms:rep%2 ? 50:null,source:"local",scripted:true});
     await ledger.flush();
@@ -32,7 +32,7 @@ ledger.emit("session.end",{reps:40,elapsed_ms:180000,kcal:12,weight_kg:68,met:3.
 const response=await fetch(base+"/api/session/audit",{method:"POST",headers:{"Content-Type":"application/json",Cookie:cookie},body:JSON.stringify({thread_id:thread,...ledger.receipt,ledger:ledger.events}),signal:AbortSignal.timeout(85000)});assert.equal(response.status,200,"Audit unavailable");
 const result=await response.json(),client=new Client(),readback=await readSession(client,thread),trace_url=await client.getRunUrl({runId:ledger.receipt.run_id,projectOpts:{projectName:process.env.LANGSMITH_PROJECT}});
 assert.equal(readback.current.pass,true,"Independent LangSmith readback failed");assert.equal(readback.runs.filter(r=>r.name==="rep").length,40,"Missing fixture reps");
-assert.ok(readback.runs.filter(r=>r.name==="rep").every(r=>Array.isArray(r.outputs?.landmark_series) && r.outputs.landmark_series.length>0),"Missing landmark replay data");
+assert.ok(readback.runs.filter(r=>r.name==="rep").every(r=>Array.isArray(r.outputs?.landmark_series) && r.outputs.landmark_series.length>0 && typeof r.outputs.frame_width==="number" && r.outputs.frame_width>0 && typeof r.outputs.frame_height==="number" && r.outputs.frame_height>0),"Missing landmark replay data or native dimensions");
 const output={...result,run_id:ledger.receipt.run_id,trace_url,readback:readback.current};
 console.log(`Session trace audit: ${result.pass ? "PASS":"FAIL"} (${result.recorded}/${result.expected} recorded), thread_id=${thread}, session.end=${ledger.receipt.run_id}`);
 console.log("LangSmith: "+trace_url);

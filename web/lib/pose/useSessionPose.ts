@@ -54,7 +54,7 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
           frames.push(frame);frames=frames.filter(f=>frame.t-f.t<=15000);
           if(pipeline.counter.count>previousCount){
             previousCount=pipeline.counter.count;const count=offset+previousCount;
-            if(count<=10){const now=performance.now(),built=reporter.build({exercise:MOVES[exercise].id,width:video.videoWidth,height:video.videoHeight,frames,baselineTorsoLength:pipeline.baseline || undefined},count,10,now-lastRep);current.current.trace?.("rep",{report:built.report,landmark_series:landmarkSeries(frames),landmark_ids:JSON.stringify(LANDMARK_IDS),sample_hz:10,resampling:"linear; visibility=min endpoints; gaps>500ms hidden",source:"local"});report(built.report,built.observations);dispatch({type:"rep"});lastRep=now;frames=[frame];}
+            if(count<=10){const now=performance.now(),built=reporter.build({exercise:MOVES[exercise].id,width:video.videoWidth,height:video.videoHeight,frames,baselineTorsoLength:pipeline.baseline || undefined},count,10,now-lastRep);current.current.trace?.("rep",{report:built.report,frame_width:video.videoWidth,frame_height:video.videoHeight,coordinate_space:"normalized-image",landmark_series:landmarkSeries(frames),landmark_ids:JSON.stringify(LANDMARK_IDS),sample_hz:10,resampling:"linear; visibility=min endpoints; gaps>500ms hidden",source:"local"});report(built.report,built.observations);dispatch({type:"rep"});lastRep=now;frames=[frame];}
           }
         }
       }catch{setError("Tracking unavailable. Reframe or skip this set.");dispatch({type:"frame",value:false});}
