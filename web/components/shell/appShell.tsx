@@ -79,7 +79,7 @@ export default function AppShell({sessionId,fake,simulateDenial=false,preview,po
   function answer(value:string){if(!fake){void coach.answer(value);return;}emit("onboarding.answer",{question:s.question,answer:value});dispatch({type:"answer",value});}
   function continueSetup(){emit("setup.pass",{simulated:fake,floor:s.floor,position_check:!s.floor});dispatch({type:"continue"});}
   function end(){permissionVersion.current++;capture.current?.getTracks().forEach(track=>track.stop());audio.current?.stopMicrophone();dispatch({type:"end"});}
-  function restart(){router.push("/?fake=1");router.refresh();}
+  function restart(){router.push(fake ? "/?fake=1":"/");router.refresh();}
   async function rate(score:number){if(!receipt){setFeedback("Feedback is not connected yet. Please try again.");return;}setFeedback("Sending feedback…");try{const response=await fetch("/api/session/feedback",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({thread_id:sessionId,...receipt,score})});if(!response.ok)throw new Error("Not recorded");setRating(score);setFeedback("Thanks for your feedback.");}catch{setFeedback("Feedback was not recorded. Please try again.");}}
   const next=Math.min(3,s.exercise+1),total=s.reps.reduce((a,b)=>a+b,0),countdown=COUNTDOWN[Math.min(4,Math.floor(s.introMs/1000))];
   return <MotionConfig reducedMotion="user"><main className={`shell ${compact ? "is-compact":""}`} data-screen={s.screen} data-testid="app-shell">
