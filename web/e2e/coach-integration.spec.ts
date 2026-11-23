@@ -63,3 +63,13 @@ test("pending rep retention survives a timed-out in-flight browser request",asyn
     console.log("PENDING REP RETENTION: camera reached rep 3 while request 1 was in flight; deadline fallback; next HTTP batch retained reps [2,3].");
   }finally{release();mkdirSync(folder,{recursive:true});writeFileSync(resolve(folder,"pending-reps.json"),JSON.stringify({sent,events},null,2));await browser.close();}
 });
+test("floor setup is immediately available without a position or hold gate",async()=>{
+  test.setTimeout(90000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  try{
+    await prepare(page);await page.route("**/api/coach",r=>r.fulfill({json:{decision:{...decision,text:r.request().postDataJSON().event.next_question??"Ready."}}}));await setup(page);await start(page);
+    for(let exercise=0;exercise<3;exercise++){
+      await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S6",{timeout:20000});await page.getByRole("button",{name:"Skip",exact:true}).click();await page.getByRole("button",{name:"Skip rest",exact:true}).click();
+    }
+    await page.getByRole("button",{name:"Set up for push-ups"}).click();await expect(page.getByRole("button",{name:"Start push-ups"})).toBeEnabled();await expect(page.locator(".screen-S3")).toHaveCSS("opacity","1");await expect(page.locator(".camera-frame-guide")).toHaveCount(0);await expect(page.locator(".setup-bottom")).not.toContainText("1.5 seconds");await shot(page,"floor-setup-ready");await page.getByRole("button",{name:"Start push-ups"}).click();await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S6",{timeout:20000});await page.getByRole("button",{name:"End",exact:true}).click();console.log("FLOOR SETUP: no framing guide, position gate or hold instruction; Start push-ups is immediately enabled.");
+  }finally{await browser.close();}
+});
