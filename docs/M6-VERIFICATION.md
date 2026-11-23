@@ -1,4 +1,4 @@
-# M6 remaining full-session verification
+# M6 full-session verification
 
 Raz approved ignoring camera angle/position before push-ups. The production
 floor prompt is non-blocking; the initial standing setup still requires 50–90%
@@ -9,6 +9,24 @@ Build first (`npm run build`). The commands below start an isolated local web
 server through Playwright; no droplet or hosted-agent configuration is changed.
 The environment file stays outside Git. Explicit command-line environment values
 override its values, including the deliberately broken URL.
+
+The MDA/LangSmith environment file on this box does not contain the voice key.
+For every live command, explicitly bind `ELEVENLABS_API_KEY` from
+`secret:org:ELEVEN_LABS_KEY` in the execution environment, with
+`ELEVENLABS_VOICE_ID=SYXbTJsLE7zmSjr1DchT` and
+`ELEVENLABS_TTS_MODEL=eleven_v4_turbo`. Do not put a secret-reference string into
+a shell assignment as if it were a literal API key.
+
+The committed mono 24kHz/16-bit WAV contains three contiguous repetitions of
+"Full body. Ten minutes. No injuries. Yes, I have dumbbells." followed by two
+seconds of silence. Repetition keeps the complete answer available when the
+fake microphone opens partway through its looping capture; local parsing still
+rejects ambiguous or unrelated answers. It is actual ElevenLabs speech, not
+injected transcripts or chip clicks.
+
+Completed evidence is in `/home/ubuntu/jax-evidence/m6/final-agent-complete/`
+and `/home/ubuntu/jax-evidence/m6/final-fallback-complete/`. Each contains the
+session ledger, measurements, LangSmith readback and passing trace audit.
 
 ## Healthy agent, after approval
 
