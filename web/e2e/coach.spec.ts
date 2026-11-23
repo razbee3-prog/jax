@@ -4,8 +4,9 @@ import {resolve} from "node:path";
 import {demoCamera} from "./coach-fixtures";
 import {uuid7} from "langsmith";
 test("real hybrid coach completes forty camera reps with WAV onboarding",async()=>{
-  test.skip(process.env.COACH_LIVE_E2E!=="1","Explicit real-agent/voice opt-in required");test.setTimeout(720000);
+  test.skip(process.env.COACH_LIVE_E2E!=="1" || process.env.COACH_FULL_SESSION_APPROVED!=="1","Full sessions await the floor-framing decision and explicit opt-in");test.setTimeout(720000);
   const fallback=process.env.COACH_EXPECT_FALLBACK==="1",folder=process.env.COACH_EVIDENCE_DIR??"test-results/coach";mkdirSync(folder,{recursive:true});
+  if(fallback)expect(process.env.MDA_DEPLOYMENT_URL,"Break only the local test server's upstream URL").toBe("http://127.0.0.1:1");
   const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader","--use-fake-device-for-media-stream","--use-fake-ui-for-media-stream","--use-file-for-fake-audio-capture="+resolve("evals/fixtures/voice/coach-answers.wav")]}),page=await browser.newPage({viewport:{width:390,height:844}});
   const events:{thread_id:string;event_id:string;type:string;data:Record<string,unknown>}[]=[],acknowledged=new Set<string>();
   page.on("request",request=>{if(request.url().endsWith("/api/session/event"))events.push(request.postDataJSON());});
@@ -27,7 +28,7 @@ test("real hybrid coach completes forty camera reps with WAV onboarding",async()
     await expect.poll(()=>events.some(e=>e.type==="coach.turn" && e.data.event_type==="session_end"),{timeout:30000}).toBe(true);await shot("S8");
     expect(events.filter(e=>e.type==="rep.detected")).toHaveLength(40);expect(events.filter(e=>e.type==="cue.decision")).toHaveLength(40);
     expect(events.some(e=>e.type==="coach.turn" && e.data.source===(fallback ? "fallback":"agent"))).toBe(true);
-    if(fallback)expect(events.some(e=>e.type==="cue.decision" && e.data.source==="fallback")).toBe(true);
+    if(fallback){expect(events.some(e=>e.type==="cue.decision" && e.data.source==="fallback")).toBe(true);expect(events.filter(e=>e.type==="coach.turn").every(e=>e.data.source==="fallback")).toBe(true);}
     else expect(events.find(e=>e.type==="coach.turn" && e.data.event_type==="session_end")?.data.source).toBe("agent");
     await expect.poll(()=>acknowledged.size,{timeout:30000}).toBe(events.length);
     console.log(`COACH SESSION ${fallback ? "fallback":"agent"}: 40 reps, four WAV answers, microphone stopped at setup, ${acknowledged.size}/${events.length} events acknowledged.`);
