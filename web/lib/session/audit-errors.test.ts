@@ -8,6 +8,10 @@ it("logs the exception class and status without environment secrets or URLs",()=
 it("retries a transient metadata read once with bounded backoff",async()=>{
   vi.useFakeTimers();const read=vi.fn().mockRejectedValueOnce(new DOMException("slow","TimeoutError")).mockResolvedValueOnce({id:"project"});const result=retryAuditRead(read);expect(read).toHaveBeenCalledTimes(1);await vi.advanceTimersByTimeAsync(250);await expect(result).resolves.toEqual({id:"project"});expect(read).toHaveBeenCalledTimes(2);
 });
+it("preserves successful and empty reads without retrying",async()=>{
+  for(const value of [undefined,{id:"project"}]){const read=vi.fn().mockResolvedValue(value);await expect(retryAuditRead(read)).resolves.toBe(value);expect(read).toHaveBeenCalledTimes(1);}
+  expect(auditError(undefined)).toEqual({name:"Error",message:"undefined"});expect(auditError(new Error(""))).toEqual({name:"Error",message:""});
+});
 it("does not retry authentication errors or retry indefinitely",async()=>{
   const denied=vi.fn().mockRejectedValue(Object.assign(new Error("denied"),{status:401}));await expect(retryAuditRead(denied)).rejects.toThrow("denied");expect(denied).toHaveBeenCalledTimes(1);
   vi.useFakeTimers();const unavailable=vi.fn().mockRejectedValue(Object.assign(new Error("unavailable"),{status:503}));const failure=expect(retryAuditRead(unavailable)).rejects.toThrow("unavailable");await vi.advanceTimersByTimeAsync(250);await failure;expect(unavailable).toHaveBeenCalledTimes(2);
