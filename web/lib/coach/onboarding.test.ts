@@ -4,6 +4,9 @@ describe("explicit onboarding answers",()=>{
   it("normalizes both remembered-injury chip answers without inventing an injury",()=>{
     expect(answer(2,"Yes, still",["Shoulder discomfort"])).toBe("Shoulder discomfort");expect(answer(2,"No, it's better",["Shoulder discomfort"])).toBe("No injuries");expect(answer(2,"Yes, still")).toBeNull();expect(answer(2,"No, it's better")).toBeNull();
   });
+  it("confirms and clears arbitrary remembered injuries, not just chip presets",()=>{
+    for(const injuries of [["left knee"],["left knee","right elbow"]]){expect(answer(2,"Yes, still",injuries)).toBe(injuries.join(" and "));expect(answer(2,"No, it's better",injuries)).toBe("No injuries");}
+  });
   it("does not turn rejected or fractional durations into supported choices",()=>{for(const text of ["not ten minutes","no 5 minutes","5.5 minutes"])expect(answer(1,text)).toBeNull();});
   it("accepts explicit slots without inventing defaults",()=>{
     expect(answer(0,"upper body")).toBe("upper body");expect(answer(0,"Full-body")).toBe("full body");expect(answer(1,"Ten minutes, please.")).toBe("10");expect(answer(1,"5")).toBe("5");expect(answer(2,"Shoulder discomfort")).toBe("Shoulder discomfort");expect(answer(2,"No injuries")).toBe("No injuries");expect(answer(3,"I have a pair of dumbbells")).toBe("Yes");expect(answer(3,"I don't have dumbbells")).toBe("No");
