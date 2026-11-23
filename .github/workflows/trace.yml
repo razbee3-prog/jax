@@ -1,0 +1,52 @@
+name: Deployed trace completeness
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+      INVITE_CODE: ${{ secrets.INVITE_CODE }}
+      JAX_BASE_URL: ${{ secrets.JAX_BASE_URL }}
+      LANGSMITH_PROJECT: jax-coach-dedicated-production
+      SMOKE_OUTPUT: smoke-audit.json
+      SWEEP_OUTPUT: sweep-audit.json
+    steps:
+      - id: secrets
+        shell: bash
+        run: |
+          missing=""
+          for name in LANGSMITH_API_KEY INVITE_CODE JAX_BASE_URL; do
+            if [ -z "${!name}" ]; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "SKIP deployed tracing checks: missing secrets:$missing"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ready == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        if: steps.secrets.outputs.ready == 'true'
+      - run: npm run smoke:session
+        if: steps.secrets.outputs.ready == 'true'
+      - run: npx tsx scripts/sweep-sessions.mts
+        if: always() && steps.secrets.outputs.ready == 'true' && github.event_name == 'schedule'
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.secrets.outputs.ready == 'true'
+        with:
+          name: deployed-trace-audits
+          path: '*-audit.json'

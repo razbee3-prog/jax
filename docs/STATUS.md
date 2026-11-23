@@ -416,3 +416,42 @@ as CI does; no new real-provider measurements were made in this review loop.
 Partial transcript screenshot visually inspected at 390×844:
 `/home/ubuntu/jax-evidence/m4-review/partial-transcript-390x844.png`.
 Review fixes are pushed for CI only, not redeployed. Real-device QA remains open.
+
+## M7 — trace completeness (implementation; deployment proof pending)
+
+Branch `devin/1795456505-m7-trace` starts at M6 review HEAD `034b51a`.
+The existing shell ledger/audit path now shares its recorder and comparison with
+batched `/api/telemetry`, `/api/session/audit`, admin inspection and the CLI.
+Client batches flush every 2 seconds; page hide beacons include unacknowledged
+and in-flight events. Canonical onboarding/setup names preserve legacy callers.
+Rep runs include the RepReport's rolling 15-second analysis window, linearly
+resampled at 10 Hz into 13 image-coordinate landmarks; visibility uses the
+minimum endpoint value and gaps over 500 ms are marked invisible. No frames,
+images, audio or world landmarks are uploaded; counting thresholds are unchanged.
+Utterances record played/dropped, original outcome, reason and nullable TTFA.
+Set starts/ends, setup rate/model, structured coach decisions and session totals
+are recorded; the final flush waits for the summary turn and speech queue.
+
+The audit polls LangSmith for up to 60 seconds, compares IDs and canonical names
+against the ledger and persisted end manifest, writes `trace_complete` feedback,
+persists `trace.audit`, optionally sends a failure webhook, and drives the actual
+summary status/missing-event list. Server-side Basic auth (`admin:ADMIN_KEY`)
+protects `/admin/sessions/{id}`. A new random 256-bit key is stored only in the
+mode-600 server environment and local private evidence files; it is never printed.
+The permissions screen discloses landmark/transcript/injury-note retention.
+
+`npm run smoke:session` replays 40 fixture reports against the deployed APIs and
+independently reads LangSmith. The daily sweep flags last-24-hour sessions with
+no end or ledger gaps. The trace workflow runs on main pushes and daily, and
+skips cleanly if required repo secrets are unavailable. GitHub secret writes were
+denied at the public-key request: HTTP 403, Resource not accessible by integration.
+Raz must add `LANGSMITH_API_KEY`, `INVITE_CODE`, and `JAX_BASE_URL`; this toolset
+has no explicit org-secret binding, so no alternate credential was substituted
+for the requested org-secret write.
+
+Initial browser tests caught an illegal native-fetch receiver in the new ledger
+(zero posts despite healthy Node mocks); default fetch now uses a wrapper and a
+regression covers its receiver. Batch observers wait for delivery rather than
+assuming a synchronous post. Deployment, full PASS/intentional-FAIL sessions,
+webhook readback and visual evidence are pending below. iPhone-specific QA remains
+unverified; M1/M9 latency and real-device performance gates are unchanged.

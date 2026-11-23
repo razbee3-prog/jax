@@ -11,12 +11,13 @@ import {setupQuality} from "./setup";
 import {derive} from "./angles";
 import type {Frame} from "./types";
 import type {Observation} from "./faults";
-export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:boolean,delegate:"CPU"|"GPU",dispatch:Dispatch<ShellAction>,report:(report:RepReport,observations:Observation[])=>void,status:(data:Record<string,string|number|boolean>)=>void,frameRef?:RefObject<Frame|null>){
+import {landmarkSeries,LANDMARK_IDS} from "../session/landmarks";
+export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:boolean,delegate:"CPU"|"GPU",dispatch:Dispatch<ShellAction>,report:(report:RepReport,observations:Observation[])=>void,status:(data:Record<string,string|number|boolean>)=>void,frameRef?:RefObject<Frame|null>,trace?:(type:string,data:Record<string,unknown>)=>void){
   const [error,setError]=useState("");
-  const current=useRef({state,report,status});useEffect(()=>{current.current={state,report,status};},[state,report,status]);
+  const current=useRef({state,report,status,trace});useEffect(()=>{current.current={state,report,status,trace};},[state,report,status,trace]);
   useEffect(()=>{
     if(!enabled || !stream)return;
-    let closed=false,detector:Landmarker|undefined,raf=0,pipeline:PosePipeline|undefined,reporter=new RepReporter(FAULT_EVIDENCE),exercise=-1,screen="",offset=0,frames:Frame[]=[],previousCount=0,lastRep=0,lastVideoTime=-1,lastGood=-Infinity,lastStatus=-Infinity;
+    let closed=false,detector:Landmarker|undefined,raf=0,pipeline:PosePipeline|undefined,reporter=new RepReporter(FAULT_EVIDENCE),exercise=-1,screen="",offset=0,frames:Frame[]=[],previousCount=0,lastRep=0,lastVideoTime=-1,lastGood=-Infinity,lastStatus=-Infinity,setupFrames=0,setupStart=performance.now();
     const video=document.createElement("video");video.muted=true;video.playsInline=true;video.srcObject=stream;
     const loop=()=>{
       if(closed)return;
@@ -42,8 +43,10 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
         const frame=detector.detect(video);if(frameRef)frameRef.current=frame;const result=pipeline.process(frame),angles=result?.angles;
         const setup=setupQuality(frame,pipeline.side);
         if(s.screen==="S3"){
+          if(setupFrames===0)setupStart=performance.now();
+          setupFrames++;
           if(setup.ready!==s.inFrame)dispatch({type:"frame",value:setup.ready});
-          if(performance.now()-lastStatus>=1000){lastStatus=performance.now();current.current.status({model:"full",delegate:detector.delegate,floor:s.floor,...setup});}
+          if(performance.now()-lastStatus>=1000){lastStatus=performance.now();current.current.status({model:"full",delegate:detector.delegate,floor:s.floor,inference_hz:setupFrames*1000/Math.max(1000,performance.now()-setupStart),...setup});}
         }
         else{
           if(angles?.valid)lastGood=performance.now();
@@ -51,7 +54,7 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
           frames.push(frame);frames=frames.filter(f=>frame.t-f.t<=15000);
           if(pipeline.counter.count>previousCount){
             previousCount=pipeline.counter.count;const count=offset+previousCount;
-            if(count<=10){const now=performance.now(),built=reporter.build({exercise:MOVES[exercise].id,width:video.videoWidth,height:video.videoHeight,frames,baselineTorsoLength:pipeline.baseline || undefined},count,10,now-lastRep);report(built.report,built.observations);dispatch({type:"rep"});lastRep=now;frames=[frame];}
+            if(count<=10){const now=performance.now(),built=reporter.build({exercise:MOVES[exercise].id,width:video.videoWidth,height:video.videoHeight,frames,baselineTorsoLength:pipeline.baseline || undefined},count,10,now-lastRep);current.current.trace?.("rep",{report:built.report,landmark_series:landmarkSeries(frames),landmark_ids:JSON.stringify(LANDMARK_IDS),sample_hz:10,resampling:"linear; visibility=min endpoints; gaps>500ms hidden",source:"local"});report(built.report,built.observations);dispatch({type:"rep"});lastRep=now;frames=[frame];}
           }
         }
       }catch{setError("Tracking unavailable. Reframe or skip this set.");dispatch({type:"frame",value:false});}

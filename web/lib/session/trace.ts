@@ -1,11 +1,22 @@
 "use client";
-import { useCallback,useRef,useState } from "react";
+import { useCallback,useEffect,useState } from "react";
+import {SessionLedger} from "./ledger";
+import type {TraceData} from "./events";
+import type {AuditResult} from "./audit.server";
 export function useShellTrace(thread_id:string){
-  const [receipt,setReceipt]=useState<{run_id:string;receipt:string}|null>(null),[acknowledged,setAcknowledged]=useState(0),[emitted,setEmitted]=useState(0);
-  const ledger=useRef<{event_id:string;type:string;acked:boolean}[]>([]);
-  const emit=useCallback((type:string,data:Record<string,string|number|boolean>={})=>{
-    const event_id=crypto.randomUUID(),item={event_id,type,acked:false};ledger.current.push(item);setEmitted(n=>n+1);
-    void fetch("/api/session/event",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({thread_id,event_id,type,data}),keepalive:true}).then(async response=>{if(!response.ok)return;const result=await response.json();if(result.event_id!==event_id)return;item.acked=true;setAcknowledged(n=>n+1);if(type==="session.end")setReceipt({run_id:result.run_id,receipt:result.receipt});}).catch(()=>{});
-  },[thread_id]);
-  return {emit,receipt,acknowledged,emitted,ledger};
+  const [ledger]=useState(()=>new SessionLedger(thread_id)),[snapshot,setSnapshot]=useState({receipt:ledger.receipt,acknowledged:0,emitted:0}),[audit,setAudit]=useState<AuditResult|null>(null),[auditState,setAuditState]=useState("pending");
+  useEffect(()=>{
+    const unsubscribe=ledger.subscribe(()=>setSnapshot({receipt:ledger.receipt,acknowledged:ledger.acknowledged.size,emitted:ledger.events.length}));
+    const interval=setInterval(()=>void ledger.flush(),2000);
+    const hide=()=>{if(document.visibilityState==="hidden")ledger.beacon((url,data)=>navigator.sendBeacon(url,data));};
+    document.addEventListener("visibilitychange",hide);const pagehide=()=>ledger.beacon((url,data)=>navigator.sendBeacon(url,data));window.addEventListener("pagehide",pagehide);
+    return()=>{clearInterval(interval);document.removeEventListener("visibilitychange",hide);window.removeEventListener("pagehide",pagehide);unsubscribe();};
+  },[ledger]);
+  const emit=useCallback((type:string,data:TraceData={})=>ledger.emit(type,data),[ledger]);
+  const finish=useCallback(async()=>{
+    setAuditState("checking");await ledger.flush();
+    try{if(!ledger.receipt)throw new Error("Telemetry flush failed");const response=await fetch("/api/session/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({thread_id,...ledger.receipt,ledger:ledger.events}),signal:AbortSignal.timeout(80000)});if(!response.ok)throw new Error("Audit unavailable");const result:AuditResult=await response.json();setAudit(result);setAuditState(result.pass ? "pass":"fail");}
+    catch{setAuditState("fail");setAudit({thread_id,pass:false,expected:ledger.events.length,recorded:0,missing:[...ledger.events]});}
+  },[thread_id,ledger]);
+  return {emit,finish,audit,auditState,...snapshot};
 }
