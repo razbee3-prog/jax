@@ -14,7 +14,7 @@ export class CoachQuota {
   private ips=new Map<string,number>();
   private day=-1;
   consume(user:string,thread:string,ip:string,limits=coachLimits(),now=Date.now()){
-    const day=Math.floor(now/86400000);if(day!==this.day){this.day=day;this.users.clear();this.ips.clear();}
+    const day=Math.floor(now/86400000);if(day!==this.day){this.day=day;this.threads.clear();this.users.clear();this.ips.clear();}
     const entries=[[this.threads,`${user}:${thread}`,limits.thread,"thread"],[this.users,user,limits.user,"user"],[this.ips,ip,limits.ip,"ip"]] as const;
     for(const [map,key,limit,scope] of entries)if((map.get(key)??0)>=limit || (!map.has(key) && map.size>=20000))return scope;
     for(const [map,key] of entries)map.set(key,(map.get(key)??0)+1);
