@@ -5,6 +5,7 @@ import {CoachEventSchema} from "../../../../shared/coach-event";
 import {agentClient,parseDecision,repRunConfig} from "../../../lib/coach/agent.server";
 import {voiceAccess} from "../../../lib/voice/access.server";
 import {userIdentity} from "../../../lib/coach/identity.server";
+import {coachIp,coachQuota} from "../../../lib/coach/quota.server";
 export const maxDuration=90;
 const input=z.object({thread_id:z.uuidv7(),event_id:z.uuid(),event:CoachEventSchema}).strict();
 const active=new Set<string>();
@@ -16,6 +17,13 @@ export async function POST(request:Request){
   const parsed=input.safeParse(body);if(!parsed.success)return Response.json({error:"Invalid event"},{status:400});
   const {thread_id,event_id,event}=parsed.data,key=`${user}:${thread_id}`;
   if(active.has(key))return Response.json({error:"Turn in flight"},{status:409});
+  const scope=coachQuota.consume(user,thread_id,coachIp(request));
+  if(scope){
+    const traces=new Client();
+    try{await traceable(async()=>({source:"fallback",reason:"usage quota",scope}),{name:"coach.quota",client:traces,tracingEnabled:true,project_name:process.env.LANGSMITH_PROJECT,metadata:{thread_id,event_id,source:"fallback",event_type:event.type}})();}catch{}
+    finally{await traces.awaitPendingTraceBatches().catch(()=>{});}
+    return Response.json({error:"Coach usage limit reached",source:"fallback"},{status:429,headers:{"Cache-Control":"no-store"}});
+  }
   active.add(key);let traces:Client|undefined;
   try{
     const client=agentClient(user);traces=new Client();
