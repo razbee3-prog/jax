@@ -2,8 +2,24 @@ import { afterEach,it,expect,vi } from "vitest";
 import { TTS } from "./tts";
 import type { AudioSession } from "./audioSession";
 import { SpeechDropped } from "../coach/governor";
-afterEach(()=>vi.unstubAllGlobals());
+afterEach(()=>{vi.unstubAllGlobals();vi.useRealTimers();});
 const session={context:{currentTime:0},getOutputVolume:()=>0} as AudioSession;
+it("ignores a rep tick while cue PCM is delayed or silent, then records only cue onset",async()=>{
+  vi.useFakeTimers();
+  let stream!:ReadableStreamDefaultController<Uint8Array>,cueVolume=0;
+  const sources:{connect:ReturnType<typeof vi.fn>;onended?:()=>void;start:ReturnType<typeof vi.fn>;stop:ReturnType<typeof vi.fn>;disconnect:ReturnType<typeof vi.fn>}[]=[];
+  const meter={connect:vi.fn(),disconnect:vi.fn()},gain={};
+  const audio={gain,volume:(node:unknown)=>node===meter ? cueVolume:1,getOutputVolume:()=>1,context:{currentTime:1,createAnalyser:()=>meter,createBuffer:()=>({duration:0.1,getChannelData:()=>new Float32Array(1)}),createBufferSource:()=>{const source={connect:vi.fn(),start:vi.fn(),stop:vi.fn(),disconnect:vi.fn()};sources.push(source);return source;}}} as unknown as AudioSession;
+  vi.stubGlobal("fetch",vi.fn(async()=>new Response(new ReadableStream<Uint8Array>({start(c){stream=c;}}))));
+  const onAudio=vi.fn(),playing=new TTS(audio).play("Delayed cue",new AbortController().signal,onAudio);
+  await vi.advanceTimersByTimeAsync(1);audio.context.currentTime=2;
+  await vi.advanceTimersByTimeAsync(40);expect(onAudio).not.toHaveBeenCalled();
+  stream.enqueue(new Uint8Array([0,0]));await vi.advanceTimersByTimeAsync(16);expect(onAudio).not.toHaveBeenCalled();
+  expect(sources[0].connect).toHaveBeenCalledWith(meter);expect(meter.connect).toHaveBeenCalledWith(gain);
+  cueVolume=0.2;await vi.advanceTimersByTimeAsync(8);expect(onAudio).toHaveBeenCalledOnce();
+  stream.close();await vi.advanceTimersByTimeAsync(0);sources[0].onended!();
+  expect((await playing).ttfa_ms).toBeGreaterThan(40);expect(meter.disconnect).toHaveBeenCalledOnce();
+});
 it("never waits for or starts a network request for cached-only in-set audio",async()=>{
   let resolve!:(value:Response)=>void;const fetcher=vi.fn(()=>new Promise<Response>(r=>{resolve=r;}));vi.stubGlobal("fetch",fetcher);
   const tts=new TTS(session);await expect(tts.play("Offline",new AbortController().signal,vi.fn(),()=>{},true)).rejects.toThrow("audio not prefetched");expect(fetcher).not.toHaveBeenCalled();
