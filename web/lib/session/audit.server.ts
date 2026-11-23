@@ -1,6 +1,7 @@
 import {Client} from "langsmith";
 import {traceable} from "langsmith/traceable";
 import {ledgerItem,runName,type LedgerItem} from "./events";
+import {retryAuditRead} from "./audit-errors.server";
 export type AuditRun={id?:string;name?:string;error?:string|null;extra?:{metadata?:Record<string,unknown>};outputs?:Record<string,unknown>|null};
 export function compareLedger(thread_id:string,ledger:LedgerItem[],runs:AuditRun[]){
   const missing=ledger.filter(e=>!runs.some(r=>!r.error && r.name===runName(e.type) && (r.extra?.metadata?.event_id??r.id)===e.event_id));
@@ -34,7 +35,7 @@ export async function readSession(client:Client,thread:string){
 export async function finishAudit(thread:string,run_id:string,ledger:LedgerItem[]){
   const client=new Client({timeout_ms:5000,callerOptions:{maxRetries:0}});await client.awaitPendingTraceBatches();
   const result=await pollAudit(client,thread,ledger);
-  try{const project=await client.readProject({projectName:process.env.LANGSMITH_PROJECT});
+  try{const project=await retryAuditRead(()=>client.readProject({projectName:process.env.LANGSMITH_PROJECT}));
     await client.createFeedback({runId:run_id,traceId:run_id,sessionId:project.id,key:"trace_complete",score:result.pass ? 1:0,comment:JSON.stringify(result),feedbackSourceType:"app",sourceInfo:{thread_id:thread}});
     await traceable(async()=>result,{name:"trace.audit",client,tracingEnabled:true,project_name:process.env.LANGSMITH_PROJECT,metadata:{thread_id:thread,session_end:run_id}})();
   }finally{await client.awaitPendingTraceBatches();}
