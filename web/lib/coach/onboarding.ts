@@ -12,7 +12,8 @@ export function onboardingAnswer(question:number,raw:string,injuries:readonly st
     const choices=[...new Set(values.map(v=>({five:"5",ten:"10",twenty:"20"}[v.toLowerCase()]??v)))];return choices.length===1 ? choices[0]:null;
   }
   if(question===2){
-    if(/^(?:yes|yes,? (?:it is|still the case))[.!]?$/i.test(text))return injuries.length ? injuries.join(" and "):null;
+    if(/^(?:yes|yes,? (?:it is|still(?: the case)?))[.!]?$/i.test(text))return injuries.length ? injuries.join(" and "):null;
+    if(/^no,? (?:it's|it is) better[.!]?$/i.test(text))return injuries.length ? "No injuries":null;
     if(/^(?:no|none)[.!]?$/i.test(text) || (/\bno (?:injuries|pain)\b/i.test(text) && !/\b(?:but|except)\b/i.test(text)))return "No injuries";
     if(/^(?:(?:upper|lower|full) body|\d+(?: minutes?)?|(?:yes,? )?i have dumbbells)[.!]?$/i.test(text))return null;
     return text;

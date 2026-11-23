@@ -78,5 +78,5 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
   },[state,fake,sessionId,turn]);
   const report=useCallback((report:RepReport,observations:Observation[])=>{setReports.current[current.current.exercise].push(report);latestRep.current={set_id:`${sessionId}:${current.current.exercise}`,rep:report.rep};hybrid.current?.rep(report,observations);},[sessionId]);
   const key=`${state.screen}-${state.screen==="S2" ? state.question:state.exercise}`;
-  return {answer,report,busy,caption:captions[key],summary,fallback,partial:stt.partial,sttError:stt.error};
+  return {answer,report,busy,returning:injuries.current.length>0,caption:captions[key],summary,fallback,partial:stt.partial,sttError:stt.error};
 }
