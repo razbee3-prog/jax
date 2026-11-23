@@ -2,7 +2,8 @@ import {describe,it,expect,vi} from "vitest";
 import {runInNewContext} from "node:vm";
 import {sessionMetrics,latencyPercentiles,type SimEvent} from "../../../evals/evaluators/session";
 import {onlineCode} from "../../../evals/evaluators/online";
-import {judgeMean,JUDGE_MODEL} from "../../../evals/evaluators/judge";
+import {coachJudge,judgeMean,JUDGE_MODEL} from "../../../evals/evaluators/judge";
+import type {CoachInput} from "../../../evals/datasets/coach";
 import {SpeechQueue} from "../voice/speechQueue";
 
 function event(type:string,data:Record<string,unknown>):SimEvent{return {thread_id:"fixture",event_id:crypto.randomUUID(),type,data};}
@@ -47,6 +48,9 @@ describe("M8 deployable online code",()=>{
   });
 });
 describe("M8 Haiku judge",()=>{
+  it("rejects absent candidates without a model call",async()=>{
+    vi.stubEnv("ANTHROPIC_API_KEY","fixture-only");try{const judge=await coachJudge();await expect(judge({} as CoachInput,undefined)).rejects.toThrow("Judge requires a completed candidate");await expect(judge({} as CoachInput,{turns:[],traces:[],latencies_ms:[]})).rejects.toThrow("Judge requires a completed candidate");}finally{vi.unstubAllEnvs();}
+  });
   it("uses the required cheapest model and enforces four 1–5 dimensions",()=>{
     expect(JUDGE_MODEL).toBe("claude-haiku-5-5");
     expect(judgeMean({warmth:4,external_focus:5,fits_moment:4,not_annoying:5,explanation:"Appropriate restraint."})).toBe(4.5);

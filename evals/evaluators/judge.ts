@@ -17,8 +17,8 @@ export async function coachJudge(){
   if(!process.env.ANTHROPIC_API_KEY)throw new Error("ANTHROPIC_API_KEY is required for the Haiku judge");
   const rubric=await readFile(new URL("../rubrics/coach.md",import.meta.url),"utf8");
   const model=new ChatAnthropic({model:JUDGE_MODEL,maxTokens:450,maxRetries:0,thinking:{type:"disabled"},outputConfig:{effort:"low"}}).withStructuredOutput(JudgeScore,{name:"coach_judgment"});
-  return async(input:CoachInput,output:CoachOutput)=>{
-    if(!output.turns?.length)throw new Error("Judge requires a completed candidate");
+  return async(input:CoachInput,output:CoachOutput|undefined)=>{
+    if(!output?.turns?.length)throw new Error("Judge requires a completed candidate");
     const score=await model.invoke([{role:"system",content:rubric},{role:"user",content:JSON.stringify({input,candidate:output.turns})}]);
     return {score:judgeMean(score),dimensions:score,model:JUDGE_MODEL};
   };
