@@ -23,7 +23,7 @@ export function shellReducer(s:ShellState,a:ShellAction):ShellState{
     case "permissions":return s.screen==="S1" ? {...s,screen:"S2"}:s;
     case "answer":{if(s.screen!=="S2" || !a.value.trim())return s;const answers=[...s.answers,a.value.trim()];return {...s,answers,question:Math.min(3,s.question+1),screen:s.question===3 ? "S3":"S2",holdMs:0};}
     case "continue":
-      if(s.screen==="S3" && s.holdMs>=1500)return s.floor ? {...s,screen:"S5",introMs:0}: {...s,screen:"S4"};
+      if(s.screen==="S3" && (s.floor || s.holdMs>=1500))return s.floor ? {...s,screen:"S5",introMs:0}: {...s,screen:"S4"};
       return s.screen==="S4" ? {...s,screen:"S5",introMs:0}:s;
     case "skip":return s.screen==="S6" ? finishSet(s) : s.screen==="S7" ? (s.exercise===2 ? {...s,restMs:0}:nextIntro(s)):s;
     case "floor":return s.screen==="S7" && s.exercise===2 && s.restMs===0 ? {...s,screen:"S3",exercise:3,floor:true,holdMs:0}:s;
@@ -55,7 +55,7 @@ export function kcal(ms:number){return Math.round(3.5*3.5*68/200*Math.max(0,ms)/
 export function caption(s:ShellState){
   switch(s.screen){
     case "S2":return question(s);
-    case "S3":return s.holdMs>=1500 ? "Perfect. I can see all of you." : s.floor ? FLOOR:SETUP;
+    case "S3":return s.floor ? FLOOR:s.holdMs>=1500 ? "Perfect. I can see all of you.":SETUP;
     case "S4":return BRIEF;
     case "S5":return MOVES[s.exercise].cue;
     case "S6":return s.paused ? s.pauseReason:"I'll count and watch your form.";

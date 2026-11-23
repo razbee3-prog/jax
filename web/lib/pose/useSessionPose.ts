@@ -23,6 +23,7 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
       const {state:s,report}=current.current;
       if(!detector || video.readyState<2 || video.currentTime===lastVideoTime)return;
       lastVideoTime=video.currentTime;
+      if(s.screen==="S3" && s.floor){if(frameRef)frameRef.current=null;if(!s.inFrame)dispatch({type:"frame",value:true});return;}
       if(!["S3","S6"].includes(s.screen) || s.paused || document.visibilityState!=="visible" || window.matchMedia("(orientation: landscape)").matches){screen=s.screen;if(s.paused)pipeline=undefined;return;}
       if(exercise!==s.exercise || screen!==s.screen || !pipeline){
         exercise=s.exercise;screen=s.screen;pipeline=new PosePipeline(MOVES[exercise].id,video.videoWidth,video.videoHeight);reporter=new RepReporter(FAULT_EVIDENCE);offset=s.reps[exercise];previousCount=0;frames=[];lastRep=performance.now();

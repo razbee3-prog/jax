@@ -1,6 +1,13 @@
 # Jax status
 
-## M6 — coach loop integration (BLOCKED: floor-framing decision; not complete)
+## M6 — coach loop integration (final full-session checks in progress)
+
+- **Raz decision, overrides PLAN S3/S7 for push-ups:** "i think pushups are fine for you to ignore the camera angle/position". Floor setup now offers a non-blocking prompt and Start push-ups, with no coverage/position/1.5-second hold requirement or framing guide. Initial standing setup remains unchanged. Rep counting thresholds, quality-gated fault reports and speech eligibility are unchanged.
+- Independent items pushed: WIP `c74af9c`; conservative STT parsing `ece847b`, `d64c7c6`; contained camera/landmark overlay and real/fake control separation `5254232`; report-grounded debrief/summary and authoritative calories `9b4c133`; browser pending-rep proof `4a37b38`; guarded broken-upstream runbook/test `14c7efc`.
+- Latest independent checks: lint/typecheck, 173 tests/18 files, production build and shared copies passed. Browser partial real-agent debrief and queued-rep retention: **2 passed (1.9m)**. The partial test supplies ten real camera reports to set_end, renders actual agent feedback/summary, waits ten seconds during rest before End, and verifies calorie time froze at the last rep (60,229ms, 4kcal, MET 3.5/68kg). Pending proof holds the first HTTP turn through its four-second deadline and camera rep 3, then verifies the next HTTP request retains reports [2,3]. Evidence: `/home/ubuntu/jax-evidence/m6/independent/`.
+- Client calorie duration is first Go through last counted rep, including intervening rests but excluding trailing rest after early End. Empty workouts return zero; canonical sign-off/card/agent totals share the rounded calculation. The agent was redeployed with a required grounded observation after each set's exact rest line; low-quality reports request a camera adjustment rather than a form claim. An S5 audio-failure fallback latch is reset only on screen entry, not by later caption changes.
+
+### Earlier partial investigation (historical; superseded by the decision above)
 
 - Branch `devin/1795446505-m6-coach` starts from M5 `36ba1e4`.
 - Raz approved **hybrid in-set coaching**, overriding PLAN's agent-per-rep spoken path after M1 failed its latency gate (p95 about 2.2s). Every rep immediately invokes local CuePolicy/cue-bank/governor decisions (`source: local`). Serialized, coalesced background agent turns guide only later local cues; their in-set decisions are never directly spoken. Valid agent-shaped cues use `source: agent`. Errors or turns over four seconds leave the workout running locally and mark following cues `source: fallback`.

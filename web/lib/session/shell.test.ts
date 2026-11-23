@@ -2,6 +2,10 @@ import { describe,it,expect } from "vitest";
 import { initialShell,previewState,shellReducer as step,kcal,caption,type ShellState } from "./shell";
 const at=(screen:ShellState["screen"],other:Partial<ShellState>={}):ShellState=>({...initialShell,screen,...other});
 describe("scripted shell",()=>{
+  it("never blocks push-up setup on position, visibility or hold time; standing setup still requires a hold",()=>{
+    for(const inFrame of [false,true]){const floor=at("S3",{floor:true,exercise:3,inFrame,holdMs:0});expect(step(floor,{type:"continue"})).toMatchObject({screen:"S5",exercise:3});expect(caption({...floor,holdMs:1500})).not.toContain("I can see all of you");}
+    expect(step(at("S3",{holdMs:1499}),{type:"continue"}).screen).toBe("S3");expect(step(at("S3",{holdMs:1500}),{type:"continue"}).screen).toBe("S4");
+  });
   it("freezes calorie time at the last rep while retaining rests before later reps",()=>{
     let s=step(at("S6",{fakeReps:false,started:true,elapsedMs:60000}),{type:"rep"});expect(s.lastRepMs).toBe(60000);s=step(s,{type:"skip"});s=step(s,{type:"tick",ms:15000});expect(s.elapsedMs).toBe(75000);expect(s.lastRepMs).toBe(60000);expect(caption(step(s,{type:"end"}))).toContain("approximately 4 calories");
     s=step(s,{type:"skip"});s=step(s,{type:"intro-complete"});s=step(s,{type:"tick",ms:15000});s=step(s,{type:"rep"});expect(s.lastRepMs).toBe(90000);expect(kcal(s.lastRepMs)).toBe(6);expect(caption(step(at("S2"),{type:"end"}))).toContain("approximately 0 calories");

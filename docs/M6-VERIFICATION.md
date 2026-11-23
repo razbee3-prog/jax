@@ -1,8 +1,9 @@
 # M6 remaining full-session verification
 
-**Do not run either full session until Raz's floor-framing decision is relayed.**
-`COACH_FULL_SESSION_APPROVED=1` is a test opt-in, not a setup bypass. The production
-floor check still requires 50–90% vertical frame coverage held for 1.5 seconds.
+Raz approved ignoring camera angle/position before push-ups. The production
+floor prompt is non-blocking; the initial standing setup still requires 50–90%
+vertical coverage held for 1.5 seconds. `COACH_FULL_SESSION_APPROVED=1` explicitly
+opts into the long provider-backed session checks below.
 
 Build first (`npm run build`). The commands below start an isolated local web
 server through Playwright; no droplet or hosted-agent configuration is changed.

@@ -23,7 +23,7 @@ test("real hybrid coach completes forty camera reps with WAV onboarding",async()
       await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen",exercise===3 ? "S8":"S7",{timeout:120000});
       const count=events.filter(e=>e.type==="rep.detected" && e.data.exercise===["rdl","push-press","curl","push-up"][exercise]).length;expect(count).toBe(10);
       if(exercise<3)await shot(`S7-${exercise}`);
-      if(exercise===2){await expect(page.getByRole("button",{name:"Check floor framing"})).toBeVisible({timeout:30000});await page.getByRole("button",{name:"Check floor framing"}).click();await expect(page.getByRole("button",{name:"Start push-ups"})).toBeEnabled({timeout:30000});await page.getByRole("button",{name:"Start push-ups"}).click();}
+      if(exercise===2){await expect(page.getByRole("button",{name:"Set up for push-ups"})).toBeVisible({timeout:30000});await page.getByRole("button",{name:"Set up for push-ups"}).click();await expect(page.getByRole("button",{name:"Start push-ups"})).toBeEnabled({timeout:1000});await expect(page.locator(".camera-frame-guide")).toHaveCount(0);await shot("S3-floor");await page.getByRole("button",{name:"Start push-ups"}).click();}
     }
     await expect.poll(()=>events.some(e=>e.type==="coach.turn" && e.data.event_type==="session_end"),{timeout:30000}).toBe(true);await shot("S8");
     expect(events.filter(e=>e.type==="rep.detected")).toHaveLength(40);expect(events.filter(e=>e.type==="cue.decision")).toHaveLength(40);

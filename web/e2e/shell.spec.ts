@@ -88,7 +88,7 @@ test("full scripted session at 390x844: all screens, pauses, rest, floor setup a
       await screenEventually(page,exercise===3 ? "S8":"S7",25000);
       if(exercise===3)break;
       if(exercise===0){await shot(page,"S7");await expect(page.getByRole("timer")).toBeVisible();}
-      if(exercise===2){await expect(page.getByRole("button",{name:"Check floor framing"})).toBeVisible({timeout:25000});await page.getByRole("button",{name:"Check floor framing"}).click();await screen(page,"S3");await expect(page.getByRole("button",{name:"Start push-ups"})).toBeEnabled();await shot(page,"S3-floor");await page.getByRole("button",{name:"Start push-ups"}).click();}
+      if(exercise===2){await expect(page.getByRole("button",{name:"Set up for push-ups"})).toBeVisible({timeout:25000});await page.getByRole("button",{name:"Set up for push-ups"}).click();await screen(page,"S3");await expect(page.getByRole("button",{name:"Start push-ups"})).toBeEnabled();await shot(page,"S3-floor");await page.getByRole("button",{name:"Start push-ups"}).click();}
       await screenEventually(page,"S5",25000);await screenEventually(page,"S6");
     }
     await expect(page.getByText("You completed all four scripted sets.")).toBeVisible();
