@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
-import type {Dispatch} from "react";
+import type {Dispatch,RefObject} from "react";
 import type {RepReport} from "../../../shared/rep-report";
 import {MOVES,type ShellAction,type ShellState} from "../session/shell";
 import {Landmarker} from "./landmarker";
@@ -10,7 +10,7 @@ import {FAULT_EVIDENCE} from "./evidence";
 import {setupQuality} from "./setup";
 import type {Frame} from "./types";
 import type {Observation} from "./faults";
-export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:boolean,delegate:"CPU"|"GPU",dispatch:Dispatch<ShellAction>,report:(report:RepReport,observations:Observation[])=>void,status:(data:Record<string,string|number|boolean>)=>void){
+export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:boolean,delegate:"CPU"|"GPU",dispatch:Dispatch<ShellAction>,report:(report:RepReport,observations:Observation[])=>void,status:(data:Record<string,string|number|boolean>)=>void,frameRef?:RefObject<Frame|null>){
   const [error,setError]=useState("");
   const current=useRef({state,report,status});useEffect(()=>{current.current={state,report,status};},[state,report,status]);
   useEffect(()=>{
@@ -28,7 +28,7 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
         exercise=s.exercise;screen=s.screen;pipeline=new PosePipeline(MOVES[exercise].id,video.videoWidth,video.videoHeight);reporter=new RepReporter(FAULT_EVIDENCE);offset=s.reps[exercise];previousCount=0;frames=[];lastRep=performance.now();
       }
       try{
-        const frame=detector.detect(video);const result=pipeline.process(frame),angles=result?.angles;
+        const frame=detector.detect(video);if(frameRef)frameRef.current=frame;const result=pipeline.process(frame),angles=result?.angles;
         const setup=setupQuality(frame,pipeline.side);
         if(s.screen==="S3"){
           if(setup.ready!==s.inFrame)dispatch({type:"frame",value:setup.ready});
@@ -46,7 +46,7 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
       }catch{setError("Tracking unavailable. Reframe or skip this set.");dispatch({type:"frame",value:false});}
     };
     void Promise.all([Landmarker.create("full",delegate),video.play()]).then(([landmarker])=>{if(closed){landmarker.close();return;}detector=landmarker;setError("");loop();},()=>{if(!closed){setError("Pose model unavailable. Reload to retry.");dispatch({type:"frame",value:false});}});
-    return()=>{closed=true;cancelAnimationFrame(raf);detector?.close();video.pause();video.srcObject=null;};
-  },[enabled,stream,delegate,dispatch]);
+    return()=>{closed=true;cancelAnimationFrame(raf);detector?.close();video.pause();video.srcObject=null;if(frameRef)frameRef.current=null;};
+  },[enabled,stream,delegate,dispatch,frameRef]);
   return error;
 }
