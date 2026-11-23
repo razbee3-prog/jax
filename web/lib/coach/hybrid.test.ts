@@ -10,6 +10,18 @@ const fault:RepReport["faults"][number]={id:"rdl_knee_squat",value:120,threshold
 function deferred<T>(){let resolve!:(value:T)=>void;const promise=new Promise<T>(r=>{resolve=r;});return {promise,resolve};}
 afterEach(()=>{vi.useRealTimers();});
 describe("serialized background coach",()=>{
+  it("settles queued rep reports before a fallback summary can complete",async()=>{
+    vi.useFakeTimers();const first=deferred<CoachDecision>(),log=vi.fn(),send=vi.fn().mockReturnValue(first.promise),coach=new SerialCoach(send,log),event=(rep:number)=>({type:"rep" as const,set_id:"one",report:report(rep),reports:[report(rep)]});
+    const active=coach.request(event(1)),pending=[coach.request(event(2)),coach.request(event(3))];await vi.advanceTimersByTimeAsync(4000);expect((await active).source).toBe("fallback");
+    expect((await coach.request({type:"session_end"})).source).toBe("fallback");expect(log.mock.calls.map(([r])=>r.event.type)).toEqual(["rep","rep","session_end"]);
+    expect(log.mock.calls[1][0]).toMatchObject({source:"fallback",event:{reports:[{rep:2},{rep:3}]}});expect((await Promise.all(pending)).every(r=>r.source==="fallback")).toBe(true);
+    first.resolve(silent);await vi.advanceTimersByTimeAsync(0);expect(send).toHaveBeenCalledOnce();expect(log).toHaveBeenCalledTimes(3);coach.close();
+  });
+  it("settles queued reps while a healthy in-flight turn finishes before the summary",async()=>{
+    const first=deferred<CoachDecision>(),log=vi.fn(),send=vi.fn().mockReturnValueOnce(first.promise).mockResolvedValue(silent),coach=new SerialCoach(send,log),event=(rep:number)=>({type:"rep" as const,set_id:"one",report:report(rep),reports:[report(rep)]});
+    const active=coach.request(event(1)),pending=coach.request(event(2)),summary=coach.request({type:"session_end"});first.resolve(silent);await Promise.all([active,pending,summary]);
+    expect(log.mock.calls.map(([r])=>r.event.type)).toEqual(["rep","rep","session_end"]);expect((await pending).source).toBe("fallback");expect((await summary).source).toBe("agent");expect(send).toHaveBeenCalledTimes(2);coach.close();
+  });
   it("sends once while busy and coalesces subsequent rep reports without losing reps",async()=>{
     const first=deferred<CoachDecision>(),sent=vi.fn().mockReturnValueOnce(first.promise).mockResolvedValue(silent),log=vi.fn();const coach=new SerialCoach(sent,log);
     const event=(rep:number)=>({type:"rep" as const,set_id:"one",report:report(rep),reports:[report(rep)]});

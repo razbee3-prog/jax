@@ -11,6 +11,10 @@ export class SerialCoach {
   request(event:CoachEvent,receive?:(result:CoachResult)=>void){
     return new Promise<CoachResult>(resolve=>{
       if(this.closed){resolve({event,decision:null,source:"fallback",latency_ms:0,reason:"session closed"});return;}
+      if(event.type==="session_end"){
+        const reps=this.jobs.filter(job=>job.event.type==="rep");this.jobs=this.jobs.filter(job=>job.event.type!=="rep");
+        for(const pending of reps)pending.finish(null,"session ended before dispatch");
+      }
       const pending=this.jobs.at(-1);
       if(event.type==="rep" && pending?.event.type==="rep" && !pending.settled && event.set_id===pending.event.set_id){
         pending.event={...event,reports:[...pending.event.reports!,...event.reports!].slice(-10)};

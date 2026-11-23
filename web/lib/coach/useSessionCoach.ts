@@ -11,10 +11,12 @@ import {HybridCoach,type CueSource} from "./hybrid";
 import {SerialCoach,type CoachResult} from "./serial";
 import {onboardingAnswer} from "./onboarding";
 import {debriefReports,summarySpeech,restSpeech} from "./debrief";
-type Emit=(type:string,data:Record<string,string|number|boolean>)=>void;
+type Emit=(type:string,data:Record<string,unknown>)=>void;
 export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,talking}:{state:ShellState;fake:boolean;sessionId:string;queue:RefObject<SpeechQueue|null>;emit:Emit;dispatch:Dispatch<ShellAction>;speak:(text:string,inSet?:boolean,countdown?:boolean,source?:CueSource)=>void;talking:boolean}){
   const [answerBusy,setBusy]=useState(false),[captions,setCaptions]=useState<Record<string,string>>({}),[summary,setSummary]=useState<{went_well:string;next_time:string}|null>(null),[fallback,setFallback]=useState(false);
   const [returning,setReturning]=useState(false);
+  const [summaryReady,setSummaryReady]=useState(false);
+  const setFaults=useRef(Array.from({length:4},()=>({seen:new Set<string>(),current:new Set<string>()})));
   const busy=answerBusy || (!fake && state.screen==="S2" && state.question===0 && !captions["S2-0"]);
   const current=useRef(state),hybrid=useRef<HybridCoach|null>(null),serial=useRef<SerialCoach|null>(null),alive=useRef(true),injuries=useRef<string[]>([]),lastScreen=useRef(""),latestRep=useRef({set_id:"",rep:0}),answerLock=useRef(false);
   const setReports=useRef<RepReport[][]>([[],[],[],[]]);
@@ -23,7 +25,7 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
     if(fake)return;alive.current=true;
     const record=(result:CoachResult)=>{
       hybrid.current?.contact(result);if(alive.current)setFallback(result.source==="fallback");
-      emit("coach.turn",{source:result.source,event_type:result.event.type,set_id:result.event.set_id??"",rep:result.event.report?.rep??0,reports:JSON.stringify(result.event.reports?.map(r=>r.rep)??[]),latency_ms:result.latency_ms,reason:result.reason,before_next_rep:result.event.type==="rep" && current.current.screen==="S6" && latestRep.current.set_id===result.event.set_id && latestRep.current.rep===result.event.report?.rep,decision:JSON.stringify(result.decision).slice(0,1900)});
+      emit("coach.turn",{source:result.source,event_type:result.event.type,event:result.event,set_id:result.event.set_id??"",rep:result.event.report?.rep??0,reports:JSON.stringify(result.event.reports?.map(r=>r.rep)??[]),latency_ms:result.latency_ms,reason:result.reason,before_next_rep:result.event.type==="rep" && current.current.screen==="S6" && latestRep.current.set_id===result.event.set_id && latestRep.current.rep===result.event.report?.rep,decision:result.decision??null});
     };
     const transport=new SerialCoach(async event=>{
       const response=await fetch("/api/coach",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({thread_id:sessionId,event_id:crypto.randomUUID(),event}),signal:AbortSignal.timeout(75000)});
@@ -38,7 +40,7 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
     const decision=result.decision,text=event.type==="session_end" ? summarySpeech(decision,fallbackText):event.type==="set_end" ? restSpeech(decision,fallbackText):decision?.speak && decision.text.trim() ? decision.text:fallbackText;
     setCaptions(old=>({...old,[key]:text}));speak(text,false,countdown,result.source);
     if(event.type==="session_start"){injuries.current=decision?.slots?.injuries??[];setReturning(injuries.current.length>0);}
-    if(event.type==="session_end")setSummary(decision?.summary??null);
+    if(event.type==="session_end"){setSummary(decision?.summary??null);setSummaryReady(true);}
   },[speak]);
   const answer=useCallback(async(raw:string)=>{
     const s=current.current;if(fake || s.screen!=="S2" || answerLock.current)return;
@@ -77,7 +79,8 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
       hybrid.current?.end();void (async()=>{if(previousKey.startsWith("S6-"))await turn({type:"set_end",exercise:MOVES[state.exercise].id,...debriefReports(setReports.current,state.exercise),totals},"That's the set.","final-debrief");await turn({type:"session_end",...debriefReports(setReports.current),totals},caption(state),key);})();
     }
   },[state,fake,sessionId,turn]);
-  const report=useCallback((report:RepReport,observations:Observation[])=>{setReports.current[current.current.exercise].push(report);latestRep.current={set_id:`${sessionId}:${current.current.exercise}`,rep:report.rep};hybrid.current?.rep(report,observations);},[sessionId]);
+  const report=useCallback((report:RepReport,observations:Observation[])=>{setReports.current[current.current.exercise].push(report);const faults=setFaults.current[current.current.exercise];if(report.quality.visibility>=0.8 && report.quality.view_ok){faults.current=new Set(observations.map(o=>o.id));for(const id of faults.current)faults.seen.add(id);}latestRep.current={set_id:`${sessionId}:${current.current.exercise}`,rep:report.rep};hybrid.current?.rep(report,observations);},[sessionId]);
+  const setStats=useCallback((exercise:number)=>{const faults=setFaults.current[exercise];return {faults_seen:JSON.stringify([...faults.seen]),faults_fixed:JSON.stringify([...faults.seen].filter(id=>!faults.current.has(id)))};},[]);
   const key=`${state.screen}-${state.screen==="S2" ? state.question:state.exercise}`;
-  return {answer,report,busy,returning,caption:captions[key],summary,fallback,partial:stt.partial,sttError:stt.error};
+  return {answer,report,busy,returning,setStats,summaryReady,caption:captions[key],summary,fallback,partial:stt.partial,sttError:stt.error};
 }

@@ -7,6 +7,7 @@ export class SpeechQueue {
   private controller?:AbortController;
   private closed=false;
   readonly governor=new SpeechGovernor();
+  get idle(){return !this.active && !this.pending;}
   constructor(private play:(line:SpeechLine,signal:AbortSignal,beforeAudio:()=>void)=>Promise<Playback>,private log:(event:SpeechEvent)=>void,private now=()=>performance.now()){}
   enqueue(line:SpeechLine){
     if(this.closed){this.log({line,outcome:"dropped",reason:"queue closed",ttfa_ms:null});return;}

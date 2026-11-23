@@ -1,3 +1,4 @@
+import {mockSessionEvents} from "./telemetry-fixtures";
 import { test,expect,chromium,type Page } from "@playwright/test";
 import { mkdirSync,writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -6,7 +7,7 @@ const flags=["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftsh
 const folder=process.env.SHELL_EVIDENCE_DIR||"test-results/shell";
 async function mocks(page:Page){
   await page.addInitScript(()=>{const state={requested:0,released:0};(window as typeof window & {shellWake:typeof state}).shellWake=state;Object.defineProperty(navigator,"wakeLock",{value:{request:async()=>{state.requested++;return {release:async()=>{state.released++;}};}}});});
-  await page.route("**/api/session/event",route=>{const data=route.request().postDataJSON();return route.fulfill({json:{event_id:data.event_id,...(data.type==="session.end" ? {run_id:data.event_id,receipt:"test-receipt"}:{})}});});
+  await mockSessionEvents(page,route=>{const data=route.request().postDataJSON();return route.fulfill({json:{event_id:data.event_id,...(data.type==="session.end" ? {run_id:data.event_id,receipt:"test-receipt"}:{})}});});
   await page.route("**/api/session/feedback",route=>route.fulfill({json:{ok:true}}));
   await page.route("**/api/tts",route=>route.abort());
   await page.route("**/api/stt-token",route=>route.abort());
@@ -92,7 +93,7 @@ test("full scripted session at 390x844: all screens, pauses, rest, floor setup a
       await screenEventually(page,"S5",25000);await screenEventually(page,"S6");
     }
     await expect(page.getByText("You completed all four scripted sets.")).toBeVisible();
-    await page.getByRole("button",{name:"Thumbs up"}).click();await expect(page.getByRole("status")).toHaveText("Thanks for your feedback.");await shot(page,"S8");
+    await page.getByRole("button",{name:"Thumbs up"}).click();await expect(page.getByRole("status").filter({hasText:"Thanks for your feedback."})).toHaveText("Thanks for your feedback.");await shot(page,"S8");
     const shifts=await page.evaluate(()=>(window as typeof window & {shellShifts:{value:number;time:number;recent:boolean}[]}).shellShifts);
     const result={orbMoveCLS:moveShifts,totalLayoutShift:shifts.reduce((sum,s)=>sum+s.value,0),cls:shifts.filter(s=>!s.recent).reduce((sum,s)=>sum+s.value,0),shifts};writeFileSync(resolve(folder,"layout-shift.json"),JSON.stringify(result,null,2));console.log("SHELL CLS "+JSON.stringify(result));
     await page.getByRole("button",{name:"Start another preview"}).click();await screen(page,"S0");

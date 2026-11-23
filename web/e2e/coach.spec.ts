@@ -9,8 +9,8 @@ test("real hybrid coach completes forty camera reps with WAV onboarding",async()
   if(fallback)expect(process.env.MDA_DEPLOYMENT_URL,"Break only the local test server's upstream URL").toBe("http://127.0.0.1:1");
   const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader","--use-fake-device-for-media-stream","--use-fake-ui-for-media-stream","--use-file-for-fake-audio-capture="+resolve("evals/fixtures/voice/coach-answers.wav")]}),page=await browser.newPage({viewport:{width:390,height:844}});
   const events:{thread_id:string;event_id:string;type:string;data:Record<string,unknown>}[]=[],acknowledged=new Set<string>();
-  page.on("request",request=>{if(request.url().endsWith("/api/session/event"))events.push(request.postDataJSON());});
-  page.on("response",response=>{if(response.url().endsWith("/api/session/event") && response.ok())void response.json().then(body=>acknowledged.add(body.event_id)).catch(()=>{});});
+  page.on("request",request=>{if(request.url().endsWith("/api/telemetry"))events.push(...request.postDataJSON().events);});
+  page.on("response",response=>{if(response.url().endsWith("/api/telemetry") && response.ok())void response.json().then(body=>body.acknowledged.forEach((id:string)=>acknowledged.add(id))).catch(()=>{});});
   async function shot(name:string){await page.screenshot({path:resolve(folder,`${name}.png`)});}
   try{
     await demoCamera(page,true);await page.goto("/?poseDelegate=CPU");await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();await page.getByRole("button",{name:"Turn on camera and mic"}).click();
@@ -43,7 +43,7 @@ test("returning user hears the remembered injury on a new agent thread",async()=
   test.skip(process.env.COACH_LIVE_E2E!=="1" || process.env.COACH_EXPECT_FALLBACK==="1","Real agent required");test.setTimeout(120000);
   const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"]}),page=await browser.newPage({viewport:{width:390,height:844}}),events:{type:string;data:Record<string,unknown>}[]=[];
   try{
-    await demoCamera(page);page.on("request",r=>{if(r.url().endsWith("/api/session/event"))events.push(r.postDataJSON());});
+    await demoCamera(page);page.on("request",r=>{if(r.url().endsWith("/api/telemetry"))events.push(...r.postDataJSON().events);});
     await page.goto("/?poseDelegate=CPU");await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();
     const seed=await page.request.post("/api/coach",{data:{thread_id:uuid7(),event_id:crypto.randomUUID(),event:{type:"onboarding_answer",question:"injuries",transcript:"Shoulder discomfort",next_question:"Last one: do you have a pair of dumbbells with you?"}}});expect(seed.status()).toBe(200);
     await page.getByRole("button",{name:"Turn on camera and mic"}).click();for(const answer of ["full body","10"])await page.getByRole("button",{name:answer,exact:true}).click();

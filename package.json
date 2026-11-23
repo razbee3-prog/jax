@@ -23,7 +23,7 @@
     "agent:dev": "mda dev agent",
     "agent:deploy": "npm run sync:shared && tsx scripts/sync-agent-instructions.mts && mda deploy agent --context-strategy overwrite --name jax-coach-dedicated --agent-server-type dedicated",
     "smoke:agent": "tsx scripts/smoke-agent.mts",
-    "smoke:session": "node scripts/not-implemented.mjs M6",
+    "smoke:session": "tsx scripts/smoke-session.mts",
     "evals": "tsx scripts/eval-perception.mts"
   },
   "dependencies": {
