@@ -417,7 +417,7 @@ Partial transcript screenshot visually inspected at 390×844:
 `/home/ubuntu/jax-evidence/m4-review/partial-transcript-390x844.png`.
 Review fixes are pushed for CI only, not redeployed. Real-device QA remains open.
 
-## M7 — trace completeness (implementation; deployment proof pending)
+## M7 — trace completeness (desktop validation complete)
 
 Branch `devin/1795456505-m7-trace` starts at M6 review HEAD `034b51a`.
 The existing shell ledger/audit path now shares its recorder and comparison with
@@ -452,6 +452,87 @@ for the requested org-secret write.
 Initial browser tests caught an illegal native-fetch receiver in the new ledger
 (zero posts despite healthy Node mocks); default fetch now uses a wrapper and a
 regression covers its receiver. Batch observers wait for delivery rather than
-assuming a synchronous post. Deployment, full PASS/intentional-FAIL sessions,
-webhook readback and visual evidence are pending below. iPhone-specific QA remains
-unverified; M1/M9 latency and real-device performance gates are unchanged.
+assuming a synchronous post. Native width/height and normalized-coordinate tags
+are retained for replay without distorting camera aspect ratios. Service errors
+display an unavailable result, not fabricated missing-event counts.
+
+### Deployed proof
+
+Runtime commit `693ba15` was rebuilt/deployed to **jax-web only**, shipping the M6
+review fixes too. Other container IDs remained unchanged. Container health,
+public Jax health and strongr all returned HTTP 200. The temporary loopback test
+webhook was restored to its original setting; the test receiver was stopped.
+`/opt/jax/.env` remains mode 600, with the generated ADMIN_KEY retained.
+
+Final `npm run smoke:session` against that deployment, including independent
+LangSmith readback and native-dimension checks:
+
+```text
+Session trace audit: PASS (136/136 recorded), thread_id=01a209b8-7c8a-755b-bf21-8c995ab61d03, session.end=b5a173dd-01e2-46c9-967e-61ad6c07094a
+```
+
+This is a 40-rep **fixture-event** replay, not a new live-agent/audio measurement.
+Trace: https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/01a1fb80-0ac8-7811-8ba3-fb4377f4e01d/r/b5a173dd-01e2-46c9-967e-61ad6c07094a?trace_id=b5a173dd-01e2-46c9-967e-61ad6c07094a
+
+Two unattended full 40-rep scripted UI sessions used the **real deployed APIs
+and LangSmith**, with no telemetry/audit mock in the PASS session:
+
+```text
+PASS SUMMARY: 95/95; 0 missing; 0 deliberately dropped posts. Thread 01a209a7-5410-71c5-8aa0-168f6b4caf2a
+FAIL SUMMARY: 68/95; 27 missing; 5 deliberately dropped posts. Thread 01a209a9-b362-77a8-9d93-0eb301154309
+```
+
+The failure injector intercepted exactly five POSTs without forwarding them and
+acknowledged them locally. This prevents unload retries healing the deliberate
+loss and proves the audit reads LangSmith rather than trusting client ACKs.
+The server listed all 27 missing IDs/types after polling; the summary was red.
+Independent feedback readback verified `trace_complete=1` and `=0`, respectively.
+The local-only receiver captured the identical 27-event failure payload, streamed
+to persistent evidence before it was stopped.
+
+PASS trace: https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/01a1fb80-0ac8-7811-8ba3-fb4377f4e01d/r/f9f212f8-3d2c-424c-9d17-4a44530cde0a?trace_id=f9f212f8-3d2c-424c-9d17-4a44530cde0a
+
+FAIL trace: https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/01a1fb80-0ac8-7811-8ba3-fb4377f4e01d/r/4f67d452-11e2-4fd4-903e-bfe0ac419459?trace_id=4f67d452-11e2-4fd4-903e-bfe0ac419459
+
+### Checks and evidence
+
+Lint and web/agent typecheck exited 0. Unit/build/browser results:
+
+```text
+Test Files  22 passed (22)
+Tests       198 passed (198)
+✓ Compiled successfully in 871ms
+✓ Generating static pages using 7 workers (13/13) in 211ms
+4 skipped
+26 passed (5.7m)
+1 passed (31.0s)
+Shared copies match.
+```
+
+The additional focused native-camera case verifies 10 Hz / 13-point telemetry,
+native dimensions, normalized coordinates and pending-rep retention. The four
+skips are existing explicit live-provider opt-ins. The browser suite covers PASS,
+FAIL, unavailable-service rendering, pagehide and visibility-hide beacons.
+
+Daily sweep readback intentionally exited 1: **26 sessions, 24 flagged** (the
+planted M7 failure plus 23 pre-M7 abandoned/no-manifest sessions). The healthy
+M7 sessions passed. Historical missing manifests are reported as unverifiable,
+not asserted to be proven missing events. No bad traces were excluded/deleted to
+make the sweep green. These test/migration records will flag until they age out
+of the 24-hour window. The missing-secret workflow guard was exercised and printed
+`SKIP deployed tracing checks: missing secrets: LANGSMITH_API_KEY INVITE_CODE JAX_BASE_URL`.
+
+All evidence is under `/home/ubuntu/jax-evidence/m7/`:
+- Visually inspected 390×844: `pass-summary.png`, `fail-summary.png`,
+  `admin-session.png`, `permissions-privacy.png`, `trace-unavailable.png`.
+- `pass-audit.json`, `fail-audit.json`, corresponding `*-ledger.json`,
+  `smoke-audit-final.json`, `feedback-readback.json`, `webhook-received.jsonl`,
+  `sweep-audit.json`, `secrets-status.json`, `deploy-result.txt`, `cleanup-result.txt`.
+- **Private, mode 600; do not publish:** `admin-key`, `runtime.json`.
+
+Node 22.23.3 and configured runtime credentials were verified. LangSmith 0.13.1
+emits non-blocking `listRuns`/`getRunUrl` deprecation warnings (removal after
+January 31, 2027); migrate those SDK calls before that deadline. This is not an
+environment/credential failure. GitHub secret-write permission and explicit
+org-secret binding remain unavailable as described above. iPhone-specific QA
+remains unverified; M1/M9 latency and real-device performance gates are unchanged.
