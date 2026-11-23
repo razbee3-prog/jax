@@ -5,6 +5,7 @@ import {CUES} from "../../shared/cues";
 import type {CoachEvent} from "../../shared/coach-event";
 import type {SpeechLine} from "../../web/lib/coach/governor";
 import {restSpeech} from "../../web/lib/coach/debrief";
+import {asksExpectedQuestion} from "./questions";
 import type {CoachExpectation} from "../datasets/coach";
 
 export type PolicyLine={line:SpeechLine;outcome:string};
@@ -31,6 +32,7 @@ export function hardChecks(turn:EvaluatedTurn,expected:CoachExpectation):Record<
   const guidanceValid=!rep ? g===null:Boolean(g && (g.action==="quiet" ? g.fault_id===null && g.text==="":g.fault_id && eligible.includes(g.fault_id) && (g.action==="focus" ? g.text==="":(g.action==="ack" ? CUES[g.fault_id].fixed:CUES[g.fault_id].reminder).includes(g.text))));
   const localGrounded=spoken.every(({line})=>!line.faultId || flagged.has(line.faultId as FaultId) || (line.priority==="fixed" && turn.previous_faults.includes(line.faultId as FaultId)));
   let behavior=guidanceValid;
+  if((event.type==="onboarding_answer" || event.type==="session_start") && event.next_question)behavior &&=d.speak && asksExpectedQuestion(d.text,event.next_question);
   if(expected.guidance==="quiet")behavior &&=g?.action==="quiet";
   if(expected.guidance==="eligible")behavior &&=Boolean(g && g.action!=="quiet" && g.fault_id===expected.fault);
   if(expected.local_speech!==undefined)behavior &&=Boolean(spoken.length)===expected.local_speech;

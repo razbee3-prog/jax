@@ -24,6 +24,19 @@ describe("M8 decision coverage",()=>{
   });
 });
 describe("M8 hard code checks",()=>{
+  it("requires the expected next onboarding question, not just correct slots and nonempty speech",()=>{
+    const check=(next_question:string,text:string)=>hardChecks(turn({event:{type:"onboarding_answer",question:"injuries",transcript:"No injuries",next_question},decision:{...quiet,speak:true,kind:"question",guidance:null,text,slots:{focus:null,duration_min:null,injuries:[],has_dumbbells:null}}}),{speak:true,slot:{name:"injuries",value:[]}}).behavior;
+    const dumbbells="Last one: do you have a pair of dumbbells with you?";
+    expect(check(dumbbells,"Have a great day.")).toBe(0);
+    expect(check(dumbbells,"Dumbbells are useful. How much time do you have?")).toBe(0);
+    expect(check(dumbbells,"")).toBe(0);
+    expect(check(dumbbells,dumbbells)).toBe(1);
+    expect(check(dumbbells,"Thanks for letting me know. Are your weights available?")).toBe(1);
+    expect(check("How much time do you have: 5, 10, or 20 minutes?","How much time do you have?")).toBe(0);
+    expect(check("How much time do you have: 5, 10, or 20 minutes?","Would five, ten, or twenty minutes work for you?")).toBe(1);
+    expect(check("Any injuries or anything you'd like me to be careful with?","Is there any pain I should know about?")).toBe(1);
+    expect(check("What would you like to work on today?","What workout would you like today?")).toBe(1);
+  });
   it("credits rest fault mentions only in the note the client actually speaks",()=>{
     const event={type:"set_end" as const,reports:[contractReport("rdl",3,["rdl_knee_squat"])]};
     const check=(text:string,next_time:string,went_well="You completed the set.")=>hardChecks(turn({event,decision:{...quiet,speak:true,kind:"summary",guidance:null,text,summary:{next_time,went_well}}}),{speak:true,mention:"rdl_knee_squat"}).behavior;
