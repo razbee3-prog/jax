@@ -2,6 +2,7 @@ import {test,expect,chromium,type Page} from "@playwright/test";
 import {mkdirSync,writeFileSync} from "node:fs";
 import {resolve} from "node:path";
 import {demoCamera} from "./coach-fixtures";
+import type {CoachEvent} from "../../shared/coach-event";
 const flags=["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"];
 const folder=process.env.COACH_EVIDENCE_DIR??"test-results/coach-independent";
 const decision={speak:true,text:"Ready.",kind:"question",fault_id:null,slots:null,reason:"Browser fixture",guidance:null,summary:null};
@@ -46,4 +47,19 @@ test("agent debrief and calorie summary work after one real camera set",async()=
     await expect(page.locator(".summary-card")).toContainText(summary.went_well);await expect(page.locator(".summary-card")).toContainText(summary.next_time);await expect(page.locator(".shell-caption")).toContainText(`approximately ${totals.kcal} calories, assuming a body weight of 68 kilograms`);await shot(page,"agent-partial-summary");
     console.log(`PARTIAL AGENT DEBRIEF: 10 camera reps, 10 reports, one set_end, agent summary, ${totals.elapsed_ms.toFixed(0)}ms, MET ${totals.met}, ${totals.weight_kg}kg, ${totals.kcal}kcal.`);
   }finally{mkdirSync(folder,{recursive:true});writeFileSync(resolve(folder,"partial-debrief.json"),JSON.stringify({events,calls},null,2));await browser.close();}
+});
+test("pending rep retention survives a timed-out in-flight browser request",async()=>{
+  test.setTimeout(90000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}}),sent:CoachEvent[]=[],events:{type:string;data:Record<string,unknown>}[]=[];
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
+  try{
+    await prepare(page);page.on("request",r=>{if(r.url().endsWith("/api/session/event"))events.push(r.postDataJSON());});
+    await page.route("**/api/coach",async route=>{
+      const {event}:{event:CoachEvent}=route.request().postDataJSON();if(event.type==="rep"){sent.push(event);if(sent.length===1)await gate;}
+      await route.fulfill({json:{decision:event.type==="rep" ? {...decision,speak:false,text:"",kind:"silence",guidance:{action:"quiet",fault_id:null,text:""}}:{...decision,text:event.next_question??"Ready."}}});
+    });
+    await setup(page);await start(page);await expect.poll(async()=>Number(await page.getByTestId("shell-reps").locator("strong").textContent()),{timeout:45000}).toBeGreaterThanOrEqual(3);
+    expect(sent).toHaveLength(1);expect(events.some(e=>e.type==="coach.turn" && e.data.event_type==="rep" && e.data.reason==="four-second deadline")).toBe(true);expect(events.some(e=>e.type==="cue.decision" && e.data.source==="fallback")).toBe(true);
+    release();await expect.poll(()=>sent.length).toBeGreaterThanOrEqual(2);expect(sent[1].reports?.map(r=>r.rep)).toEqual([2,3]);expect(sent.every(e=>JSON.stringify(e).length<64000)).toBe(true);await shot(page,"pending-reps-retained");await page.getByRole("button",{name:"End",exact:true}).click();
+    console.log("PENDING REP RETENTION: camera reached rep 3 while request 1 was in flight; deadline fallback; next HTTP batch retained reps [2,3].");
+  }finally{release();mkdirSync(folder,{recursive:true});writeFileSync(resolve(folder,"pending-reps.json"),JSON.stringify({sent,events},null,2));await browser.close();}
 });
