@@ -24,6 +24,15 @@ describe("M8 decision coverage",()=>{
   });
 });
 describe("M8 hard code checks",()=>{
+  it("credits rest fault mentions only in the note the client actually speaks",()=>{
+    const event={type:"set_end" as const,reports:[contractReport("rdl",3,["rdl_knee_squat"])]};
+    const check=(text:string,next_time:string,went_well="You completed the set.")=>hardChecks(turn({event,decision:{...quiet,speak:true,kind:"summary",guidance:null,text,summary:{next_time,went_well}}}),{speak:true,mention:"rdl_knee_squat"}).behavior;
+    expect(check("Too much knee bend.","Rest for a moment.")).toBe(0);
+    expect(check("Rest.","Rest for a moment.","Too much knee bend.")).toBe(0);
+    expect(check("Rest.","Too much knee bend.")).toBe(1);
+    expect(check("Rest.","","Too much knee bend.")).toBe(1);
+    expect(check("Rest.","")).toBe(0);
+  });
   it("accepts deliberate quiet, rejects absent/incomplete results and malformed schemas",()=>{
     expect(Object.values(hardChecks(turn(),{speak:false,guidance:"quiet",local_speech:false}))).toEqual(Array(8).fill(1));
     expect(aggregateHard([],[])).toEqual({complete:0});

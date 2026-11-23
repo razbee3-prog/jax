@@ -4,6 +4,7 @@ import {claimedFaults,namedFaults} from "./fault-language";
 import {CUES} from "../../shared/cues";
 import type {CoachEvent} from "../../shared/coach-event";
 import type {SpeechLine} from "../../web/lib/coach/governor";
+import {restSpeech} from "../../web/lib/coach/debrief";
 import type {CoachExpectation} from "../datasets/coach";
 
 export type PolicyLine={line:SpeechLine;outcome:string};
@@ -42,7 +43,7 @@ export function hardChecks(turn:EvaluatedTurn,expected:CoachExpectation):Record<
     behavior &&=Array.isArray(want) ? Array.isArray(value) && (want.length ? want.every(v=>value.some(got=>got.toLowerCase().includes(v.toLowerCase()))):value.length===0):typeof want==="string" ? typeof value==="string" && value.toLowerCase()===want.toLowerCase():value===want;
   }
   if(expected.mention){
-    const text=[d.text,d.summary?.next_time??""].join(" ");
+    const text=event.type==="set_end" ? restSpeech(d,""):[d.text,d.summary?.next_time??""].join(" ");
     behavior &&=namedFaults(text).includes(expected.mention);
   }
   if(expected.conservative)behavior &&=/skip|smaller|shorter|comfortable|pain.free|lighter|gentle|reduce|shallow|stop if/iu.test(segments.join(" "));
