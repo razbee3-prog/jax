@@ -59,6 +59,24 @@ describe("hybrid local decisions",()=>{
     h.local.rep(report(1,[fault]),[]);await vi.waitFor(()=>expect(h.send).toHaveBeenCalledOnce());await Promise.resolve();h.local.rep(report(2,[fault]),[]);
     expect(h.queue).toHaveBeenLastCalledWith(expect.objectContaining({source:"agent",text:CUES[fault.id].reminder[1]}));h.local.rep(report(3,[fault]),[]);expect(h.queue).toHaveBeenLastCalledWith(expect.objectContaining({speak:false}));h.serial.close();
   });
+  for(const quality of [{visibility:1,view_ok:false,fps:30},{visibility:0.79,view_ok:true,fps:30}]){
+    it.each(["focus","reminder","ack","quiet"] as const)(`drops %s guidance originating at poor quality ${JSON.stringify(quality)}`,async action=>{
+      const guidance={action,fault_id:action==="quiet" ? null:fault.id,text:action==="reminder" ? CUES[fault.id].reminder[1]:action==="ack" ? CUES[fault.id].fixed[1]:""};
+      const h=harness({...silent,guidance});h.local.rep({...report(1,[fault]),quality},[]);await vi.waitFor(()=>expect(h.send).toHaveBeenCalledOnce());await Promise.resolve();
+      expect(h.queue).toHaveBeenLastCalledWith(expect.objectContaining({speak:false}));h.local.rep(report(2,[fault]),[]);
+      expect(h.queue).toHaveBeenLastCalledWith(expect.objectContaining({source:"local",text:CUES[fault.id].first[0]}));h.serial.close();
+    });
+  }
+  it("clears stored guidance on tracking loss and rejects earlier replies while quality is poor",async()=>{
+    const decision={...silent,guidance:{action:"reminder" as const,fault_id:fault.id,text:CUES[fault.id].reminder[1]}};
+    for(const late of [false,true]){
+      const pending=deferred<CoachDecision>(),h=harness(decision);if(late)h.send.mockReturnValueOnce(pending.promise);
+      h.local.rep(report(1,[fault]),[]);await vi.waitFor(()=>expect(h.send).toHaveBeenCalledOnce());
+      h.local.rep({...report(2,[fault]),quality:{visibility:0.2,view_ok:false,fps:5}},[]);pending.resolve(decision);
+      await vi.waitFor(()=>expect(h.send).toHaveBeenCalledTimes(2));h.local.rep(report(3,[fault]),[]);
+      expect(h.queue).toHaveBeenLastCalledWith(expect.objectContaining({source:"local",text:CUES[fault.id].reminder[0]}));h.serial.close();
+    }
+  });
   it.each(["Use your glutes",Array(15).fill("wall").join(" ")])("rejects an arbitrary wording override: %s",async text=>{
     const h=harness({...silent,guidance:{action:"reminder",fault_id:fault.id,text}});h.local.rep(report(1,[fault]),[]);await vi.waitFor(()=>expect(h.send).toHaveBeenCalledOnce());await Promise.resolve();h.local.rep(report(2,[fault]),[]);expect(h.queue).toHaveBeenLastCalledWith(expect.objectContaining({source:"local",text:CUES[fault.id].reminder[0]}));h.serial.close();
   });

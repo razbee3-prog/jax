@@ -17,13 +17,16 @@ export class HybridCoach {
   private guidance?:Guidance;
   private quietStamp="";
   private outage=false;
+  private qualityOk=false;
   constructor(readonly serial:SerialCoach,private enqueue:(line:SpeechLine)=>void,private clearFault:(id:string,at:number)=>void,private log:(data:{rep:number;source:CueSource;latency_ms:number;reason:string})=>void,private now=()=>performance.now()){}
-  start(setId:string){this.setId=setId;this.policy.reset();this.active.clear();this.eligible.clear();this.epochs.clear();this.guidance=undefined;}
+  start(setId:string){this.setId=setId;this.policy.reset();this.active.clear();this.eligible.clear();this.epochs.clear();this.guidance=undefined;this.qualityOk=false;}
   end(){this.setId="";this.guidance=undefined;}
   contact(result:CoachResult){this.outage=result.source==="fallback";if(this.outage)this.guidance=undefined;}
   private stamp(){return [...this.active].sort().map(id=>`${id}:${this.epochs.get(id)??0}`).join("|");}
   rep(report:RepReport,observations:Observation[]){
     const at=this.now(),set=this.setId;if(!set)return;
+    const qualityOk=report.quality.visibility>=0.8 && report.quality.view_ok;this.qualityOk=qualityOk;
+    if(!qualityOk)this.guidance=undefined;
     const previousGuidance=this.guidance;
     const active=new Set(observations.map(o=>o.id));for(const f of report.faults)active.add(f.id);
     for(const id of this.active)if(!active.has(id)){this.epochs.set(id,(this.epochs.get(id)??0)+1);this.clearFault(id,at);if(this.guidance?.fault_id===id)this.guidance=undefined;}
@@ -50,7 +53,7 @@ export class HybridCoach {
     this.log({rep:report.rep,source,latency_ms:this.now()-at,reason:cue ? cue.kind:guidance?.action==="quiet" ? "agent requested quiet":"local silence"});
     const epochs=new Map(this.epochs);
     void this.serial.request({type:"rep",set_id:set,exercise:report.exercise,report,reports:[report]},result=>{
-      this.contact(result);if(result.source!=="agent" || this.setId!==set)return;
+      this.contact(result);if(result.source!=="agent" || this.setId!==set || !qualityOk || !this.qualityOk)return;
       const g=result.decision?.guidance;if(!g || result.decision?.speak)return;
       if(g.action==="quiet"){if(g.fault_id===null && !g.text && this.stamp()===stamp){this.guidance=g;this.quietStamp=stamp;}return;}
       const id=g.fault_id;
