@@ -12,5 +12,5 @@ export function asksExpectedQuestion(text:string,expected:string){
   if(normalize(text).includes(want))return true;
   const topic=topics.find(pattern=>pattern.test(expected));if(!topic)return false;
   const choices=[...expected.matchAll(/\b\d+\b|\b(?:upper|lower|full)[ -]body\b/giu)].map(match=>normalize(match[0]));
-  return (text.match(/[^.!?]+\?/gu)??[]).some(question=>topic.test(question) && choices.every(choice=>` ${normalize(question)} `.includes(` ${choice} `)));
+  return (text.match(/[^.!?]+\?/gu)??[]).some(question=>topic.test(question) && (topic!==topics[0] || (/have|got|access|available|nearby|with you|ready|handy/iu.test(question) && !/how (?:heavy|much)|what weight/iu.test(question))) && choices.every(choice=>` ${normalize(question)} `.includes(` ${choice} `)));
 }

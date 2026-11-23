@@ -29,6 +29,7 @@ describe("M8 hard code checks",()=>{
     const dumbbells="Last one: do you have a pair of dumbbells with you?";
     expect(check(dumbbells,"Have a great day.")).toBe(0);
     expect(check(dumbbells,"Dumbbells are useful. How much time do you have?")).toBe(0);
+    expect(check(dumbbells,"How heavy are your dumbbells?")).toBe(0);
     expect(check(dumbbells,"")).toBe(0);
     expect(check(dumbbells,dumbbells)).toBe(1);
     expect(check(dumbbells,"Thanks for letting me know. Are your weights available?")).toBe(1);

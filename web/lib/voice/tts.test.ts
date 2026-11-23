@@ -12,7 +12,7 @@ it("ignores a rep tick while cue PCM is delayed or silent, then records only cue
   const audio={gain,volume:(node:unknown)=>node===meter ? cueVolume:1,getOutputVolume:()=>1,context:{currentTime:1,createAnalyser:()=>meter,createBuffer:()=>({duration:0.1,getChannelData:()=>new Float32Array(1)}),createBufferSource:()=>{const source={connect:vi.fn(),start:vi.fn(),stop:vi.fn(),disconnect:vi.fn()};sources.push(source);return source;}}} as unknown as AudioSession;
   vi.stubGlobal("fetch",vi.fn(async()=>new Response(new ReadableStream<Uint8Array>({start(c){stream=c;}}))));
   const onAudio=vi.fn(),playing=new TTS(audio).play("Delayed cue",new AbortController().signal,onAudio);
-  await vi.advanceTimersByTimeAsync(1);audio.context.currentTime=2;
+  await vi.advanceTimersByTimeAsync(1);Object.defineProperty(audio.context,"currentTime",{value:2});
   await vi.advanceTimersByTimeAsync(40);expect(onAudio).not.toHaveBeenCalled();
   stream.enqueue(new Uint8Array([0,0]));await vi.advanceTimersByTimeAsync(16);expect(onAudio).not.toHaveBeenCalled();
   expect(sources[0].connect).toHaveBeenCalledWith(meter);expect(meter.connect).toHaveBeenCalledWith(gain);
