@@ -1,4 +1,5 @@
 import type { Exercise } from "../pose/types";
+import {STEP_BACK_LINE} from "../voice/fixedLines";
 export const MOVES:readonly {id:Exercise;name:string;plural:string;cue:string}[]=[
   {id:"rdl",name:"Dumbbell Romanian deadlift",plural:"Romanian deadlifts",cue:"Feet hip-width, soft knees, weights in front of your thighs."},
   {id:"push-press",name:"Dumbbell push press",plural:"push presses",cue:"Weights at your shoulders. Dip, then drive them overhead."},
@@ -43,7 +44,7 @@ export function shellReducer(s:ShellState,a:ShellAction):ShellState{
       if(n.screen==="S7"){n.restMs=Math.max(0,n.restMs-a.ms);return n.restMs===0 && n.exercise!==2 ? nextIntro(n):n;}
       if(n.screen!=="S6" || n.paused)return n;
       n.missingMs=n.inFrame ? 0:n.missingMs+a.ms;
-      if(n.missingMs>=5000)return {...n,paused:true,pauseReason:"Step back into frame when you're ready."};
+      if(n.missingMs>=5000)return {...n,paused:true,pauseReason:STEP_BACK_LINE};
       n.idleMs+=a.ms;
       if(n.inFrame && n.fakeReps){n.repMs+=a.ms;const add=Math.floor(n.repMs/1500);if(add){n.reps=n.reps.map((v,i)=>i===n.exercise ? Math.min(10,v+add):v);n.repMs%=1500;n.idleMs=0;n.lastRepMs=n.elapsedMs;}}
       return n.reps[n.exercise]>=10 || n.idleMs>=30000 ? finishSet(n):n;

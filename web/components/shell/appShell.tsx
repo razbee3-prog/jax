@@ -8,7 +8,7 @@ import { SelfView } from "./selfView";
 import { getAudioSession,type AudioSession } from "../../lib/voice/audioSession";
 import { TTS } from "../../lib/voice/tts";
 import { SpeechQueue } from "../../lib/voice/speechQueue";
-import { COUNTDOWN,COUNTDOWN_LINE,FIXED_LINES } from "../../lib/voice/fixedLines";
+import { COUNTDOWN,COUNTDOWN_LINE,FIXED_LINES,STEP_BACK_LINE } from "../../lib/voice/fixedLines";
 import { holdWakeLock } from "../../lib/pose/wakeLock";
 import { EXERCISES } from "../../lib/pose/exercises/config";
 import { initialShell,previewState,shellReducer,caption,MOVES,FLOOR,kcal,type ShellState,type Screen } from "../../lib/session/shell";
@@ -60,12 +60,12 @@ export default function AppShell({sessionId,fake,simulateDenial=false,preview,po
     const old=previous.current;previous.current=s;if(s.screen==="S0")return;
     if(old.screen==="S0"){emit("session.start",{fake,scripted:fake});emit("screen.view",{screen:"S0"});}
     if(old.screen!==s.screen)emit("screen.view",{screen:s.screen,caption:line});
-    if(old.paused!==s.paused)emit(s.paused ? "session.pause":"session.resume",{reason:s.pauseReason});
+    if(old.paused!==s.paused){emit(s.paused ? "session.pause":"session.resume",{reason:s.pauseReason});if(!fake && s.paused && s.pauseReason===STEP_BACK_LINE)speak(STEP_BACK_LINE,false,false,coach.fallback ? "fallback":"local");}
     for(let i=0;i<4;i++)for(let n=old.reps[i]+1;n<=s.reps[i];n++){tickSound(audio.current);emit("rep.detected",{exercise:MOVES[i].id,count:n,source:fake ? "scripted":"local",at_ms:performance.now(),workout_ms:s.lastRepMs});}
     if(s.screen==="S6" && old.screen!=="S6")emit("set.start",{exercise:MOVES[s.exercise].id});
     if(old.screen==="S6" && s.screen!=="S6")emit("set.end",{exercise:MOVES[old.exercise].id,reps:s.reps[old.exercise]});
     if(s.screen==="S8" && old.screen!=="S8")emit("session.end",{reps:s.reps.reduce((a,b)=>a+b,0),elapsed_ms:s.elapsedMs,last_rep_elapsed_ms:s.lastRepMs,kcal:kcal(s.lastRepMs),scripted:fake});
-  },[s,line,emit,fake]);
+  },[s,line,emit,fake,speak,coach.fallback]);
   async function invite(event:React.FormEvent){event.preventDefault();const code=input.current?.value??"";setBusy(true);setError("");try{audio.current=getAudioSession();void audio.current.unlock().catch(()=>{});const response=await fetch("/api/invite",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code})});if(!response.ok){setAttempt(n=>n+1);setError(response.status===401 ? "That code didn't work.":"Jax is unavailable. Please try again.");return;}const tts=new TTS(audio.current);queue.current=new SpeechQueue(async(item,signal,before)=>{
       capture.current?.getAudioTracks().forEach(track=>{track.enabled=false;});
       try{
