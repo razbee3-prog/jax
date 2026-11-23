@@ -8,3 +8,7 @@ export function summarySpeech(decision:CoachDecision|null|undefined,signoff:stri
   const text=decision?.speak ? decision.text.trim():"";
   return text.endsWith(signoff) ? text:[decision?.summary?.went_well?.trim(),signoff].filter(Boolean).join(" ");
 }
+export function restSpeech(decision:CoachDecision|null|undefined,restLine:string){
+  const note=decision?.speak ? decision.summary?.next_time.trim() || decision.summary?.went_well.trim():"";
+  return [restLine,note].filter(Boolean).join(" ");
+}

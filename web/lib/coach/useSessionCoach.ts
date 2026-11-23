@@ -10,7 +10,7 @@ import {caption,GREETING,MOVES,question,kcal,type ShellAction,type ShellState} f
 import {HybridCoach,type CueSource} from "./hybrid";
 import {SerialCoach,type CoachResult} from "./serial";
 import {onboardingAnswer} from "./onboarding";
-import {debriefReports,summarySpeech} from "./debrief";
+import {debriefReports,summarySpeech,restSpeech} from "./debrief";
 type Emit=(type:string,data:Record<string,string|number|boolean>)=>void;
 export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,talking}:{state:ShellState;fake:boolean;sessionId:string;queue:RefObject<SpeechQueue|null>;emit:Emit;dispatch:Dispatch<ShellAction>;speak:(text:string,inSet?:boolean,countdown?:boolean,source?:CueSource)=>void;talking:boolean}){
   const [answerBusy,setBusy]=useState(false),[captions,setCaptions]=useState<Record<string,string>>({}),[summary,setSummary]=useState<{went_well:string;next_time:string}|null>(null),[fallback,setFallback]=useState(false);
@@ -34,7 +34,7 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
   },[fake,sessionId,queue,emit]);
   const turn=useCallback(async(event:CoachEvent,fallbackText:string,key:string,countdown=false)=>{
     const result=await serial.current?.request(event);if(!result || !alive.current)return;
-    const decision=result.decision,text=event.type==="session_end" ? summarySpeech(decision,fallbackText):decision?.speak && decision.text.trim() ? decision.text:fallbackText;
+    const decision=result.decision,text=event.type==="session_end" ? summarySpeech(decision,fallbackText):event.type==="set_end" ? restSpeech(decision,fallbackText):decision?.speak && decision.text.trim() ? decision.text:fallbackText;
     setCaptions(old=>({...old,[key]:text}));speak(text,false,countdown,result.source);
     if(event.type==="session_start")injuries.current=decision?.slots?.injuries??[];
     if(event.type==="session_end")setSummary(decision?.summary??null);

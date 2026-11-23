@@ -21,7 +21,8 @@ test("real hybrid coach completes forty camera reps with WAV onboarding",async()
     for(let exercise=0;exercise<4;exercise++){
       await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S6",{timeout:60000});await shot(`S6-${exercise}`);
       await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen",exercise===3 ? "S8":"S7",{timeout:120000});
-      const count=events.filter(e=>e.type==="rep.detected" && e.data.exercise===["rdl","push-press","curl","push-up"][exercise]).length;expect(count).toBe(10);
+      await expect.poll(()=>events.filter(e=>e.type==="rep.detected" && e.data.exercise===["rdl","push-press","curl","push-up"][exercise]).length).toBe(10);
+      if(!fallback && exercise<3){await expect.poll(()=>events.filter(e=>e.type==="coach.turn" && e.data.event_type==="set_end").length,{timeout:15000}).toBe(exercise+1);const turn=events.filter(e=>e.type==="coach.turn" && e.data.event_type==="set_end").at(-1)!;expect(turn.data.source).toBe("agent");const feedback=JSON.parse(String(turn.data.decision)).summary.next_time;expect(feedback.trim()).not.toBe("");const rest=`Great job. Let's take a 20-second break, then we move on to ${["push presses","bicep curls","push-ups"][exercise]}.`;await expect(page.locator(".shell-caption")).toHaveText(`${rest} ${feedback}`);}
       if(exercise<3)await shot(`S7-${exercise}`);
       if(exercise===2){await expect(page.getByRole("button",{name:"Set up for push-ups"})).toBeVisible({timeout:30000});await page.getByRole("button",{name:"Set up for push-ups"}).click();await expect(page.getByRole("button",{name:"Start push-ups"})).toBeEnabled({timeout:1000});await expect(page.locator(".camera-frame-guide")).toHaveCount(0);await shot("S3-floor");await page.getByRole("button",{name:"Start push-ups"}).click();}
     }
@@ -30,7 +31,9 @@ test("real hybrid coach completes forty camera reps with WAV onboarding",async()
     expect(events.some(e=>e.type==="coach.turn" && e.data.source===(fallback ? "fallback":"agent"))).toBe(true);
     if(fallback){expect(events.some(e=>e.type==="cue.decision" && e.data.source==="fallback")).toBe(true);expect(events.filter(e=>e.type==="coach.turn").every(e=>e.data.source==="fallback")).toBe(true);}
     else expect(events.find(e=>e.type==="coach.turn" && e.data.event_type==="session_end")?.data.source).toBe("agent");
-    await expect.poll(()=>acknowledged.size,{timeout:30000}).toBe(events.length);
+    const end=events.find(e=>e.type==="session.end")!.data;expect(end.kcal).toBe(Math.round(3.5*3.5*68/200*Number(end.last_rep_elapsed_ms)/60000));await expect(page.locator(".shell-caption")).toContainText(`approximately ${end.kcal} calories, assuming a body weight of 68 kilograms`);
+    await expect.poll(()=>events.some(e=>e.type==="utterance" && e.data.outcome==="played" && String(e.data.text).includes("Signing off, it's your AI trainer, Jax.")),{timeout:60000}).toBe(true);await shot("S8");
+    await expect.poll(()=>acknowledged.size===events.length,{timeout:30000}).toBe(true);
     console.log(`COACH SESSION ${fallback ? "fallback":"agent"}: 40 reps, four WAV answers, microphone stopped at setup, ${acknowledged.size}/${events.length} events acknowledged.`);
   }finally{
     if(!page.isClosed())await shot("last-state");const thread_id=events[0]?.thread_id;writeFileSync(resolve(folder,"session.json"),JSON.stringify({fallback,events,acknowledged:[...acknowledged],ledger:{thread_id,events:events.map(({event_id,type})=>({event_id,type}))}},null,2));await browser.close();
