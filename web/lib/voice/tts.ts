@@ -1,17 +1,20 @@
 import type { AudioSession } from "./audioSession";
+import {SpeechDropped} from "../coach/governor";
 export type AudioResult={ttfa_ms:number;cache:string};
 type Clip={pcm:Uint8Array;cache:string};
 export class TTS {
   private clips=new Map<string,Promise<Clip>>();
+  private ready=new Set<string>();
   constructor(private session:AudioSession){}
   private async response(text:string,signal?:AbortSignal){const r=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text}),signal});if(!r.ok || !r.body)throw new Error(r.status===401 ? "Enter the invite code on the home page first." : "Speech unavailable");return r;}
   prefetch(text:string){
     let clip=this.clips.get(text);
-    if(!clip){clip=this.response(text).then(async r=>({pcm:new Uint8Array(await r.arrayBuffer()),cache:r.headers.get("X-TTS-Cache")??"MISS"})).catch(error=>{this.clips.delete(text);throw error;});this.clips.set(text,clip);}
+    if(!clip){clip=this.response(text).then(async r=>{const clip={pcm:new Uint8Array(await r.arrayBuffer()),cache:r.headers.get("X-TTS-Cache")??"MISS"};this.ready.add(text);return clip;}).catch(error=>{this.clips.delete(text);throw error;});this.clips.set(text,clip);}
     return clip;
   }
   async prefetchAll(lines:readonly string[]){const remaining=[...new Set(lines)];await Promise.all([0,1].map(async()=>{while(remaining.length)await this.prefetch(remaining.shift()!);}));}
-  async play(text:string,signal:AbortSignal,onAudio:()=>void,beforeAudio=()=>{}):Promise<AudioResult>{
+  async play(text:string,signal:AbortSignal,onAudio:()=>void,beforeAudio=()=>{},cachedOnly=false):Promise<AudioResult>{
+    if(cachedOnly && !this.ready.has(text))throw new SpeechDropped("audio not prefetched");
     const start=performance.now();
     const controller=new AbortController(),abort=()=>controller.abort(signal.reason);
     signal.addEventListener("abort",abort,{once:true});if(signal.aborted)abort();

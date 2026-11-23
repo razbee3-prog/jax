@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { agentClient, parseDecision, percentile, repRunConfig } from "../../../scripts/lib/agent.mjs";
 import { currentSetMessages, latestEventType, memoryWriteCompleted, toolAllowed } from "../../../agent/policy";
 
-const silent={speak:false,text:"",kind:"silence",fault_id:null,slots:null,reason:"Clean rep; leave room to move."};
+const silent={speak:false,text:"",kind:"silence",fault_id:null,slots:null,guidance:null,summary:null,reason:"Clean rep; leave room to move."};
 afterEach(()=>{vi.unstubAllGlobals();vi.unstubAllEnvs();});
 describe("CoachDecision",()=>{
   it("parses structured silence and an onboarding answer",()=>{

@@ -10,5 +10,7 @@ export const CoachDecisionSchema = z.object({
     injuries: z.array(z.string()), has_dumbbells: z.boolean().nullable(),
   }).strict().nullable(),
   reason: z.string(),
+  guidance: z.object({action:z.enum(["focus","reminder","ack","quiet"]),fault_id:FaultIdSchema.nullable(),text:z.string()}).strict().nullable(),
+  summary: z.object({went_well:z.string(),next_time:z.string()}).strict().nullable(),
 }).strict();
 export type CoachDecision = z.infer<typeof CoachDecisionSchema>;

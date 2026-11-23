@@ -33,7 +33,9 @@
 .pulse { animation:chips-pulse 1.5s ease-in-out infinite; }
 @keyframes chips-pulse { 50% { filter:brightness(1.6); } }
 .shell-self { position:absolute;z-index:12;bottom:24px;left:20px;width:100px;height:142px;border-radius:20px;overflow:hidden;background:#21212B;pointer-events:none;border:1px solid #444450; }
-.shell-self video { width:100%;height:100%;object-fit:cover;transform:scaleX(-1); }
+.camera-plane { position:absolute;inset:auto;width:100%;height:100%; }
+.shell-self video,.shell-self canvas { position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform:scaleX(-1); }
+.camera-frame-guide { position:absolute;inset:5% 10%;border:2px dashed #CADCFC;border-radius:16px; }
 .shell-self span { position:absolute;bottom:7px;left:0;width:100%;font-size:8px;background:#0B0B0FDC;padding:3px;color:#F5F5F7;text-align:center; }
 .body-guide { position:absolute;inset:8% 20%;width:60%;height:84%;fill:none;stroke:#CADCFC;stroke-width:3;stroke-linecap:round; }
 .body-guide circle { fill:#CADCFC;stroke:none; }
