@@ -5,14 +5,14 @@ import {buildCoachRows} from "../../../evals/datasets/coach";
 import {aggregateHard} from "../../../evals/evaluators/coach";
 import {eventSchema,type TraceEvent} from "../session/events";
 
-function transport(coachStatus=200,acknowledge=true,auditStatus=200){
+function transport(coachStatus=200,acknowledge=true,auditStatus=200,quietHistory=false){
   const events:TraceEvent[]=[],requests:{url:string;cookie:string|null}[]=[];
   const send:typeof fetch=vi.fn(async(input,init)=>{
     const url=String(input),body=JSON.parse(String(init?.body??"{}"));requests.push({url,cookie:new Headers(init?.headers).get("cookie")});
     if(url.endsWith("/api/invite"))return Response.json({ok:true},{headers:{"Set-Cookie":"jax_user=fixture; HttpOnly; Path=/"}});
     if(url.endsWith("/api/coach")){
       if(coachStatus!==200)return Response.json({error:"Evaluation error"},{status:coachStatus});
-      const fault=body.event.report?.faults[0];
+      const fault=quietHistory ? undefined:body.event.report?.faults[0];
       return Response.json({decision:{speak:false,text:"",kind:"silence",fault_id:null,slots:null,reason:"Policy fixture",guidance:fault ? {action:"focus",fault_id:fault.id,text:""}:{action:"quiet",fault_id:null,text:""},summary:null},latency_ms:5});
     }
     if(url.endsWith("/api/telemetry")){
@@ -26,6 +26,16 @@ function transport(coachStatus=200,acknowledge=true,auditStatus=200){
   return {send,events,requests};
 }
 describe("M8 production-path target",()=>{
+  it("rejects third-cue fixtures unless two corrections actually played in history",async()=>{
+    const row=buildCoachRows().find(r=>r.inputs.id==="rdl_knee_squat-third")!;
+    const input={...row.inputs,required_prior_corrections:{rdl_knee_squat:2}};
+    for(const history of [input.history,[]]){
+      const mock=transport(200,true,200,true);
+      await expect(coachTarget({...input,history},{base:"http://127.0.0.1",invite:"fixture",send:mock.send})).rejects.toThrow("Invalid evaluation fixture");
+    }
+    const mock=transport(),result=await coachTarget(input,{base:"http://127.0.0.1",invite:"fixture",send:mock.send});
+    expect(result.turns[0].prior_corrections.rdl_knee_squat).toBe(2);
+  });
   it("uses the invite identity, app route, real hybrid replay and an audited ledger",async()=>{
     const mock=transport(),row=buildCoachRows().find(r=>r.inputs.id==="rdl_knee_squat-fixed")!;
     const result=await coachTarget(row.inputs,{base:"http://127.0.0.1:3000",invite:"fixture",send:mock.send});

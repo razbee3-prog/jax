@@ -15,7 +15,7 @@ export type CoachExpectation={
 };
 export type CoachStep={event:CoachEvent;expected:CoachExpectation;new_thread?:boolean};
 export type CoachInput={
-  id:string;history:CoachEvent[];event:CoachEvent;seed_injury?:string;followup?:CoachStep[];
+  id:string;history:CoachEvent[];event:CoachEvent;seed_injury?:string;followup?:CoachStep[];required_prior_corrections?:Partial<Record<FaultId,number>>;
 };
 export type CoachRow={inputs:CoachInput;outputs:CoachExpectation;metadata:{situation:string;provenance:"synthetic-contract";counterfactual_validation:boolean}};
 
@@ -36,7 +36,7 @@ export function buildCoachRows():CoachRow[]{
     add(`${id}-first`,"first-fault",first,{speak:false,guidance:"eligible",fault:id,local_speech:true,local_kind:"first"});
     add(`${id}-fixed`,"fault-fixed",repEvent(contractReport(exercise,2)),{speak:false,guidance:"quiet",local_speech:true,local_kind:"fixed"},{history:[first]});
     add(`${id}-persists`,"fault-persists",second,{speak:false,guidance:"eligible",fault:id,local_speech:true,local_kind:"reminder"},{history:[first]});
-    add(`${id}-third`,"third-cue-and-rest",third,{speak:false,guidance:"quiet",local_speech:false},{history:[first,second],followup:[{
+    add(`${id}-third`,"third-cue-and-rest",third,{speak:false,guidance:"quiet",local_speech:false},{history:[first,second],required_prior_corrections:{[id]:2},followup:[{
       event:{type:"set_end",exercise,reports:[first.report!,second.report!,third.report!]},expected:{speak:true,mention:id},
     }]});
   }

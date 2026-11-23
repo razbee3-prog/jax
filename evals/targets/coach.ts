@@ -41,6 +41,10 @@ export async function coachTarget(input:CoachInput,config:AppConfig):Promise<Coa
       await nextSession();
     }
     for(const event of input.history)await step(event);
+    for(const [fault,required] of Object.entries(input.required_prior_corrections??{})){
+      const played=corrections[fault as FaultId]??0;
+      if(played!==required)throw new Error(`Invalid evaluation fixture: ${fault} requires ${required} played prior corrections, got ${played}`);
+    }
     const turns=[await step(input.event)];
     for(const followup of input.followup??[]){if(followup.new_thread)await nextSession();turns.push(await step(followup.event));}
     return {turns,traces,latencies_ms};
