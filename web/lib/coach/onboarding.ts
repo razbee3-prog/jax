@@ -6,6 +6,7 @@ export function onboardingAnswer(question:number,raw:string,injuries:readonly st
     const choices=[...new Set(matches)];return choices.length===1 ? `${choices[0]} body`:null;
   }
   if(question===1){
+    if(/\b(?:not|no)\s+(?:5|five|10|ten|20|twenty)\b|\b\d+\.\d+\b/i.test(text))return null;
     if(!/\b(?:5|five|10|ten|20|twenty)\s*(?:minutes?|mins?)\b/i.test(text) && !/^(?:5|five|10|ten|20|twenty)[.!]?$/i.test(text))return null;
     const values=[...text.matchAll(/\b(5|five|10|ten|20|twenty)\b/gi)].map(m=>m[1]);
     const choices=[...new Set(values.map(v=>({five:"5",ten:"10",twenty:"20"}[v.toLowerCase()]??v)))];return choices.length===1 ? choices[0]:null;
