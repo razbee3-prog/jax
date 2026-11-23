@@ -10,7 +10,7 @@ test("restart waits for the final coach turn and completed trace audit",async()=
     await page.route("**/api/session/audit",async r=>{auditStarted=true;await audit;const body=r.request().postDataJSON();return r.fulfill({json:{pass:true,thread_id:body.thread_id,expected:body.ledger.length,recorded:body.ledger.length,missing:[]}});});
     await page.goto("/");await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();await page.getByRole("button",{name:"End",exact:true}).click();
     const restart=page.getByRole("button",{name:"Start another workout"});await expect(restart).toBeDisabled();expect(events.some(e=>e.type==="session.end")).toBe(false);
-    await page.screenshot({path:"test-results/restart-finalizing.png"});releaseSummary();await expect.poll(()=>auditStarted).toBe(true);await expect(restart).toBeDisabled();expect(events.filter(e=>e.type==="session.end")).toHaveLength(1);
+    await expect(page.locator(".shell-screen")).toHaveCount(1);await expect(page.locator(".screen-S8")).toHaveCSS("opacity","1");await page.screenshot({path:"test-results/restart-finalizing.png"});releaseSummary();await expect.poll(()=>auditStarted).toBe(true);await expect(restart).toBeDisabled();expect(events.filter(e=>e.type==="session.end")).toHaveLength(1);
     releaseAudit();await expect(restart).toBeEnabled();await restart.click();await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S0");
   }finally{releaseSummary();releaseAudit();await browser.close();}
 });

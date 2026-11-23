@@ -514,9 +514,10 @@ native dimensions, normalized coordinates and pending-rep retention. The four
 skips are existing explicit live-provider opt-ins. The browser suite covers PASS,
 FAIL, unavailable-service rendering, pagehide and visibility-hide beacons.
 
-Daily sweep readback intentionally exited 1: **26 sessions, 24 flagged** (the
-planted M7 failure plus 23 pre-M7 abandoned/no-manifest sessions). The healthy
-M7 sessions passed. Historical missing manifests are reported as unverifiable,
+Initial daily sweep readback exited 1: **26 threads, 24 flagged** (the planted
+M7 failure plus 23 older threads flagged for missing ends/manifests). This snapshot
+predates the PR #8 voice-lab exclusion, so it is not a verified workout-only
+inventory. The healthy M7 sessions passed. Historical missing manifests are reported as unverifiable,
 not asserted to be proven missing events. No bad traces were excluded/deleted to
 make the sweep green. These test/migration records will flag until they age out
 of the 24-hour window. The missing-secret workflow guard was exercised and printed
@@ -536,3 +537,45 @@ January 31, 2027); migrate those SDK calls before that deadline. This is not an
 environment/credential failure. GitHub secret-write permission and explicit
 org-secret binding remain unavailable as described above. iPhone-specific QA
 remains unverified; M1/M9 latency and real-device performance gates are unchanged.
+
+## M7 — PR #8 review fixes
+
+Starting HEAD confirmed as `5e673ab`. Three accepted findings fixed separately:
+- `f163485`: restart remains disabled/guarded until final narration, session.end
+  telemetry and audit have settled. PASS, FAIL and unavailable audit results all
+  permit restart; static previews retain their existing behavior. A live-mode
+  browser regression holds the final coach response and then the audit response,
+  verifies one end event and only then allows navigation to the next session.
+- `c50d355`: requesting the terminal coach summary settles queued/coalesced rep
+  jobs as logged fallback results before the summary can resolve. In-flight turns
+  retain their existing completion/deadline behavior. Late HTTP completions do
+  not duplicate the settled traces. This avoids waiting for a stalled 75-second
+  request and ensures pending rep results enter the ledger before finalization.
+- `36f1149`: the daily sweep excludes existing `source: "voice-lab"` runs before
+  grouping threads. This uses the tag already emitted by `/api/voice-events`,
+  rather than requiring session.start and hiding genuine lost-start failures.
+
+The rejected legacy-ledger finding was **not implemented**. Tests explicitly
+retain missing-end and missing-manifest failures, including lost session.start.
+No production sweep was re-run in this CI-only step.
+
+All three had failing-first regressions: restart expected disabled/received
+enabled; queued-rep logs expected `[rep, rep, session_end]`/received
+`[rep, session_end]`; voice-only sweep expected 0 flagged/received 1 flagged.
+
+After the edits, lint and web/agent typecheck exited 0:
+
+```text
+Test Files  23 passed (23)
+Tests       206 passed (206)
+✓ Compiled successfully in 588ms
+✓ Generating static pages using 7 workers (13/13) in 203ms
+4 skipped
+27 passed (5.7m)
+```
+
+The four skips remain explicit live-provider opt-ins. The restart state was
+visually checked at 390×844; evidence:
+`/home/ubuntu/jax-evidence/m7-review/restart-finalizing.png`.
+No redeployment, new live-provider measurement or iPhone verification in this
+CI-only review loop. No counting thresholds or legacy audit policy were changed.
