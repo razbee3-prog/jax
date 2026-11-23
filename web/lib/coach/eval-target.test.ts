@@ -26,9 +26,14 @@ function transport(coachStatus=200,acknowledge=true,auditStatus=200,quietHistory
   return {send,events,requests};
 }
 describe("M8 production-path target",()=>{
+  it("declares the two-played-correction precondition on every generated third-cue input",()=>{
+    const rows=buildCoachRows().filter(row=>row.metadata.situation==="third-cue-and-rest");
+    expect(rows).toHaveLength(15);
+    for(const row of rows)expect(row.inputs.required_prior_corrections).toEqual({[row.inputs.event.report!.faults[0].id]:2});
+  });
   it("rejects third-cue fixtures unless two corrections actually played in history",async()=>{
     const row=buildCoachRows().find(r=>r.inputs.id==="rdl_knee_squat-third")!;
-    const input={...row.inputs,required_prior_corrections:{rdl_knee_squat:2}};
+    const input=row.inputs;
     for(const history of [input.history,[]]){
       const mock=transport(200,true,200,true);
       await expect(coachTarget({...input,history},{base:"http://127.0.0.1",invite:"fixture",send:mock.send})).rejects.toThrow("Invalid evaluation fixture");
