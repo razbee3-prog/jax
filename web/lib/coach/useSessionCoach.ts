@@ -14,6 +14,7 @@ import {debriefReports,summarySpeech,restSpeech} from "./debrief";
 type Emit=(type:string,data:Record<string,string|number|boolean>)=>void;
 export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,talking}:{state:ShellState;fake:boolean;sessionId:string;queue:RefObject<SpeechQueue|null>;emit:Emit;dispatch:Dispatch<ShellAction>;speak:(text:string,inSet?:boolean,countdown?:boolean,source?:CueSource)=>void;talking:boolean}){
   const [answerBusy,setBusy]=useState(false),[captions,setCaptions]=useState<Record<string,string>>({}),[summary,setSummary]=useState<{went_well:string;next_time:string}|null>(null),[fallback,setFallback]=useState(false);
+  const [returning,setReturning]=useState(false);
   const busy=answerBusy || (!fake && state.screen==="S2" && state.question===0 && !captions["S2-0"]);
   const current=useRef(state),hybrid=useRef<HybridCoach|null>(null),serial=useRef<SerialCoach|null>(null),alive=useRef(true),injuries=useRef<string[]>([]),lastScreen=useRef(""),latestRep=useRef({set_id:"",rep:0}),answerLock=useRef(false);
   const setReports=useRef<RepReport[][]>([[],[],[],[]]);
@@ -36,7 +37,7 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
     const result=await serial.current?.request(event);if(!result || !alive.current)return;
     const decision=result.decision,text=event.type==="session_end" ? summarySpeech(decision,fallbackText):event.type==="set_end" ? restSpeech(decision,fallbackText):decision?.speak && decision.text.trim() ? decision.text:fallbackText;
     setCaptions(old=>({...old,[key]:text}));speak(text,false,countdown,result.source);
-    if(event.type==="session_start")injuries.current=decision?.slots?.injuries??[];
+    if(event.type==="session_start"){injuries.current=decision?.slots?.injuries??[];setReturning(injuries.current.length>0);}
     if(event.type==="session_end")setSummary(decision?.summary??null);
   },[speak]);
   const answer=useCallback(async(raw:string)=>{
@@ -78,5 +79,5 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
   },[state,fake,sessionId,turn]);
   const report=useCallback((report:RepReport,observations:Observation[])=>{setReports.current[current.current.exercise].push(report);latestRep.current={set_id:`${sessionId}:${current.current.exercise}`,rep:report.rep};hybrid.current?.rep(report,observations);},[sessionId]);
   const key=`${state.screen}-${state.screen==="S2" ? state.question:state.exercise}`;
-  return {answer,report,busy,returning:injuries.current.length>0,caption:captions[key],summary,fallback,partial:stt.partial,sttError:stt.error};
+  return {answer,report,busy,returning,caption:captions[key],summary,fallback,partial:stt.partial,sttError:stt.error};
 }
