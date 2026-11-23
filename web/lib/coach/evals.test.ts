@@ -1,6 +1,7 @@
 import {describe,it,expect} from "vitest";
 import {buildCoachRows,contractReport,repEvent} from "../../../evals/datasets/coach";
 import {aggregateHard,hardChecks,type EvaluatedTurn} from "../../../evals/evaluators/coach";
+import {asksExpectedQuestion} from "../../../evals/evaluators/questions";
 import {CoachEventSchema} from "../../../shared/coach-event";
 import type {CoachDecision} from "../../../shared/coach-decision";
 import {CUES} from "../../../shared/cues";
@@ -24,6 +25,17 @@ describe("M8 decision coverage",()=>{
   });
 });
 describe("M8 hard code checks",()=>{
+  it.each([
+    ["Do you have dumbbells with you?","What kind of dumbbells do you have?",false],
+    ["How much time do you have: 5, 10, or 20 minutes?","Would you prefer a 5-, 10-, or 20-minute workout?",true],
+    ["Do you have dumbbells with you?","Which dumbbells do you have?",false],
+    ["Do you have dumbbells with you?","Do you have heavy or light dumbbells?",false],
+    ["Do you have dumbbells with you?","Have you got weights nearby?",true],
+    ["How much time do you have: 5, 10, or 20 minutes?","How many reps are in a 5-, 10-, or 20-minute workout?",false],
+    ["How much time do you have: 5, 10, or 20 minutes?","Would you prefer a 5- or 20-minute workout?",false],
+  ])("matches onboarding intent and choices: %s / %s",(expected,text,result)=>{
+    expect(asksExpectedQuestion(text,expected)).toBe(result);
+  });
   it("requires the expected next onboarding question, not just correct slots and nonempty speech",()=>{
     const check=(next_question:string,text:string)=>hardChecks(turn({event:{type:"onboarding_answer",question:"injuries",transcript:"No injuries",next_question},decision:{...quiet,speak:true,kind:"question",guidance:null,text,slots:{focus:null,duration_min:null,injuries:[],has_dumbbells:null}}}),{speak:true,slot:{name:"injuries",value:[]}}).behavior;
     const dumbbells="Last one: do you have a pair of dumbbells with you?";
