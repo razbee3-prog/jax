@@ -1,0 +1,572 @@
+{
+  "label": "iteration-1-all",
+  "suite": "all",
+  "created_at": "2026-11-23T21:05:58.715Z",
+  "links": {
+    "counting": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/19c323e8-ee7d-4803-91fc-6591332da10a",
+    "faults": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/03b89a30-ebb6-4947-8282-5364355ad7e0",
+    "coach": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/b0964ecb-c545-4297-9ba2-bbbd03a2df3e",
+    "sessions": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/a5f5f9a8-8f06-4131-8b57-feffea7ce52c"
+  },
+  "table": [
+    {
+      "check": "Perception fixtures",
+      "value": "passed",
+      "bar": "existing M3 gates",
+      "pass": true
+    },
+    {
+      "check": "Coach hard checks",
+      "value": "72/78",
+      "bar": "100%",
+      "pass": false
+    },
+    {
+      "check": "Haiku judge",
+      "value": "3.683 (78/78)",
+      "bar": "average ≥4; all judged",
+      "pass": false
+    },
+    {
+      "check": "Decision coverage",
+      "value": "78/78",
+      "bar": "all 78 examples",
+      "pass": true
+    },
+    {
+      "check": "Session forty_reps",
+      "value": "0/2",
+      "bar": "100%",
+      "pass": false
+    },
+    {
+      "check": "Session talk_ratio",
+      "value": "0/2",
+      "bar": "25–55% in every set",
+      "pass": false
+    },
+    {
+      "check": "Session rep_latency",
+      "value": "0/2",
+      "bar": "browser meter p95 ≤2500 ms",
+      "pass": false
+    },
+    {
+      "check": "Session speech_gap",
+      "value": "0/2",
+      "bar": "100%",
+      "pass": false
+    },
+    {
+      "check": "Session trace_complete",
+      "value": "0/2",
+      "bar": "100%",
+      "pass": false
+    },
+    {
+      "check": "Session thumbs_feedback",
+      "value": "0/2",
+      "bar": "100%",
+      "pass": false
+    },
+    {
+      "check": "Session expected_mode",
+      "value": "0/2",
+      "bar": "100%",
+      "pass": false
+    }
+  ],
+  "details": {
+    "perception": {
+      "suite": "m3-perception-v2",
+      "created_at": "2026-11-23T20:42:07.593Z",
+      "urls": {
+        "counting": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/19c323e8-ee7d-4803-91fc-6591332da10a",
+        "faults": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/03b89a30-ebb6-4947-8282-5364355ad7e0"
+      },
+      "counting": {
+        "examples": 16,
+        "exact_matches": 16,
+        "absolute_error": 0
+      },
+      "faults": {
+        "examples": 24,
+        "real_labeled_clips": 0,
+        "table": [
+          {
+            "id": "rdl_back_round",
+            "synthetic": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 0.5,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          },
+          {
+            "id": "rdl_knee_squat",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "rdl_drift",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "rdl_shallow",
+            "synthetic": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 0.5,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          },
+          {
+            "id": "rdl_fast",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_chest_forward",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_dip_deep",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_no_legs",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_soft_lockout",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_lean_back",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_press_early",
+            "synthetic": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 0.5,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          },
+          {
+            "id": "curl_swing",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "curl_elbow_drift",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "curl_partial",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "curl_drop",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pu_hip_sag",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pu_hip_pike",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pu_shallow",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pu_head_drop",
+            "synthetic": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 0.5,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          }
+        ]
+      }
+    },
+    "coach": {
+      "examples": 78,
+      "hard_passed": 72,
+      "judge_average": 3.6826923076923075,
+      "judged": 78,
+      "failures": [
+        {
+          "id": "pu_hip_sag-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "pp_soft_lockout-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "pp_no_legs-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "pp_dip_deep-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "pp_chest_forward-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "rdl_shallow-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        }
+      ],
+      "instructions_sha256": "ee851324bfeea05fba868e8e17bbddf9fc523bdb5d9431afe6328bc84be56411"
+    },
+    "sessions": [
+      {
+        "id": "healthy-agent",
+        "error": "Error: expect(locator).toBeEnabled() failed\n\nLocator:  getByRole('button', { name: 'Continue', exact: true })\nExpected: enabled\nReceived: disabled\nTimeout:  45000ms\n\nCall log:\n  - Expect \"toBeEnabled\" getByRole('button', { name: 'Continue', exact: true }) with timeout 45000ms\n  - waiting for getByRole('button', { name: 'Continue', exact: true })\n    83 × locator resolved to <button disabled>Continue</button>\n       - unexpected value \"disabled\"\n",
+        "scores": [
+          {
+            "key": "forty_reps",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7e5-7000-8000-023effe20069"
+          },
+          {
+            "key": "talk_ratio",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7e5-7000-8000-023effe20069"
+          },
+          {
+            "key": "rep_latency",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7e5-7000-8000-023effe20069"
+          },
+          {
+            "key": "speech_gap",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7e5-7000-8000-023effe20069"
+          },
+          {
+            "key": "trace_complete",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7e5-7000-8000-023effe20069"
+          },
+          {
+            "key": "thumbs_feedback",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7e5-7000-8000-023effe20069"
+          },
+          {
+            "key": "expected_mode",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7e5-7000-8000-023effe20069"
+          }
+        ]
+      },
+      {
+        "id": "agent-outage",
+        "error": "Error: expect(locator).toBeEnabled() failed\n\nLocator:  getByRole('button', { name: 'Continue', exact: true })\nExpected: enabled\nReceived: disabled\nTimeout:  45000ms\n\nCall log:\n  - Expect \"toBeEnabled\" getByRole('button', { name: 'Continue', exact: true }) with timeout 45000ms\n  - waiting for getByRole('button', { name: 'Continue', exact: true })\n    90 × locator resolved to <button disabled>Continue</button>\n       - unexpected value \"disabled\"\n",
+        "scores": [
+          {
+            "key": "forty_reps",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7eb-7000-8000-037a1eb06279"
+          },
+          {
+            "key": "talk_ratio",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7eb-7000-8000-037a1eb06279"
+          },
+          {
+            "key": "rep_latency",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7eb-7000-8000-037a1eb06279"
+          },
+          {
+            "key": "speech_gap",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7eb-7000-8000-037a1eb06279"
+          },
+          {
+            "key": "trace_complete",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7eb-7000-8000-037a1eb06279"
+          },
+          {
+            "key": "thumbs_feedback",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7eb-7000-8000-037a1eb06279"
+          },
+          {
+            "key": "expected_mode",
+            "score": 0,
+            "sourceRunId": "01a20a3a-d7eb-7000-8000-037a1eb06279"
+          }
+        ]
+      }
+    ]
+  },
+  "iphone_acoustic_latency": "unverified"
+}

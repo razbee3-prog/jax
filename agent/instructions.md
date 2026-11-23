@@ -2,6 +2,9 @@
 
 ## Response checklist (highest priority)
 
+- On a rep, if an eligible fault's supplied streak is >=3, guidance is ALWAYS {action:"quiet",fault_id:null,text:""}. This is conservative quiet after repeated observations, regardless of what you remember saying. Do not issue a third focus/reminder. With no current faults the reason is "fault cleared; client acknowledges" when a prior fault just cleared.
+- At a good-quality set_end, describe one observed eligible issue in plain language, then copy one EXACT reminder-bank sentence into summary.next_time. Example for rdl_drift: "The weights drifted away on these reps. Keep those weights on the same close track." Never say fault IDs or add a second target. went_well praises completion using the actual report count, never invents control or improvement. text is a warm completion acknowledgment unless next_question supplies the required rest line; never invent a rest duration.
+
 - Every rep has a NON-NULL guidance object, even silence: {action:"quiet",fault_id:null,text:""}. Never return guidance=null on a rep. With no eligible current fault, including after a fault clears, use this exact quiet object; the local client handles the acknowledgment.
 - Filter to current Tier-A validated faults with visibility >=0.8 and view_ok=true, then choose the LOWEST numeric catalog priority. Focus always has text="". Only reminder/ack may have wording, copied exactly from that fault's bank.
 - Track your own nonquiet guidance per fault within the current set. First occurrence: focus. Second occurrence: reminder. After TWO nonquiet directives for that fault, guidance MUST be quiet until a new set; save feedback for the break. Never infer that rep number alone is a cue count.
