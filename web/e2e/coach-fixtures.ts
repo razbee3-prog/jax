@@ -16,7 +16,7 @@ export async function demoCamera(page:Page,microphone=false){
         if(next!==exercise){videos.get(exercise)!.pause();exercise=next;}
         const video=videos.get(exercise)!;if(active==="S6" && screen!==active)video.currentTime=0;screen=active;
         if(video.paused)void video.play().catch(()=>{});
-        if(video.readyState>=2){const scale=Math.min(canvas.width/video.videoWidth,canvas.height/video.videoHeight),width=video.videoWidth*scale,height=video.videoHeight*scale;context.fillStyle="black";context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(video,(canvas.width-width)/2,(canvas.height-height)/2,width,height);}
+        if(video.readyState>=2){const scale=Math.min(canvas.width/video.videoWidth,canvas.height/video.videoHeight),width=video.videoWidth*scale,height=video.videoHeight*scale;context.fillStyle="black";context.fillRect(0,0,canvas.width,canvas.height);if(!(window as typeof window & {coachOutOfFrame?:boolean}).coachOutOfFrame)context.drawImage(video,(canvas.width-width)/2,(canvas.height-height)/2,width,height);}
         requestAnimationFrame(draw);
       };draw();
       return new MediaStream([...canvas.captureStream(24).getVideoTracks(),...audio.getAudioTracks()]);

@@ -8,6 +8,7 @@ import {PosePipeline} from "./pipeline";
 import {RepReporter} from "./repReport";
 import {FAULT_EVIDENCE} from "./evidence";
 import {setupQuality} from "./setup";
+import {derive} from "./angles";
 import type {Frame} from "./types";
 import type {Observation} from "./faults";
 export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:boolean,delegate:"CPU"|"GPU",dispatch:Dispatch<ShellAction>,report:(report:RepReport,observations:Observation[])=>void,status:(data:Record<string,string|number|boolean>)=>void,frameRef?:RefObject<Frame|null>){
@@ -24,7 +25,16 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
       if(!detector || video.readyState<2 || video.currentTime===lastVideoTime)return;
       lastVideoTime=video.currentTime;
       if(s.screen==="S3" && s.floor){if(frameRef)frameRef.current=null;if(!s.inFrame)dispatch({type:"frame",value:true});return;}
-      if(!["S3","S6"].includes(s.screen) || s.paused || document.visibilityState!=="visible" || window.matchMedia("(orientation: landscape)").matches){screen=s.screen;if(s.paused)pipeline=undefined;return;}
+      if(!["S3","S6"].includes(s.screen) || document.visibilityState!=="visible" || window.matchMedia("(orientation: landscape)").matches){screen=s.screen;return;}
+      if(s.paused){
+        pipeline=undefined;
+        try{
+          const frame=detector.detect(video);if(frameRef)frameRef.current=frame;
+          if((["left","right"] as const).some(side=>derive(frame.landmarks,video.videoWidth,video.videoHeight,side)?.valid))lastGood=performance.now();
+          const visible=performance.now()-lastGood<500;if(visible!==s.inFrame)dispatch({type:"frame",value:visible});
+        }catch{dispatch({type:"frame",value:false});}
+        return;
+      }
       if(exercise!==s.exercise || screen!==s.screen || !pipeline){
         exercise=s.exercise;screen=s.screen;pipeline=new PosePipeline(MOVES[exercise].id,video.videoWidth,video.videoHeight);reporter=new RepReporter(FAULT_EVIDENCE);offset=s.reps[exercise];previousCount=0;frames=[];lastRep=performance.now();
       }

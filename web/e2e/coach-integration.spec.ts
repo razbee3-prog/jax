@@ -6,6 +6,14 @@ import type {CoachEvent} from "../../shared/coach-event";
 const flags=["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"];
 const folder=process.env.COACH_EVIDENCE_DIR??"test-results/coach-independent";
 const decision={speak:true,text:"Ready.",kind:"question",fault_id:null,slots:null,reason:"Browser fixture",guidance:null,summary:null};
+test("real tracking detects re-entry while auto-paused without counting paused reps",async()=>{
+  test.setTimeout(90000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  try{
+    await prepare(page);await page.route("**/api/coach",r=>r.fulfill({json:{decision:{...decision,text:r.request().postDataJSON().event.next_question??"Ready."}}}));await setup(page);await start(page);
+    await page.evaluate(()=>{(window as typeof window & {coachOutOfFrame:boolean}).coachOutOfFrame=true;});await expect(page.getByRole("button",{name:"Resume",exact:true})).toBeDisabled({timeout:15000});const count=await page.getByTestId("shell-reps").locator("strong").textContent();
+    await page.evaluate(()=>{(window as typeof window & {coachOutOfFrame:boolean}).coachOutOfFrame=false;});await expect(page.getByRole("button",{name:"Resume",exact:true})).toBeEnabled({timeout:10000});await expect(page.getByTestId("shell-reps").locator("strong")).toHaveText(count!);await shot(page,"real-reentry-resume");await page.getByRole("button",{name:"Resume",exact:true}).click();await expect.poll(async()=>Number(await page.getByTestId("shell-reps").locator("strong").textContent()),{timeout:20000}).toBeGreaterThan(Number(count));await page.getByRole("button",{name:"End",exact:true}).click();
+  }finally{await browser.close();}
+});
 async function prepare(page:Page){
   await demoCamera(page);await page.route("**/api/tts",r=>r.abort());await page.route("**/api/stt-token",r=>r.abort());
   await page.route("**/api/session/event",r=>r.fulfill({json:{event_id:r.request().postDataJSON().event_id}}));
