@@ -9,6 +9,7 @@ import {useTranscription} from "../voice/stt";
 import {caption,GREETING,MOVES,question,kcal,type ShellAction,type ShellState} from "../session/shell";
 import {HybridCoach,type CueSource} from "./hybrid";
 import {SerialCoach,type CoachResult} from "./serial";
+import {onboardingAnswer} from "./onboarding";
 type Emit=(type:string,data:Record<string,string|number|boolean>)=>void;
 export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,talking}:{state:ShellState;fake:boolean;sessionId:string;queue:RefObject<SpeechQueue|null>;emit:Emit;dispatch:Dispatch<ShellAction>;speak:(text:string,inSet?:boolean,countdown?:boolean,source?:CueSource)=>void;talking:boolean}){
   const [answerBusy,setBusy]=useState(false),[captions,setCaptions]=useState<Record<string,string>>({}),[summary,setSummary]=useState<{went_well:string;next_time:string}|null>(null),[fallback,setFallback]=useState(false);
@@ -39,11 +40,12 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
   const answer=useCallback(async(raw:string)=>{
     const s=current.current;if(fake || s.screen!=="S2" || answerLock.current)return;
     answerLock.current=true;setBusy(true);
-    const value=s.question===0 ? /upper/i.test(raw) ? "upper body":/lower/i.test(raw) ? "lower body":"full body":s.question===1 ? /20|twenty/i.test(raw) ? "20":/\b5\b|five/i.test(raw) ? "5":"10":s.question===2 ? /no injur|no pain|none/i.test(raw) ? "No injuries":raw.slice(0,200):/\byes\b|have (?:a |some )?dumbbells/i.test(raw) ? "Yes":"No";
+    const value=onboardingAnswer(s.question,raw,injuries.current);
+    if(value===null){emit("onboarding.answer",{question:s.question,accepted:false,transcript:raw.slice(0,1000),source:"local"});speak(question(s));answerLock.current=false;setBusy(false);return;}
     const next={...s,answers:[...s.answers,value],question:Math.min(3,s.question+1)};
     let nextQuestion=question(next);
     if(s.question===1 && injuries.current.length)nextQuestion=`Last time you mentioned ${injuries.current.join(" and ")}. Is that still the case?`;
-    emit("onboarding.answer",{question:s.question,answer:value,transcript:raw.slice(0,1000),source:"local"});
+    emit("onboarding.answer",{question:s.question,accepted:true,answer:value,transcript:raw.slice(0,1000),source:"local"});
     const result=await serial.current?.request({type:"onboarding_answer",question:["focus","duration","injuries","dumbbells"][s.question],transcript:raw.slice(0,1000),next_question:s.question<3 ? nextQuestion:undefined,known_injuries:injuries.current,returning:injuries.current.length>0});
     if(alive.current && current.current.screen==="S2" && current.current.question===s.question){
       if(s.question<3){const text=result?.decision?.speak ? result.decision.text:nextQuestion;setCaptions(old=>({...old,[`S2-${s.question+1}`]:text}));speak(text,false,false,result?.source??"fallback");}

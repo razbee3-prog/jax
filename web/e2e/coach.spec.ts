@@ -14,7 +14,7 @@ test("real hybrid coach completes forty camera reps with WAV onboarding",async()
   try{
     await demoCamera(page,true);await page.goto("/?poseDelegate=CPU");await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();await page.getByRole("button",{name:"Turn on camera and mic"}).click();
     await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S2");await shot("S2");
-    await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S3",{timeout:180000});expect(events.filter(e=>e.type==="onboarding.answer")).toHaveLength(4);
+    await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S3",{timeout:180000});expect(events.filter(e=>e.type==="onboarding.answer" && e.data.accepted!==false)).toHaveLength(4);
     await expect.poll(()=>page.evaluate(()=>(window as typeof window & {coachMicrophoneTracks:MediaStreamTrack[]}).coachMicrophoneTracks.every(track=>track.readyState==="ended"))).toBe(true);
     await expect(page.getByRole("button",{name:"Continue",exact:true})).toBeEnabled({timeout:30000});await shot("S3");await page.getByRole("button",{name:"Continue",exact:true}).click();await page.getByRole("button",{name:"Let’s get started"}).click();
     for(let exercise=0;exercise<4;exercise++){
