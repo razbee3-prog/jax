@@ -10,15 +10,15 @@ export const SETUP="Prop your phone against a wall, about hip height. Step back 
 export const FLOOR="For push-ups, put the phone on the floor, leaning against something, and get side-on to me.";
 export const BRIEF="Here's what we're working on today: Romanian deadlifts, push presses, bicep curls, and push-ups. One set of each, 10 reps each. I'll count and watch your form. For this pilot, everyone gets the same four moves.";
 export type Screen="S0"|"S1"|"S2"|"S3"|"S4"|"S5"|"S6"|"S7"|"S8";
-export type ShellState={screen:Screen;question:number;answers:string[];exercise:number;reps:number[];paused:boolean;pauseReason:string;inFrame:boolean;fakeReps:boolean;missingMs:number;holdMs:number;floor:boolean;introMs:number;restMs:number;repMs:number;idleMs:number;elapsedMs:number;started:boolean};
-export const initialShell:ShellState={screen:"S0",question:0,answers:[],exercise:0,reps:[0,0,0,0],paused:false,pauseReason:"",inFrame:true,fakeReps:true,missingMs:0,holdMs:0,floor:false,introMs:0,restMs:20000,repMs:0,idleMs:0,elapsedMs:0,started:false};
-export function previewState(screen?:Screen):ShellState{return !screen ? initialShell:{...initialShell,screen,answers:["full body","10","No injuries","Yes"],holdMs:screen==="S3" ? 1500:0,reps:screen==="S8" ? [10,10,10,10]:screen==="S6" ? [3,0,0,0]:[0,0,0,0],elapsedMs:screen==="S8" ? 135000:0};}
+export type ShellState={screen:Screen;question:number;answers:string[];exercise:number;reps:number[];paused:boolean;pauseReason:string;inFrame:boolean;fakeReps:boolean;missingMs:number;holdMs:number;floor:boolean;introMs:number;restMs:number;repMs:number;idleMs:number;elapsedMs:number;lastRepMs:number;started:boolean};
+export const initialShell:ShellState={screen:"S0",question:0,answers:[],exercise:0,reps:[0,0,0,0],paused:false,pauseReason:"",inFrame:true,fakeReps:true,missingMs:0,holdMs:0,floor:false,introMs:0,restMs:20000,repMs:0,idleMs:0,elapsedMs:0,lastRepMs:0,started:false};
+export function previewState(screen?:Screen):ShellState{return !screen ? initialShell:{...initialShell,screen,answers:["full body","10","No injuries","Yes"],holdMs:screen==="S3" ? 1500:0,reps:screen==="S8" ? [10,10,10,10]:screen==="S6" ? [3,0,0,0]:[0,0,0,0],elapsedMs:screen==="S8" ? 135000:0,lastRepMs:screen==="S8" ? 135000:0};}
 export type ShellAction={type:"invite"|"permissions"|"continue"|"skip"|"end"|"pause"|"resume"|"floor"|"intro-complete"|"rep"}|{type:"answer";value:string}|{type:"frame"|"source";value:boolean}|{type:"intro-step";value:number}|{type:"tick";ms:number;introClock?:boolean};
 function finishSet(s:ShellState):ShellState{return {...s,screen:s.exercise===3 ? "S8":"S7",restMs:20000,paused:false,repMs:0,idleMs:0};}
 function nextIntro(s:ShellState):ShellState{return {...s,screen:"S5",exercise:s.exercise+1,introMs:0,repMs:0,idleMs:0};}
 export function shellReducer(s:ShellState,a:ShellAction):ShellState{
   switch(a.type){
-    case "rep":{if(s.screen!=="S6" || s.paused || s.fakeReps)return s;const n={...s,reps:s.reps.map((r,i)=>i===s.exercise ? Math.min(10,r+1):r),idleMs:0};return n.reps[n.exercise]>=10 ? finishSet(n):n;}
+    case "rep":{if(s.screen!=="S6" || s.paused || s.fakeReps)return s;const n={...s,reps:s.reps.map((r,i)=>i===s.exercise ? Math.min(10,r+1):r),idleMs:0,lastRepMs:s.elapsedMs};return n.reps[n.exercise]>=10 ? finishSet(n):n;}
     case "invite":return s.screen==="S0" ? {...s,screen:"S1"}:s;
     case "permissions":return s.screen==="S1" ? {...s,screen:"S2"}:s;
     case "answer":{if(s.screen!=="S2" || !a.value.trim())return s;const answers=[...s.answers,a.value.trim()];return {...s,answers,question:Math.min(3,s.question+1),screen:s.question===3 ? "S3":"S2",holdMs:0};}
@@ -45,7 +45,7 @@ export function shellReducer(s:ShellState,a:ShellAction):ShellState{
       n.missingMs=n.inFrame ? 0:n.missingMs+a.ms;
       if(n.missingMs>=5000)return {...n,paused:true,pauseReason:"Step back into frame when you're ready."};
       n.idleMs+=a.ms;
-      if(n.inFrame && n.fakeReps){n.repMs+=a.ms;const add=Math.floor(n.repMs/1500);if(add){n.reps=n.reps.map((v,i)=>i===n.exercise ? Math.min(10,v+add):v);n.repMs%=1500;n.idleMs=0;}}
+      if(n.inFrame && n.fakeReps){n.repMs+=a.ms;const add=Math.floor(n.repMs/1500);if(add){n.reps=n.reps.map((v,i)=>i===n.exercise ? Math.min(10,v+add):v);n.repMs%=1500;n.idleMs=0;n.lastRepMs=n.elapsedMs;}}
       return n.reps[n.exercise]>=10 || n.idleMs>=30000 ? finishSet(n):n;
     }
   }
@@ -60,7 +60,7 @@ export function caption(s:ShellState){
     case "S5":return MOVES[s.exercise].cue;
     case "S6":return s.paused ? s.pauseReason:"I'll count and watch your form.";
     case "S7":return `Great job. Let's take a 20-second break, then we move on to ${MOVES[Math.min(3,s.exercise+1)].plural}.`;
-    case "S8":return `Today you burned approximately ${kcal(s.elapsedMs)} calories, assuming a body weight of 68 kilograms, about 150 pounds. See you tomorrow. Signing off, it's your AI trainer, Jax.`;
+    case "S8":return `Today you burned approximately ${kcal(s.lastRepMs)} calories, assuming a body weight of 68 kilograms, about 150 pounds. See you tomorrow. Signing off, it's your AI trainer, Jax.`;
     default:return "";
   }
 }

@@ -10,11 +10,13 @@ import {caption,GREETING,MOVES,question,kcal,type ShellAction,type ShellState} f
 import {HybridCoach,type CueSource} from "./hybrid";
 import {SerialCoach,type CoachResult} from "./serial";
 import {onboardingAnswer} from "./onboarding";
+import {debriefReports,summarySpeech} from "./debrief";
 type Emit=(type:string,data:Record<string,string|number|boolean>)=>void;
 export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,talking}:{state:ShellState;fake:boolean;sessionId:string;queue:RefObject<SpeechQueue|null>;emit:Emit;dispatch:Dispatch<ShellAction>;speak:(text:string,inSet?:boolean,countdown?:boolean,source?:CueSource)=>void;talking:boolean}){
   const [answerBusy,setBusy]=useState(false),[captions,setCaptions]=useState<Record<string,string>>({}),[summary,setSummary]=useState<{went_well:string;next_time:string}|null>(null),[fallback,setFallback]=useState(false);
   const busy=answerBusy || (!fake && state.screen==="S2" && state.question===0 && !captions["S2-0"]);
   const current=useRef(state),hybrid=useRef<HybridCoach|null>(null),serial=useRef<SerialCoach|null>(null),alive=useRef(true),injuries=useRef<string[]>([]),lastScreen=useRef(""),latestRep=useRef({set_id:"",rep:0}),answerLock=useRef(false);
+  const setReports=useRef<RepReport[][]>([[],[],[],[]]);
   useEffect(()=>{current.current=state;},[state]);
   useEffect(()=>{
     if(fake)return;alive.current=true;
@@ -32,7 +34,7 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
   },[fake,sessionId,queue,emit]);
   const turn=useCallback(async(event:CoachEvent,fallbackText:string,key:string,countdown=false)=>{
     const result=await serial.current?.request(event);if(!result || !alive.current)return;
-    const decision=result.decision,text=decision?.speak && decision.text.trim() ? decision.text:fallbackText;
+    const decision=result.decision,text=event.type==="session_end" ? summarySpeech(decision,fallbackText):decision?.speak && decision.text.trim() ? decision.text:fallbackText;
     setCaptions(old=>({...old,[key]:text}));speak(text,false,countdown,result.source);
     if(event.type==="session_start")injuries.current=decision?.slots?.injuries??[];
     if(event.type==="session_end")setSummary(decision?.summary??null);
@@ -63,18 +65,18 @@ export function useSessionCoach({state,fake,sessionId,queue,emit,dispatch,speak,
   useEffect(()=>{
     if(fake)return;
     const key=`${state.screen}-${state.screen==="S2" ? state.question:state.exercise}`;
-    if(lastScreen.current===key)return;lastScreen.current=key;
-    const totals={reps:state.reps.reduce((a,b)=>a+b,0),elapsed_ms:state.elapsedMs,kcal:kcal(state.elapsedMs),weight_kg:68 as const,met:3.5 as const};
+    if(lastScreen.current===key)return;const previousKey=lastScreen.current;lastScreen.current=key;
+    const totals={reps:state.reps.reduce((a,b)=>a+b,0),elapsed_ms:state.lastRepMs,kcal:kcal(state.lastRepMs),weight_kg:68 as const,met:3.5 as const};
     if(state.screen==="S2" && state.question===0)void turn({type:"session_start",next_question:GREETING},GREETING,key);
     if(state.screen==="S4")void turn({type:"brief"},caption(state),key);
     if(state.screen==="S5")void turn({type:"set_start",exercise:MOVES[state.exercise].id,target_reps:10},caption(state),key,true);
     if(state.screen==="S6"){const set_id=`${sessionId}:${state.exercise}`;latestRep.current={set_id,rep:0};hybrid.current?.start(set_id);}
-    if(state.screen==="S7"){hybrid.current?.end();void turn({type:"set_end",exercise:MOVES[state.exercise].id,totals,next_question:caption(state)},caption(state),key);}
+    if(state.screen==="S7"){hybrid.current?.end();void turn({type:"set_end",exercise:MOVES[state.exercise].id,...debriefReports(setReports.current,state.exercise),totals,next_question:caption(state)},caption(state),key);}
     if(state.screen==="S8"){
-      hybrid.current?.end();void (async()=>{if(state.started)await turn({type:"set_end",exercise:MOVES[state.exercise].id,totals},"That's the set.","final-debrief");await turn({type:"session_end",totals},caption(state),key);})();
+      hybrid.current?.end();void (async()=>{if(previousKey.startsWith("S6-"))await turn({type:"set_end",exercise:MOVES[state.exercise].id,...debriefReports(setReports.current,state.exercise),totals},"That's the set.","final-debrief");await turn({type:"session_end",...debriefReports(setReports.current),totals},caption(state),key);})();
     }
   },[state,fake,sessionId,turn]);
-  const report=useCallback((report:RepReport,observations:Observation[])=>{latestRep.current={set_id:`${sessionId}:${current.current.exercise}`,rep:report.rep};hybrid.current?.rep(report,observations);},[sessionId]);
+  const report=useCallback((report:RepReport,observations:Observation[])=>{setReports.current[current.current.exercise].push(report);latestRep.current={set_id:`${sessionId}:${current.current.exercise}`,rep:report.rep};hybrid.current?.rep(report,observations);},[sessionId]);
   const key=`${state.screen}-${state.screen==="S2" ? state.question:state.exercise}`;
   return {answer,report,busy,caption:captions[key],summary,fallback,partial:stt.partial,sttError:stt.error};
 }

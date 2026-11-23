@@ -1,5 +1,5 @@
 import {test,expect,chromium,type Page} from "@playwright/test";
-import {mkdirSync} from "node:fs";
+import {mkdirSync,writeFileSync} from "node:fs";
 import {resolve} from "node:path";
 import {demoCamera} from "./coach-fixtures";
 const flags=["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"];
@@ -26,4 +26,24 @@ test("real camera framing is uncropped and simulation controls stay in fake mode
     await page.goto("/?fake=1&preview=S6");await expect(page.locator(".shell-bar")).toContainText("SCRIPTED");await expect(page.getByRole("button",{name:"Step out (simulate)"})).toBeVisible();
     console.log("REAL UI: contained camera/guide, real pose overlay, no simulation controls; fake controls retained.");
   }finally{await browser.close();}
+});
+test("agent debrief and calorie summary work after one real camera set",async()=>{
+  test.skip(process.env.COACH_PARTIAL_LIVE_E2E!=="1","Explicit partial live-agent opt-in required");test.setTimeout(180000);
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}}),events:{thread_id:string;event_id:string;type:string;data:Record<string,unknown>}[]=[],calls:{event:Record<string,unknown>;status:number;decision:Record<string,unknown>}[]=[];
+  try{
+    await prepare(page);await page.unroute("**/api/session/event");page.on("request",r=>{if(r.url().endsWith("/api/session/event"))events.push(r.postDataJSON());});
+    await page.route("**/api/coach",async route=>{
+      const {event}=route.request().postDataJSON();
+      if(["set_end","session_end"].includes(event.type)){const response=await route.fetch(),body=await response.json();calls.push({event,status:response.status(),decision:body.decision});await route.fulfill({response,json:body});}
+      else await route.fulfill({json:{decision:{...decision,text:event.next_question??"Ready.",...(event.type==="rep" ? {speak:false,text:"",kind:"silence",guidance:{action:"quiet",fault_id:null,text:""}}:{})}}});
+    });
+    await setup(page);await start(page);await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S7",{timeout:120000});
+    await expect.poll(()=>events.some(e=>e.type==="coach.turn" && e.data.event_type==="set_end" && e.data.source==="agent"),{timeout:15000}).toBe(true);expect(calls[0].status).toBe(200);expect(calls[0].event.reports).toHaveLength(10);expect(String(calls[0].decision.text).length).toBeGreaterThan(String(calls[0].event.next_question).length);await expect(page.locator(".shell-caption")).toHaveText(String(calls[0].decision.text));await shot(page,"agent-set-feedback");await page.waitForTimeout(10000);
+    await page.getByRole("button",{name:"End",exact:true}).click();await expect.poll(()=>events.some(e=>e.type==="coach.turn" && e.data.event_type==="session_end" && e.data.source==="agent"),{timeout:15000}).toBe(true);
+    expect(calls.map(c=>c.event.type)).toEqual(["set_end","session_end"]);const end=calls[1],totals=end.event.totals as {kcal:number;elapsed_ms:number;weight_kg:number;met:number;reps:number},summary=end.decision.summary as {went_well:string;next_time:string};
+    expect(totals.reps).toBe(10);expect(totals.weight_kg).toBe(68);expect(totals.met).toBe(3.5);expect(totals.kcal).toBe(Math.round(3.5*3.5*68/200*totals.elapsed_ms/60000));expect(totals.kcal).toBeGreaterThan(0);
+    expect(totals.elapsed_ms).toBe(events.filter(e=>e.type==="rep.detected").at(-1)?.data.workout_ms);const endEvent=events.find(e=>e.type==="session.end")!;expect(Number(endEvent.data.elapsed_ms)-totals.elapsed_ms).toBeGreaterThan(9000);expect(endEvent.data.last_rep_elapsed_ms).toBe(totals.elapsed_ms);
+    await expect(page.locator(".summary-card")).toContainText(summary.went_well);await expect(page.locator(".summary-card")).toContainText(summary.next_time);await expect(page.locator(".shell-caption")).toContainText(`approximately ${totals.kcal} calories, assuming a body weight of 68 kilograms`);await shot(page,"agent-partial-summary");
+    console.log(`PARTIAL AGENT DEBRIEF: 10 camera reps, 10 reports, one set_end, agent summary, ${totals.elapsed_ms.toFixed(0)}ms, MET ${totals.met}, ${totals.weight_kg}kg, ${totals.kcal}kcal.`);
+  }finally{mkdirSync(folder,{recursive:true});writeFileSync(resolve(folder,"partial-debrief.json"),JSON.stringify({events,calls},null,2));await browser.close();}
 });
