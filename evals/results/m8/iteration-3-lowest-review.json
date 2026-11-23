@@ -1,0 +1,190 @@
+{
+  "source_experiment": "93300d56-0f2f-4b75-8326-8fd89fe41ab7",
+  "selection": "Lowest 15 judge averages, stable dataset order breaks ties",
+  "patterns": {
+    "rest_rows": 7,
+    "immutable_local_cue_rows": 7,
+    "required_silence_rows": 1
+  },
+  "instruction_changes": [
+    "Short-circuit poor tracking before fault eligibility, memory and streak rules.",
+    "Natural specific completion acknowledgment, not stock praise or claims of improved form.",
+    "One plain-language observed fault followed by one concrete external object/path target at rest.",
+    "Exact bank wording stays mandatory for rep reminder/ack only; fixed rest/sign-off text stays exact.",
+    "No additional speech to compensate for low scores on required silence or immutable local cues."
+  ],
+  "offline_previous_output_replay": {
+    "source": "iteration-2-all/coach-results.json",
+    "model_calls": 0,
+    "hard_passed": 69,
+    "examples": 78,
+    "note": "New matcher applied locally to unchanged prior outputs; generic exact-bank-only mentions no longer accepted. Not a new model experiment or a rewrite of historical LangSmith scores."
+  },
+  "rows": [
+    {
+      "id": "pp_dip_deep-fixed",
+      "score": 3,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 2,
+        "fits_moment": 3,
+        "not_annoying": 4,
+        "explanation": "Rep 2 reported no faults, and the candidate correctly stays silent on the rep decision. However, the rendered local cue \"That was a short, sharp bounce\" was played in-set on rep 2 and refers to a dip-depth fault (pp_dip_deep) that is not a bounce. The cue is mislabeled and nothing in the rep 2 data supports it, so it is an invented/inaccurate correction. The rep 2 event also shows no faults, so the cue contradicts the evidence. Warmth is neutral; the cue is brief and restrained, but its content is inaccurate and lacks an external target."
+      }
+    },
+    {
+      "id": "rdl_drift-third",
+      "score": 3,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 2,
+        "fits_moment": 3,
+        "not_annoying": 4,
+        "explanation": "Rep 3 candidate is silent in-set, which respects the two-correction cap and the local cue being silent; that restraint is appropriate. The set_end summary is spoken, warm and plain, and references the drift fault. However, the summary's \"next_time\" advice (\"keep those weights on the same close track\") is vague and somewhat garbled; it does not give a clear external target like \"keep the bar close to your shins.\" The \"went_well\" line is generic. Warmth is neutral-to-friendly; external focus is weak because the cue is not a concrete movement outcome. Fits the moment is moderate: the fault and set-end timing are handled correctly, but the wording of the drift guidance is imprecise."
+      }
+    },
+    {
+      "id": "pu_hip_pike-third",
+      "score": 3.25,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 2,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "The in-set rep 3 response is silent, which is correct: the fault (pu_hip_pike, validated Tier A, streak 3) has already been corrected twice, so after two corrections quiet in-set is the right behavior, and the local line was also silent. The set_end summary is spoken as required for a non-rep event and mentions the validated fault accurately, with a brief, plain tone. However, the summary's \"next_time\" cue (\"Bring the whole plank onto one line\") is only loosely external; it names a plank line but gives no concrete outcome target like \"keep hips level with shoulders.\" Warmth is neutral-to-friendly (\"Nice work finishing that set\") but generic. The rest observation (\"Rest for twenty seconds and take a breath\") is fine. Also, \"went_well\" claims about visibility are a little filler-like. Overall: correct decisions and restraint, with moderate cue quality and warmth."
+      }
+    },
+    {
+      "id": "curl_partial-third",
+      "score": 3.25,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 3,
+        "not_annoying": 4,
+        "explanation": "The in-set rep-3 decision is silence after two prior curl_partial corrections, which respects the cap and the rule that rep decisions are never spoken directly; the local line was also silent, so restraint is appropriate. However, the set_end summary is generic: it says \"steady effort\" and \"Reach the lower target\" without grounding in the validated partial-range fault that persisted across all three reps, so the feedback is only loosely tied to the evidence. The rest instruction is brief and neutral, and warmth is serviceable but plain. The expected mention of curl_partial in the followup is not met by the spoken summary, which lowers fit and external focus (no concrete movement target such as \"curl all the way up to full contraction\"). Overall: safe and non-annoying, but the summary misses the specific fault."
+      }
+    },
+    {
+      "id": "rdl_knee_squat-third",
+      "score": 3.25,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 3,
+        "not_annoying": 4,
+        "explanation": "Rep 3 candidate: silence is appropriate after two prior corrections on the same fault (streak 3, cap reached), so the in-set restraint is good (not_annoying high, fits moment reasonable). Set-end summary is spoken and grounded in the validated knee_squat fault, which matches the expected mention. However, the summary is generic on warmth (\"Nice work finishing that set\") and its \"went_well\" line is vague; the next_time cue (\"reaching back toward the wall behind you\") is a decent external target but somewhat dense for a summary. Overall acceptable but unremarkable, so mid scores on warmth and external focus."
+      }
+    },
+    {
+      "id": "pu_head_drop-tier-b",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 2,
+        "fits_moment": 4,
+        "not_annoying": 5,
+        "explanation": "The candidate correctly stays silent on rep 1. The only fault is tier B (pu_head_drop), which the contract makes ineligible for spoken guidance, so silence is the right call and the rendered local cue is also silent. Restraint is excellent and nothing annoying is said. Warmth is neutral because there is no spoken text at all, and external focus is not applicable since no cue is given; the score of 2 reflects that no movement outcome is offered even quietly. Fit is strong: it respects the hybrid timing contract and the tier B exclusion without inventing a fault."
+      }
+    },
+    {
+      "id": "pu_shallow-third",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "Rep 3 candidate correctly stays silent: the pu_shallow fault has already been corrected twice, the local cue was silent, and the in-set rule calls for quiet after two corrections. The set_end summary is spoken, which is correct for non-rep responses, and it names the validated shallow-depth fault with a plain, friendly tone. Its \"next_time\" cue (\"let your shirt travel a little lower\") is a vague internal-ish external target rather than a clear movement outcome like \"chest toward the floor\", so external focus is only moderate. The summary is brief and not nagging. Warmth is neutral-to-friendly; the rest instruction is plain and serviceable."
+      }
+    },
+    {
+      "id": "pu_hip_pike-first",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "The rep was validated as a Tier A hip-pike fault on rep 1, and the candidate correctly stayed silent on the rep event (decision speak=false), with the rendered local cue \"Drop your hips into one straight line\" played in-set. The cue fits the validated fault and respects the timing contract. Warmth is neutral since the line is terse but not shaming. External focus is moderate: \"one straight line\" points to a body-shape outcome, though it is somewhat internal (\"drop your hips\") rather than a vivid external target. Restraint is good: a single cue, no repetition, no extra speech."
+      }
+    },
+    {
+      "id": "pu_hip_sag-third",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "Rep 3 candidate: the hip sag streak has reached 3 after two prior corrections, so going quiet in-set matches the contract's quiet-after-two-corrections rule, and the local cue was correctly silent. The set_end summary is spoken, names the validated pu_hip_sag fault accurately, and gives a clear external target (\"keep the whole plank in one line\"), though the opening praise is somewhat generic and the rest instruction is plain but acceptable. Warmth is neutral-to-friendly; external focus is reasonable but the summary cue is a bit internal-sounding. Overall it fits the timing contract and avoids nagging."
+      }
+    },
+    {
+      "id": "pu_hip_pike-fixed",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "The candidate decision is silence on a rep event, which is correct: rep decisions are never spoken directly, and the prior hip-pike fault (rep 1) has cleared on rep 2 (no faults reported). The rendered local cue \"That was a level plank.\" was chosen before the same-rep response and refers to the previously flagged hip pike, which now reads as an accurate acknowledgment of the cleared fault. Warmth is neutral-to-friendly but the cue is terse and slightly generic; the external focus is quiet, which is appropriate here, so it is not penalized below neutral. Restraint is good: one correction, no nagging, no extra speech."
+      }
+    },
+    {
+      "id": "pu_hip_sag-persists",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "The rep event correctly stays silent in the spoken channel (rep decisions are never spoken directly), and the guidance reminder targets the validated Tier A hip sag at streak 2, matching the report. The rendered local cue \"Keep that bridge level through the next rep\" accurately addresses the persistent hip sag and was played once, within the correction cap. Warmth is neutral: the cue is plain but not especially friendly. External focus is moderate: \"bridge level\" points to a body-line outcome, though \"hold the whole plank in one line\" would be a clearer external target. Restraint is good with one cue played and silence in-set; fit is accurate to the supplied fault evidence."
+      }
+    },
+    {
+      "id": "curl_drop-persists",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "The candidate stays silent on rep 2 (speak:false), which is correct for an in-set rep event; guidance is stored as a reminder for the validated curl_drop fault (Tier A, streak 2), and the rendered local cue \"Take your time on the way back down\" was played. The cue accurately addresses the lowering-phase drop evidenced by the validated fault and respects the hybrid timing contract. Warmth is neutral since the spoken line is handled by the local cue, not the decision. External focus is modest: \"take your time on the way back down\" points to a tempo outcome rather than a vivid target. Restraint is good: one correction already given, no repetition past the cap."
+      }
+    },
+    {
+      "id": "curl_drop-third",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "The candidate handles the rep-3 event correctly: it stays silent in-set after two prior curl_drop corrections (the local cue was silent, cap respected), which is excellent restraint. At set end it speaks one brief summary, which is appropriate since summary responses are spoken. The summary's \"next_time\" advice about slowing the lowering phase is grounded in the 4000ms lowering data and the curl_drop fault, so it fits. Warmth is neutral-to-friendly (\"Nice work finishing that set\") but plain. External focus is weak: the summary gives an internal-ish timing cue (\"slow the return\") rather than a vivid external target like a visible drop point, and the in-set silence earns no external focus credit beyond quiet. Overall a solid, restrained response with an average around 3.75; slightly below the bar on warmth and external focus."
+      }
+    },
+    {
+      "id": "curl_drop-fixed",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "Rep 2 reports no faults, and the prior fault (curl_drop on rep 1) has cleared. The candidate decision is silence, which is appropriate for a rep event with no current fault. The rendered local cue \"That return was smooth and controlled.\" was played during the set, which acknowledges the previously flagged fault clearing without referencing the same-rep decision, consistent with the timing contract. Warmth is neutral-to-friendly but the in-set line is brief and plain. External focus is a clear outcome (\"smooth and controlled\" return) but is mild; quiet guidance is acceptable here. Restraint is good: one brief acknowledgment, no nagging."
+      }
+    },
+    {
+      "id": "curl_drop-first",
+      "score": 3.5,
+      "judge": {
+        "warmth": 3,
+        "external_focus": 3,
+        "fits_moment": 4,
+        "not_annoying": 4,
+        "explanation": "Rep 1 has a validated Tier A curl_drop fault (value 1, view ok, visibility 0.95). The rendered local cue \"Lower it slow. Fight it on the way down.\" was played in-set, accurately addressing a dropped/fast lowering phase. The candidate decision is silence for the rep event, which is correct because rep decisions are never spoken directly. Guidance is a focus on curl_drop with empty text, which is appropriate. Warmth is neutral since no spoken text is given. External focus is moderate: the cue \"fight it on the way down\" points to a controlled lowering outcome, though it is somewhat internal (\"fight it\"). Fits the moment well with accurate timing; restraint is good with a single correction."
+      }
+    }
+  ]
+}

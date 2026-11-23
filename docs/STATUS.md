@@ -1,8 +1,41 @@
 # Jax status
 
-## M8 — live experiments resumed; quality gate FAILED
+## M8 — iteration 3 finished; quality gate FAILED
 
-**M8 is not complete.** Infrastructure recovered and both full session simulations pass, but the final coach experiment is **75/78 hard checks** and **3.701923077 judge average**, below the required **100% / ≥4**. Final full `npm run evals` completed with **exit 1**, not a fabricated pass. Machine-readable results: [iteration 2](../evals/results/m8/iteration-2-all.json); prior blocked artifact is explicitly historical.
+**M8 is not complete.** The requested one additional round is finished: **67/78 hard examples**, **3.814102564 judge average (78/78 judged)**, both below **100% / ≥4**. Both redeployed full-session simulations pass. No fourth instruction round or after-run scorer edits were made; stopping and reporting as requested. Current machine-readable results: [coach](../evals/results/m8/iteration-3-coach.json), [sessions](../evals/results/m8/iteration-3-sessions.json). Iteration 2's full `npm run evals` also exited 1; perception inputs have not changed and were not rerun.
+
+### Iteration 3 — one requested final round
+
+- **Quality guard:** instructions now short-circuit `view_ok=false` or visibility <0.8 BEFORE considering fault IDs, validation, streaks or memory, always returning exact quiet guidance. Both `quality-view` and visibility cases now pass. The prior client `CuePolicy.next` already suppressed poor-quality form speech, but **`HybridCoach` did not discard the background guidance itself**. Fixed that retention gap: clear stored guidance on quality loss, reject replies from poor-quality reports and reject otherwise-valid replies while current tracking is poor. Nine new tests cover focus/reminder/ack/quiet, both quality gates, recovery, stored and in-flight replies. No counting/quality threshold was changed.
+- **Mention matcher:** `evals/evaluators/fault-language.ts::FAULT_LANGUAGE` is the single per-fault definition of diagnostic claims and mention vocabulary for all 19 faults. Rest mention checks no longer require an exact cue-bank sentence; rep reminder/ack approval still DOES. Original claim patterns remain, with additive synonyms also detecting unflagged paraphrases. Nineteen tests cover accepted paraphrases, all other fault lines as negatives, generic/empty prose, Tier-B and unflagged claims. The previously rejected deep-dip and excess-knee-bend paraphrases now pass. No schema, word-cap, one-fault, grounding, Tier-B or third-cue rule was relaxed.
+- **Lowest 15 reviewed:** [full prior judge reasons](../evals/results/m8/iteration-3-lowest-review.json): seven rest responses, seven immutable local-cue responses, one required Tier-B silence. Actual rest issues were generic completion/visibility praise, vague external targets and missing specific observations. Both instruction profiles now request a specific, honest completion acknowledgment plus one plain observed issue and one concrete object/path target; rest wording may be natural rather than an exact bank copy. Fixed rest/sign-off text and silence remain authoritative. No extra speech was added to compensate for silence scores; **rubric, bars and cue bank unchanged**.
+- **Deployment:** synced `agent/instructions.md`; existing dedicated agent **10c5b11d-e461-4f54-b75f-cd956a2f4bed** reached **DEPLOYED**, managed-deepagents **0.10.5**. Source/runtime commit **b14bb05276507269b84ef1b708a9cfb213ff818e**. Because the client guard changed, rebuilt/recreated **jax-web only**, other container IDs unchanged, credentials/webhook preserved, env mode600 retained, only APP_VERSION changed. **Jax public health HTTP 200; strongr HTTP 200.**
+- **Checks after final code edit:** lint and all three typechecks exit 0; **257 tests / 29 files passed**; local build compiled **744ms**, **13/13 pages in 222ms**; **Shared copies match.** No runtime changes after these checks or during either experiment. Later edits are results/documentation only.
+
+[Coach experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/9571ae11-9a7a-4e45-9300-f776c01468bd), `iteration-3-coach`, **exit 1**:
+
+| Check | Result | Bar | Status |
+| --- | --- | --- | --- |
+| Aggregate hard examples | 67/78 | 100% | FAIL |
+| Haiku judge | 3.814102564, 78/78 judged | ≥4, complete coverage | FAIL |
+| Decision coverage | 78/78 | All 78 | PASS |
+
+All **eight other coded hard metrics are 78/78**; only behavior is 67/78. Hard totals are not directly comparable to the old 75/78: the old matcher admitted generic exact bank sentences as mentions. An **offline replay of the unchanged R2 outputs** with this round's matcher yields **69/78**, versus this new model run's **67/78**. This replay was not another model run or a replacement experiment; old results were not rescored in LangSmith.
+
+The eleven remaining behavior failures are `rdl_knee_squat-two-faults` (picked `rdl_drift` instead of the lower-priority-number knee fault) plus ten third/rest rows: `pu_shallow`, `pu_hip_pike`, `pu_hip_sag`, `curl_drop`, `curl_swing`, `pp_soft_lockout`, `pp_no_legs`, `pp_chest_forward`, `rdl_fast`, `rdl_shallow`. **Keyword coverage remains incomplete**: clear phrases such as “legs didn't drive”, “chest drifted forward” and “arms finished a little soft” are still missed. Other failures are genuinely vague/wrong descriptions: hip-pike feedback says hips “dipped out of line”, and body-swing feedback describes the upper arms instead. They are retained as FAIL; ambiguous descriptions were not aliased to multiple faults just to pass. Future matcher work needs adversarial negatives as well as these positive phrases.
+
+Judge dimension means moved from warmth **3.2564→3.4231**, external focus **3.2949→3.5513**, fit **4.0000→4.0385**, restraint **4.2564→4.2436**. Measured mean improved **3.7019→3.8141**, but the bar still misses. Rest acknowledgments also often repeat the new “Three reps in the bank” template; not every intended style change was followed. No further tuning was done.
+
+[Fresh session experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/7a0358eb-862e-445c-ba05-6351cdc227f1), `iteration-3-sessions`, **exit 0**:
+
+| Case | Reps | Talk ratio each set | Rep→audio p50 / p95 | Min gap | Audit | Fallback rep turns |
+| --- | --- | --- | --- | --- | --- | --- |
+| Healthy | 40 | 30%, 30%, 30%, 30% | 63.9 / 109.9ms | 6334.6ms | PASS 282/282 | 0 |
+| Outage | 40 | 30%, 30%, 30%, 30% | 67.3 / 170.6ms | 6404.2ms | PASS 282/282 | 40 |
+
+All seven session gates **2/2 PASS**; each has **12/12 played lines measured**, expected source mode and persisted Helpful feedback. Healthy background guidance n=40 p50 **2157.8ms**, p95 **2546.0ms**, max **2860.8ms**. Separate SDK readback confirms `trace_complete=1` and `coaching_helpful=1` on both end runs: healthy **56093915-f809-4a85-8492-f981b2b74327**, outage **46a2d086-bf0f-4e68-a1bd-c1949c00df29** ([feedback evidence](../evals/results/m8/iteration-3-feedback-readback.json)).
+
+Both **390×844** summaries visually checked once: Helpful confirmation, **282/282 recorded**, healthy 40 reps/4:47/20kcal, outage 40 reps/4:26/19kcal and the fallback explanation. Screenshots under `/home/ubuntu/jax-evidence/m8/iteration-3-sessions/sessions/{healthy-agent,agent-outage}/summary.png`. Client guard behavior is unit-verified, not live validated on real faults. Desktop meter timing **does not verify iPhone acoustic latency**; demo/counterfactual evidence does not validate detectors. No new LangSmith outage occurred and no further online-evaluator creation was attempted.
 
 ### Scope and invariant gates
 
@@ -21,21 +54,22 @@ No audit 502 or LangSmith timeout recurred in the resumed completed experiments,
 
 ### Instruction iterations
 
-Both source profiles were edited, synchronized into `agent/instructions.md` and redeployed to dedicated server **10c5b11d-e461-4f54-b75f-cd956a2f4bed**, using **managed-deepagents 0.10.5**, status **DEPLOYED**. Final instruction SHA256: `8d1a1040d421d628e487cb09bbb3300ab0856d4298a3a299c0f18a348f34bdc0`.
+Both source profiles were edited, synchronized into `agent/instructions.md` and redeployed to dedicated server **10c5b11d-e461-4f54-b75f-cd956a2f4bed**, using **managed-deepagents 0.10.5**, status **DEPLOYED**. Iteration 3 instruction SHA256: `73cc67f5574d41f2d879a0c428b46a0005817f0604bad2285b8832c23445ca17`.
 
 | Run | Change and reason | Hard examples | Judge average / coverage |
 | --- | --- | --- | --- |
 | [Resumed baseline](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/7b821d35-bf42-4ed1-a34c-f05644d8f883) | Existing instructions; 18 completed-output failures plus one speech/text semantic 502 | 59/78 FAIL | 3.779220779, 77/78 FAIL |
 | [Iteration 1](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/b0964ecb-c545-4297-9ba2-bbbd03a2df3e) | Explicit non-null quiet guidance, blank focus text, lowest eligible priority, two-directive cap, spoken memory-write answers, exact grounded rest cue; address baseline shape/priority/repeated-fault errors | 72/78 FAIL | 3.682692308, 78/78 FAIL |
 | [Iteration 2](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/93300d56-0f2f-4b75-8326-8fd89fe41ab7) | Conservative quiet at eligible-fault streak ≥3, explicit cleared-fault reason, one plain-language rest observation plus exact reminder, completion-count praise rather than invented form improvement | 75/78 FAIL | 3.701923077, 78/78 FAIL |
+| [Iteration 3](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/9571ae11-9a7a-4e45-9300-f776c01468bd) | Quality-first quiet; client guidance retention guard; keyword-based rest mentions; specific warmth/external targets after reviewing lowest 15; new matcher comparable R2 replay 69/78 | 67/78 FAIL | 3.814102564, 78/78 FAIL |
 
-No model target failed in iterations 1 or 2. The final hard metrics are schema/speech/word-cap/one-fault/no-third-cue **78/78**, grounded/no-unflagged **77/78**, behavior **75/78**. Remaining rows:
+No model target failed in iterations 1 or 2. Iteration 2's historical hard metrics were schema/speech/word-cap/one-fault/no-third-cue **78/78**, grounded/no-unflagged **77/78**, behavior **75/78**. Remaining rows at that stage:
 
 - **quality-view:** `view_ok=false`, but raw guidance proposed `focus/curl_swing` rather than quiet. This is a real guidance-eligibility violation. No local form line was played in that fixture.
 - **pp_dip_deep-third**, **rdl_knee_squat-third:** rep guidance was correctly quiet; the behavior mention matcher rejects the rest paraphrases (“dip went deeper than the target”, “knees bent a little more than the hinge needed”) and non-exact bank wording. These are review-needed lexical rejections, retained as FAIL rather than waived or rescored. Further evaluator synonym coverage needs both grounded-positive and unflagged-negative regression cases.
 - The unchanged judge's dimension means are warmth **3.2564**, external focus **3.2949**, fit **4.0000**, restraint **4.2564**. First/persistent/fixed groups average **3.7667 / 3.6000 / 3.7333**; those immediate lines are selected synchronously from the shared bank before the same-rep agent response, so agent-only prompt changes cannot rewrite them. Persistent-third/rest rows are lower still (**3.4833**), so local wording is not the sole issue: agent rest feedback also needs work. Further cue-wording/evaluator-calibration work is open; no rubric, dataset or bar was weakened to manufacture ≥4.
 
-### Full-session results
+### Iteration 2 full-session results (historical)
 
 Iteration 1's two session cases failed before reps because the fixture initializer, serialized under TSX/esbuild, referenced an undefined `__name`. Actual browser evidence: **`PAGEERROR __name is not defined`**, `getUserMedia` override absent, default Chromium green-camera feed, correctly disabled framing gate. The helper now installs standalone JavaScript text without compiler-closure dependencies. Post-fix actual TSX browser: **`DEMO OVERRIDE true`**, no page error; microphone-off/on unit cases and the existing real-framing Playwright regression pass. Framing/pose gates were not relaxed.
 
@@ -50,9 +84,9 @@ Both have **12/12 played in-set lines measured**, independent ledger readback co
 
 All seven session gates pass **2/2**, perception fixtures pass, and decision coverage is **78/78**. Only aggregate coach hard checks and judge mean fail the final printed table. Browser output-meter latency **does not verify iPhone acoustic latency** (PLAN §2 criterion 4); phone routing/silent switch/Bluetooth/permissions/framing remain unverified. Demo replays do not validate real detectors.
 
-### Checks, visuals and online attachment
+### Iteration 2 checks, visuals and online attachment (historical)
 
-Latest code checks, after adding explicit normal/empty audit-read coverage: lint/typecheck exit 0, **229 tests / 28 files passed**, build compiled **443ms**, **13/13 pages in 226ms**. Existing real-framing E2E: **1 passed (14.3s)**. Shared copies matched; their source inputs have not changed. Later edits are documentation/results only, so these checks were not needlessly repeated. Node **22.23.3**, LangSmith **0.13.1**, managed-deepagents **0.10.5** verified loaded; the legacy `readSession` emits the pinned SDK's `listRuns` deprecation, not an environment/authentication failure.
+Iteration 2 code checks, after adding explicit normal/empty audit-read coverage: lint/typecheck exit 0, **229 tests / 28 files passed**, build compiled **443ms**, **13/13 pages in 226ms**. Existing real-framing E2E: **1 passed (14.3s)**. Shared copies matched; their source inputs have not changed. Later edits are documentation/results only, so these checks were not needlessly repeated. Node **22.23.3**, LangSmith **0.13.1**, managed-deepagents **0.10.5** verified loaded; the legacy `readSession` emits the pinned SDK's `listRuns` deprecation, not an environment/authentication failure.
 
 Both **390×844** final summaries were visually inspected: Helpful confirmation and **“Trace check: 282 of 282 recorded”** are visible. Evidence under `/home/ubuntu/jax-evidence/m8/iteration-2-all/sessions/`: `healthy-agent/summary.png`, `agent-outage/summary.png`, plus events/results. Healthy shows **40 reps, 4:32, 19kcal**; outage **40 reps, 4:26, 18kcal**, with the visible local-coaching fallback explanation. Feedback readback is under the same run root.
 

@@ -1,0 +1,36 @@
+[
+  {
+    "case": "healthy-agent",
+    "thread_id": "01a20a8c-aa0f-741b-bb2d-3791d92189cf",
+    "run_id": "56093915-f809-4a85-8492-f981b2b74327",
+    "feedback": [
+      {
+        "key": "trace_complete",
+        "score": 1,
+        "run_id": "56093915-f809-4a85-8492-f981b2b74327"
+      },
+      {
+        "key": "coaching_helpful",
+        "score": 1,
+        "run_id": "56093915-f809-4a85-8492-f981b2b74327"
+      }
+    ]
+  },
+  {
+    "case": "agent-outage",
+    "thread_id": "01a20a92-b8ad-72cd-8168-dff03a1ba313",
+    "run_id": "46a2d086-bf0f-4e68-a1bd-c1949c00df29",
+    "feedback": [
+      {
+        "key": "trace_complete",
+        "score": 1,
+        "run_id": "46a2d086-bf0f-4e68-a1bd-c1949c00df29"
+      },
+      {
+        "key": "coaching_helpful",
+        "score": 1,
+        "run_id": "46a2d086-bf0f-4e68-a1bd-c1949c00df29"
+      }
+    ]
+  }
+]
