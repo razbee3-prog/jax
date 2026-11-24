@@ -11,6 +11,7 @@ describe("evaluation camera bootstrap",()=>{
     class Stream{getAudioTracks(){return [];}}
     runInNewContext(script as string,{navigator:{mediaDevices:media},window,MediaStream:Stream});
     expect(media.getUserMedia).not.toBe(original);
+    expect(Object.getOwnPropertyDescriptor(media,"getUserMedia")).toMatchObject({writable:true,configurable:true});
     await media.getUserMedia({audio:true});
     expect(original).toHaveBeenCalledTimes(microphone ? 1:0);
     expect(window).toHaveProperty("coachMicrophoneTracks",microphone ? [{kind:"audio"}]:[]);

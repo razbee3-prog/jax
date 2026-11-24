@@ -13,10 +13,11 @@ export function useShellTrace(thread_id:string){
     return()=>{clearInterval(interval);document.removeEventListener("visibilitychange",hide);window.removeEventListener("pagehide",pagehide);unsubscribe();};
   },[ledger]);
   const emit=useCallback((type:string,data:TraceData={})=>ledger.emit(type,data),[ledger]);
+  const flush=useCallback(()=>ledger.flush(),[ledger]);
   const finish=useCallback(async()=>{
     setAuditState("checking");await ledger.flush();
     try{if(!ledger.receipt)throw new Error("Telemetry flush failed");const response=await fetch("/api/session/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({thread_id,...ledger.receipt,ledger:ledger.events}),signal:AbortSignal.timeout(80000)});if(!response.ok)throw new Error("Audit unavailable");const result:AuditResult=await response.json();setAudit(result);setAuditState(result.pass ? "pass":"fail");}
     catch{setAuditState("error");setAudit(null);}
   },[thread_id,ledger]);
-  return {emit,finish,audit,auditState,...snapshot};
+  return {emit,flush,finish,audit,auditState,...snapshot};
 }

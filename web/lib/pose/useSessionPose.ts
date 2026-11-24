@@ -12,6 +12,7 @@ import {setupQuality} from "./setup";
 import {derive} from "./angles";
 import type {Frame} from "./types";
 import type {Observation} from "./faults";
+import {clientFailure} from "../session/diagnostics";
 import {landmarkSeries,LANDMARK_IDS} from "../session/landmarks";
 export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:boolean,delegate:"CPU"|"GPU",dispatch:Dispatch<ShellAction>,report:(report:RepReport,observations:Observation[])=>void,status:(data:Record<string,string|number|boolean>)=>void,frameRef?:RefObject<Frame|null>,trace?:(type:string,data:Record<string,unknown>)=>void){
   const [error,setError]=useState("");
@@ -20,6 +21,7 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
     if(!enabled || !stream)return;
     let closed=false,detector:Landmarker|undefined,raf=0,pipeline:PosePipeline|undefined,reporter=new RepReporter(FAULT_EVIDENCE),exercise=-1,screen="",offset=0,frames:Frame[]=[],previousCount=0,lastRep=0,lastVideoTime=-1,lastGood=-Infinity,lastStatus=-Infinity,setupFrames=0,setupStart=performance.now();
     const video=document.createElement("video");video.muted=true;video.playsInline=true;video.srcObject=stream;
+    const errors=new Set<string>(),failure=(phase:string,error:unknown)=>{const detail=clientFailure(error),key=`${phase}:${detail.error_name}:${detail.error_message}`;if(errors.has(key))return;errors.add(key);current.current.trace?.("client.error",{phase,screen:current.current.state.screen,delegate,...detail});};
     const loop=()=>{
       if(closed)return;
       raf=requestAnimationFrame(loop);
@@ -34,7 +36,7 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
           const frame=detector.detect(video);if(frameRef)frameRef.current=frame;
           if((["left","right"] as const).some(side=>derive(frame.landmarks,video.videoWidth,video.videoHeight,side)?.valid))lastGood=performance.now();
           const visible=performance.now()-lastGood<500;if(visible!==s.inFrame)dispatch({type:"frame",value:visible});
-        }catch{dispatch({type:"frame",value:false});}
+        }catch(error){failure("pose.reentry",error);dispatch({type:"frame",value:false});}
         return;
       }
       if(exercise!==s.exercise || screen!==s.screen || !pipeline){
@@ -58,9 +60,9 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
             if(count<=10){const now=performance.now(),built=reporter.build({exercise:MOVES[exercise].id,width:video.videoWidth,height:video.videoHeight,frames,baselineTorsoLength:pipeline.baseline || undefined},count,10,now-lastRep);current.current.trace?.("rep",{report:built.report,frame_width:video.videoWidth,frame_height:video.videoHeight,coordinate_space:"normalized-image",landmark_series:landmarkSeries(frames),landmark_ids:JSON.stringify(LANDMARK_IDS),sample_hz:10,resampling:"linear; visibility=min endpoints; gaps>500ms hidden",source:"local"});report(built.report,built.observations);dispatch({type:"rep"});lastRep=now;frames=[frame];}
           }
         }
-      }catch{setError("Tracking unavailable. Reframe or skip this set.");dispatch({type:"frame",value:false});}
+      }catch(error){failure("pose.detect",error);setError("Tracking unavailable. Reframe or skip this set.");dispatch({type:"frame",value:false});}
     };
-    void Promise.all([Landmarker.create("full",delegate),video.play()]).then(([landmarker])=>{if(closed){landmarker.close();return;}detector=landmarker;setError("");loop();},()=>{if(!closed){setError("Pose model unavailable. Reload to retry.");dispatch({type:"frame",value:false});}});
+    void Promise.all([Landmarker.create("full",delegate),video.play()]).then(([landmarker])=>{if(closed){landmarker.close();return;}detector=landmarker;setError("");loop();},error=>{if(!closed){failure("pose.initialize",error);setError("Pose model unavailable. Reload to retry.");dispatch({type:"frame",value:false});}});
     return()=>{closed=true;cancelAnimationFrame(raf);detector?.close();video.pause();video.srcObject=null;if(frameRef)frameRef.current=null;};
   },[enabled,stream,delegate,dispatch,frameRef]);
   return error;

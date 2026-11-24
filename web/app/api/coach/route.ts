@@ -6,6 +6,7 @@ import {agentClient,parseDecision,repRunConfig} from "../../../lib/coach/agent.s
 import {voiceAccess} from "../../../lib/voice/access.server";
 import {userIdentity} from "../../../lib/coach/identity.server";
 import {coachIp,coachQuota} from "../../../lib/coach/quota.server";
+import {logApiError} from "../../../lib/session/errors.server";
 export const maxDuration=90;
 const input=z.object({thread_id:z.uuidv7(),event_id:z.uuid(),event:CoachEventSchema}).strict();
 const active=new Set<string>();
@@ -35,6 +36,6 @@ export async function POST(request:Request){
       return parseDecision(state as Record<string,unknown>);
     },{name:"coach.request",client:traces,tracingEnabled:true,project_name:process.env.LANGSMITH_PROJECT,metadata:{thread_id,event_id,source:"agent",event_type:event.type}})();
     return Response.json({decision,latency_ms:performance.now()-start},{headers:{"Cache-Control":"no-store"}});
-  }catch{return Response.json({error:"Coach unavailable",source:"fallback"},{status:502});}
+  }catch(error){logApiError("/api/coach",error,request,{thread_id,event_id,event_type:event.type});return Response.json({error:"Coach unavailable",source:"fallback"},{status:502});}
   finally{active.delete(key);await traces?.awaitPendingTraceBatches().catch(()=>{});}
 }

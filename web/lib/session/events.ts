@@ -2,7 +2,7 @@ import {z} from "zod";
 import {RepReportSchema} from "../../../shared/rep-report";
 import {CoachDecisionSchema} from "../../../shared/coach-decision";
 import {CoachEventSchema} from "../../../shared/coach-event";
-export const eventTypes=["session.start","screen.view","permissions","onboarding.answer","onboarding.turn","setup.pass","setup.check","set.start","rep.detected","rep","set.end","session.pause","session.resume","session.end","utterance","coach.turn","cue.decision","pose.status"] as const;
+export const eventTypes=["session.start","screen.view","permissions","onboarding.answer","onboarding.turn","setup.pass","setup.check","set.start","rep.detected","rep","set.end","session.pause","session.resume","session.end","utterance","coach.turn","cue.decision","pose.status","client.error"] as const;
 export const ledgerItem=z.object({event_id:z.uuid(),type:z.enum(eventTypes)}).strict();
 const scalar=z.union([z.string().max(16000),z.number().finite(),z.boolean(),z.null()]);
 export const seriesSchema=z.array(z.object({t:z.number().nonnegative(),lm:z.array(z.tuple([z.number().finite(),z.number().finite(),z.number().min(0).max(1)])).length(13)}).strict()).max(151);

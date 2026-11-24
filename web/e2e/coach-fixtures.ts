@@ -3,7 +3,7 @@ export async function demoCamera(page:Pick<Page,"addInitScript">,microphone=fals
   await page.addInitScript(`(({microphone})=>{
     const media=navigator.mediaDevices,original=media.getUserMedia.bind(media),tracks=[];
     Object.assign(window,{coachMicrophoneTracks:tracks});
-    Object.defineProperty(media,"getUserMedia",{value:async(constraints)=>{
+    Object.defineProperty(media,"getUserMedia",{configurable:true,writable:true,value:async(constraints)=>{
       const audio=constraints.audio && microphone ? await original({audio:constraints.audio}):new MediaStream();tracks.push(...audio.getAudioTracks());
       if(!constraints.video)return audio;
       const canvas=document.createElement("canvas");canvas.width=640;canvas.height=366;const context=canvas.getContext("2d");

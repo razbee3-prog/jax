@@ -22,3 +22,8 @@ it("checks admin credentials server-side and handles missing, invalid, escaped a
   read.mockResolvedValueOnce({runs:[]});expect((await GET(new Request("http://localhost",{headers}),{params})).status).toBe(404);
   read.mockResolvedValueOnce({runs:[{name:"<script>alert(1)</script>"}],result:{pass:false,expected:1,recorded:0,missing:body().ledger}});const response=await GET(new Request("http://localhost",{headers}),{params});expect(response.status).toBe(200);const html=await response.text();expect(html).toContain("FAIL");expect(html).toContain("&lt;script&gt;");expect(html).not.toContain("test-admin");read.mockRejectedValueOnce(new Error("offline"));expect((await GET(new Request("http://localhost",{headers}),{params})).status).toBe(503);
 });
+it("renders escaped diagnostic details and setup gates without exposing unrelated payloads",async()=>{
+  const headers={authorization:"Basic "+Buffer.from("admin:test-admin").toString("base64")};
+  read.mockResolvedValueOnce({runs:[{name:"client.error",outputs:{screen:"S3",phase:"react",error_name:"TypeError",error_message:"<script>failure</script>",private_field:"hidden"}},{name:"setup.check",outputs:{ready:false,hold_ms:0}}],result:{pass:false,expected:0,recorded:0,missing:[]}});
+  const html=await (await GET(new Request("http://localhost",{headers}),{params:Promise.resolve({id:thread})})).text();expect(html).toContain("error_name: TypeError");expect(html).toContain("&lt;script&gt;failure&lt;/script&gt;");expect(html).toContain("ready: false");expect(html).not.toContain("private_field");expect(html).not.toContain("<script>");
+});
