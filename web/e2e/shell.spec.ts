@@ -17,7 +17,7 @@ async function screen(page:Page,name:string){await expect(page.getByTestId("app-
 async function shot(page:Page,name:string){mkdirSync(folder,{recursive:true});await expect(page.locator(".shell-screen")).toHaveCount(1);await expect(page.locator(".shell-screen")).toHaveCSS("opacity","1");await page.screenshot({path:resolve(folder,`${name}.png`)});}
 async function invite(page:Page,url="/?fake=1") {if(url==="/"){await demoCamera(page);url="/?poseDelegate=CPU";}await page.goto(url);await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();await screen(page,"S1");}
 test("real shell speaks the countdown after the cue, synchronized to scheduled audio",async()=>{
-  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true});
   try{
     await mocks(page);
     await page.addInitScript(()=>{
@@ -49,7 +49,7 @@ test("real shell speaks the countdown after the cue, synchronized to scheduled a
   }finally{await browser.close();}
 });
 test("real shell falls back to the visual countdown when audio is unavailable",async()=>{
-  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true});
   try{
     await mocks(page);
     await invite(page,"/");await page.getByRole("button",{name:"Turn on camera and mic"}).click();
@@ -60,7 +60,7 @@ test("real shell falls back to the visual countdown when audio is unavailable",a
 });
 test("full scripted session at 390x844: all screens, pauses, rest, floor setup and feedback",async()=>{
   test.setTimeout(240000);
-  const browser=await chromium.launch({args:flags}),context=await browser.newContext({viewport:{width:390,height:844},recordVideo:process.env.SHELL_RECORD ? {dir:folder,size:{width:390,height:844}}:undefined}),page=await context.newPage();
+  const browser=await chromium.launch({args:flags}),context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,recordVideo:process.env.SHELL_RECORD ? {dir:folder,size:{width:390,height:844}}:undefined}),page=await context.newPage();
   try{
     await mocks(page);
     page.on("console",message=>{if(message.text().startsWith("SHIFT "))console.log(message.text());});
@@ -101,7 +101,7 @@ test("full scripted session at 390x844: all screens, pauses, rest, floor setup a
 });
 async function screenEventually(page:Page,name:string,timeout=10000){await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen",name,{timeout});}
 test("permissions denied/retry, portrait overlay, reduced motion and Skip",async()=>{
-  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},reducedMotion:"reduce"});
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,reducedMotion:"reduce"});
   try{await mocks(page);await invite(page,"/?fake=1&deny=1");await page.getByRole("button",{name:"Turn on camera and mic"}).click();await expect(page.getByRole("heading",{name:"Camera or microphone blocked"})).toBeVisible();await shot(page,"S1-denied");await page.getByRole("button",{name:"Try again"}).click();await screen(page,"S2");
     await page.setViewportSize({width:844,height:390});await expect(page.getByRole("heading",{name:"Turn your phone upright"})).toBeVisible();await shot(page,"portrait-overlay-landscape");await page.setViewportSize({width:390,height:844});
     for(const answer of ["full body","10","No injuries","Yes"])await page.getByRole("button",{name:answer,exact:true}).click();await expect(page.getByRole("button",{name:"Continue",exact:true})).toBeEnabled();await page.getByRole("button",{name:"Continue",exact:true}).click();await page.getByRole("button",{name:"Let’s get started"}).click();await screenEventually(page,"S6");await page.getByRole("button",{name:"Skip",exact:true}).click();await screen(page,"S7");await page.getByRole("button",{name:"End",exact:true}).click();await screen(page,"S8");

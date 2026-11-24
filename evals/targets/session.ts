@@ -12,7 +12,7 @@ export async function sessionTarget(input:SessionInput,config:AppConfig,folder:s
   const base=evaluationBase(config.base);
   await mkdir(folder,{recursive:true});
   const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader","--use-fake-device-for-media-stream","--use-fake-ui-for-media-stream"]});
-  const page=await browser.newPage({viewport:{width:390,height:844}}),events:SimEvent[]=[],responses:Promise<void>[]=[];
+  const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true}),events:SimEvent[]=[],responses:Promise<void>[]=[];
   let invited=false,audit:{pass:boolean;expected:number;recorded:number;missing:unknown[]}|undefined,receipt:{run_id:string;receipt:string}|undefined;
   page.on("request",request=>{if(request.url().endsWith("/api/telemetry"))events.push(...request.postDataJSON().events);});
   page.on("response",response=>{

@@ -8,7 +8,7 @@ const flags=["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftsh
 const folder=process.env.COACH_EVIDENCE_DIR??"test-results/coach-independent";
 const decision={speak:true,text:"Ready.",kind:"question",fault_id:null,slots:null,reason:"Browser fixture",guidance:null,summary:null};
 test("real tracking detects re-entry while auto-paused without counting paused reps",async()=>{
-  test.setTimeout(90000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  test.setTimeout(90000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true});
   try{
     await prepare(page);await page.route("**/api/coach",r=>r.fulfill({json:{decision:{...decision,text:r.request().postDataJSON().event.next_question??"Ready."}}}));await setup(page);await start(page);
     await page.evaluate(()=>{(window as typeof window & {coachOutOfFrame:boolean}).coachOutOfFrame=true;});await expect(page.getByRole("button",{name:"Resume",exact:true})).toBeDisabled({timeout:15000});const count=await page.getByTestId("shell-reps").locator("strong").textContent();
@@ -27,7 +27,7 @@ async function setup(page:Page){
 async function start(page:Page){await page.getByRole("button",{name:"Continue",exact:true}).click();await page.getByRole("button",{name:"Let’s get started"}).click();await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S6",{timeout:20000});}
 async function shot(page:Page,name:string){mkdirSync(folder,{recursive:true});await page.screenshot({path:resolve(folder,`${name}.png`)});}
 test("real camera framing is uncropped and simulation controls stay in fake mode",async()=>{
-  test.setTimeout(60000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  test.setTimeout(60000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true});
   try{
     await prepare(page);await page.route("**/api/coach",r=>r.fulfill({json:{decision:{...decision,text:r.request().postDataJSON().event.next_question??"Ready."}}}));await setup(page);
     const geometry=await page.locator(".camera-plane").evaluate(element=>{const v=element.querySelector("video")!,rect=element.getBoundingClientRect(),guide=element.querySelector(".camera-frame-guide")!.getBoundingClientRect();return {width:rect.width,height:rect.height,ratio:v.videoWidth/v.videoHeight,inside:guide.left>=rect.left && guide.right<=rect.right && guide.top>=rect.top && guide.bottom<=rect.bottom,fit:getComputedStyle(v).objectFit};});
@@ -39,7 +39,7 @@ test("real camera framing is uncropped and simulation controls stay in fake mode
 });
 test("agent debrief and calorie summary work after one real camera set",async()=>{
   test.skip(process.env.COACH_PARTIAL_LIVE_E2E!=="1","Explicit partial live-agent opt-in required");test.setTimeout(180000);
-  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}}),events:{thread_id:string;event_id:string;type:string;data:Record<string,unknown>}[]=[],calls:{event:Record<string,unknown>;status:number;decision:Record<string,unknown>}[]=[];
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true}),events:{thread_id:string;event_id:string;type:string;data:Record<string,unknown>}[]=[],calls:{event:Record<string,unknown>;status:number;decision:Record<string,unknown>}[]=[];
   try{
     await prepare(page);await page.unroute("**/api/telemetry");page.on("request",r=>{if(r.url().endsWith("/api/telemetry"))events.push(...r.postDataJSON().events);});
     await page.route("**/api/coach",async route=>{
@@ -58,7 +58,7 @@ test("agent debrief and calorie summary work after one real camera set",async()=
   }finally{mkdirSync(folder,{recursive:true});writeFileSync(resolve(folder,"partial-debrief.json"),JSON.stringify({events,calls},null,2));await browser.close();}
 });
 test("pending rep retention survives a timed-out in-flight browser request",async()=>{
-  test.setTimeout(90000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}}),sent:CoachEvent[]=[],events:{type:string;data:Record<string,unknown>}[]=[];
+  test.setTimeout(90000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true}),sent:CoachEvent[]=[],events:{type:string;data:Record<string,unknown>}[]=[];
   let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
   try{
     await prepare(page);page.on("request",r=>{if(r.url().endsWith("/api/telemetry"))events.push(...r.postDataJSON().events);});
@@ -74,7 +74,7 @@ test("pending rep retention survives a timed-out in-flight browser request",asyn
   }finally{release();mkdirSync(folder,{recursive:true});writeFileSync(resolve(folder,"pending-reps.json"),JSON.stringify({sent,events},null,2));await browser.close();}
 });
 test("floor setup is immediately available without a position or hold gate",async()=>{
-  test.setTimeout(90000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  test.setTimeout(90000);const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true});
   try{
     await prepare(page);await page.route("**/api/coach",r=>r.fulfill({json:{decision:{...decision,text:r.request().postDataJSON().event.next_question??"Ready."}}}));await setup(page);await start(page);
     for(let exercise=0;exercise<3;exercise++){

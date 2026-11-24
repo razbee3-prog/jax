@@ -5,7 +5,7 @@ import {resolve} from "node:path";
 import type {CoachEvent} from "../../shared/coach-event";
 const flags=["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"];
 for(const injury of ["Shoulder discomfort","left knee"])for(const answer of ["Yes, still","No, it's better"])test(`remembered ${injury} chips support ${answer}`,async()=>{
-  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}}),answers:CoachEvent[]=[],normalized:{question:number;accepted:boolean;answer:string}[]=[];
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true}),answers:CoachEvent[]=[],normalized:{question:number;accepted:boolean;answer:string}[]=[];
   try{
     await page.addInitScript(()=>{navigator.mediaDevices.getUserMedia=async()=>new MediaStream();});await page.route("**/api/tts",r=>r.abort());await page.route("**/api/stt-token",r=>r.abort());await mockSessionEvents(page,r=>{const e=r.request().postDataJSON();if(e.type==="onboarding.answer")normalized.push(e.data);return r.fulfill({json:{event_id:e.event_id}});});
     await page.route("**/api/coach",r=>{const {event}:{event:CoachEvent}=r.request().postDataJSON();if(event.type==="onboarding_answer")answers.push(event);return r.fulfill({json:{decision:{speak:true,text:event.type==="session_start" ? "Welcome back.":event.next_question??"Ready.",kind:"question",fault_id:null,slots:{focus:null,duration_min:null,injuries:[injury],has_dumbbells:null},guidance:null,summary:null,reason:"Remembered injury fixture"}}});});

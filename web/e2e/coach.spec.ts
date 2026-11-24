@@ -7,7 +7,7 @@ test("real hybrid coach completes forty camera reps with WAV onboarding",async()
   test.skip(process.env.COACH_LIVE_E2E!=="1" || process.env.COACH_FULL_SESSION_APPROVED!=="1","Full sessions await the floor-framing decision and explicit opt-in");test.setTimeout(720000);
   const fallback=process.env.COACH_EXPECT_FALLBACK==="1",folder=process.env.COACH_EVIDENCE_DIR??"test-results/coach";mkdirSync(folder,{recursive:true});
   if(fallback)expect(process.env.MDA_DEPLOYMENT_URL,"Break only the local test server's upstream URL").toBe("http://127.0.0.1:1");
-  const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader","--use-fake-device-for-media-stream","--use-fake-ui-for-media-stream","--use-file-for-fake-audio-capture="+resolve("evals/fixtures/voice/coach-answers.wav")]}),page=await browser.newPage({viewport:{width:390,height:844}});
+  const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader","--use-fake-device-for-media-stream","--use-fake-ui-for-media-stream","--use-file-for-fake-audio-capture="+resolve("evals/fixtures/voice/coach-answers.wav")]}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true});
   const events:{thread_id:string;event_id:string;type:string;data:Record<string,unknown>}[]=[],acknowledged=new Set<string>();
   page.on("request",request=>{if(request.url().endsWith("/api/telemetry"))events.push(...request.postDataJSON().events);});
   page.on("response",response=>{if(response.url().endsWith("/api/telemetry") && response.ok())void response.json().then(body=>body.acknowledged.forEach((id:string)=>acknowledged.add(id))).catch(()=>{});});
@@ -41,7 +41,7 @@ test("real hybrid coach completes forty camera reps with WAV onboarding",async()
 });
 test("returning user hears the remembered injury on a new agent thread",async()=>{
   test.skip(process.env.COACH_LIVE_E2E!=="1" || process.env.COACH_EXPECT_FALLBACK==="1","Real agent required");test.setTimeout(120000);
-  const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"]}),page=await browser.newPage({viewport:{width:390,height:844}}),events:{type:string;data:Record<string,unknown>}[]=[];
+  const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"]}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true}),events:{type:string;data:Record<string,unknown>}[]=[];
   try{
     await demoCamera(page);page.on("request",r=>{if(r.url().endsWith("/api/telemetry"))events.push(...r.postDataJSON().events);});
     await page.goto("/?poseDelegate=CPU");await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();

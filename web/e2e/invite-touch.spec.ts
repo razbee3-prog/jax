@@ -18,7 +18,7 @@ test("keyboard viewport resize keeps portrait focus; physical rotation blocks th
   await page.setViewportSize({width:390,height:300});
   expect(await page.evaluate(()=>matchMedia("(orientation: landscape)").matches)).toBe(true);
   await expect(overlay).toBeHidden();
-  expect(await stage.evaluate(element=>element.inert)).toBe(false);
+  expect(await stage.evaluate(element=>(element as HTMLElement).inert)).toBe(false);
   await expect(input).toBeFocused();
   expect(await page.locator(".shell-invite").evaluate(element=>getComputedStyle(element).marginTop)).toBe(margin);
   await page.setViewportSize({width:390,height:844});
@@ -28,7 +28,7 @@ test("keyboard viewport resize keeps portrait focus; physical rotation blocks th
     screen.orientation.dispatchEvent(new Event("change"));
   });
   await expect(overlay).toBeVisible();
-  expect(await stage.evaluate(element=>element.inert)).toBe(true);
+  expect(await stage.evaluate(element=>(element as HTMLElement).inert)).toBe(true);
   await expect(input).not.toBeFocused();
   await page.screenshot({path:"test-results/invite-device-landscape-390x844.png"});
   await page.evaluate(()=>{
@@ -36,7 +36,7 @@ test("keyboard viewport resize keeps portrait focus; physical rotation blocks th
     screen.orientation.dispatchEvent(new Event("change"));
   });
   await expect(overlay).toBeHidden();
-  expect(await stage.evaluate(element=>element.inert)).toBe(false);
+  expect(await stage.evaluate(element=>(element as HTMLElement).inert)).toBe(false);
   await input.tap();
   await expect(input).toBeFocused();
 });

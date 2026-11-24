@@ -2,7 +2,7 @@ import {mockSessionEvents,observeSessionEvents} from "./telemetry-fixtures";
 import {test,expect,chromium} from "@playwright/test";
 const flags=["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"];
 test("restart waits for the final coach turn and completed trace audit",async()=>{
-  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}}),events:{type:string;event_id:string}[]=[];
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true}),events:{type:string;event_id:string}[]=[];
   let releaseSummary!:()=>void,releaseAudit!:()=>void;const summary=new Promise<void>(r=>{releaseSummary=r;}),audit=new Promise<void>(r=>{releaseAudit=r;});let auditStarted=false;
   try{
     await page.route("**/api/tts",r=>r.abort());observeSessionEvents(page,events);await mockSessionEvents(page,r=>{const e=r.request().postDataJSON();return r.fulfill({json:{event_id:e.event_id,...(e.type==="session.end" ? {run_id:e.event_id,receipt:"fixture"}:{})}});});
@@ -15,7 +15,7 @@ test("restart waits for the final coach turn and completed trace audit",async()=
   }finally{releaseSummary();releaseAudit();await browser.close();}
 });
 for(const fake of [false,true])test(`restart preserves ${fake ? "fake":"live"} mode`,async()=>{
-  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844}});
+  const browser=await chromium.launch({args:flags}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true});
   try{
     await page.addInitScript(()=>{navigator.mediaDevices.getUserMedia=async()=>new MediaStream();});
     await page.route("**/api/tts",r=>r.abort());await page.route("**/api/stt-token",r=>r.abort());await mockSessionEvents(page,r=>r.fulfill({json:{event_id:r.request().postDataJSON().event_id}}));await page.route("**/api/coach",r=>r.fulfill({json:{decision:{speak:false,text:"",kind:"silence",fault_id:null,slots:null,guidance:null,summary:null,reason:"Test"}}}));

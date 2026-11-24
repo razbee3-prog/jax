@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+test.use({isMobile:true});
 test("invite controls remain editable before hydration", async ({ page }) => {
   let release = () => {};
   const scripts = new Promise<void>(resolve => { release = resolve; });

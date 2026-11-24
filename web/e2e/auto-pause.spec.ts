@@ -4,7 +4,7 @@ import {mkdirSync} from "node:fs";
 import {resolve} from "node:path";
 import {demoCamera} from "./coach-fixtures";
 test("auto-pause plays its prefetched fixed line once through real Web Audio",async()=>{
-  test.setTimeout(90000);const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"]}),page=await browser.newPage({viewport:{width:390,height:844}}),text="Step back into frame when you're ready.",requested:string[]=[],events:{type:string;data:Record<string,unknown>}[]=[];
+  test.setTimeout(90000);const browser=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"]}),page=await browser.newPage({viewport:{width:390,height:844},isMobile:true}),text="Step back into frame when you're ready.",requested:string[]=[],events:{type:string;data:Record<string,unknown>}[]=[];
   try{
     await demoCamera(page);await page.route("**/api/stt-token",r=>r.abort());await mockSessionEvents(page,r=>{const e=r.request().postDataJSON();events.push(e);return r.fulfill({json:{event_id:e.event_id}});});
     await page.route("**/api/tts",r=>{requested.push(r.request().postDataJSON().text);const pcm=Buffer.alloc(24000);for(let i=0;i<12000;i++)pcm.writeInt16LE(Math.round(Math.sin(i*2*Math.PI*440/24000)*12000),i*2);return r.fulfill({contentType:"audio/pcm",body:pcm,headers:{"X-TTS-Cache":"HIT"}});});
