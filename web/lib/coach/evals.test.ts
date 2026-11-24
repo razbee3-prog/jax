@@ -45,6 +45,14 @@ describe("M8 hard code checks",()=>{
     expect(asksExpectedQuestion("Anything?","")).toBe(false);
     expect(asksExpectedQuestion("anything","thing")).toBe(false);
   });
+  it("allows only an acknowledgment, not another question, before the canonical suffix",()=>{
+    const expected="What would you like to work on today?";
+    expect(asksExpectedQuestion("Welcome back. Last time you mentioned your left knee. Is that still the case? "+expected,expected)).toBe(false);
+    expect(asksExpectedQuestion("Welcome back. Thanks for letting me know. "+expected,expected)).toBe(true);
+    expect(asksExpectedQuestion("Knee okay?WHAT would you like to work on   today?!",expected)).toBe(false);
+    expect(asksExpectedQuestion(expected,expected)).toBe(true);
+    expect(asksExpectedQuestion("Another question?İn","i n")).toBe(false);
+  });
   it("requires the expected next onboarding question, not just correct slots and nonempty speech",()=>{
     const check=(next_question:string,text:string)=>hardChecks(turn({event:{type:"onboarding_answer",question:"injuries",transcript:"No injuries",next_question},decision:{...quiet,speak:true,kind:"question",guidance:null,text,slots:{focus:null,duration_min:null,injuries:[],has_dumbbells:null}}}),{speak:true,slot:{name:"injuries",value:[]}}).behavior;
     const dumbbells="Last one: do you have a pair of dumbbells with you?";
