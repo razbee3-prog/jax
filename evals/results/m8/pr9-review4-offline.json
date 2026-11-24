@@ -1,0 +1,2069 @@
+{
+  "kind": "offline-hard-rescore",
+  "source_experiment": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/a7270ad2-149c-4b5b-a30e-cae163a6d860",
+  "source_outputs": "/home/ubuntu/jax-evidence/m8/pr9-review3-coach/coach-results.json",
+  "source_instructions_sha256": "58f07cd3c96d494b507d6759e74e7e5581549c6b89af9a2a0d1b4ce6c87d7867",
+  "live_calls": 0,
+  "examples": 78,
+  "hard_passed": 64,
+  "judge_average": 3.7564102564102564,
+  "judged": 78,
+  "judge_provenance": "Unchanged original live Haiku judgments; not rejudged offline",
+  "changed": [
+    {
+      "id": "remembered-injury",
+      "previous": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "current": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      }
+    }
+  ],
+  "records": [
+    {
+      "id": "pu_hip_sag-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "pu_shallow-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "pu_hip_pike-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "curl_drop-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 4.25
+    },
+    {
+      "id": "curl_partial-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "curl_elbow_drift-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "pp_soft_lockout-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 4.25
+    },
+    {
+      "id": "pp_no_legs-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "curl_swing-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 4.25
+    },
+    {
+      "id": "rdl_fast-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "pp_chest_forward-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "pp_dip_deep-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "rdl_knee_squat-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "rdl_drift-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "rdl_shallow-third",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "remembered-injury",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "summary",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "healed-injury",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.75
+    },
+    {
+      "id": "messy-duration_min",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.5
+    },
+    {
+      "id": "messy-has_dumbbells",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "messy-injuries",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.25
+    },
+    {
+      "id": "injury-brief",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "clean-streak",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.5
+    },
+    {
+      "id": "messy-focus",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.75
+    },
+    {
+      "id": "curl_swing-two-faults",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "quality-view",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "rdl_knee_squat-two-faults",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "quality-visibility",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.25
+    },
+    {
+      "id": "pu_head_drop-tier-b",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.25
+    },
+    {
+      "id": "provisional",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "pp_lean_back-tier-b",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "pp_press_early-tier-b",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "rdl_back_round-tier-b",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "pu_shallow-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.25
+    },
+    {
+      "id": "pu_shallow-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "pu_shallow-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "pu_hip_pike-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 0,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 0,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "pu_hip_pike-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "pu_hip_pike-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.25
+    },
+    {
+      "id": "pu_hip_sag-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "pu_hip_sag-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "pu_hip_sag-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "curl_drop-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.25
+    },
+    {
+      "id": "curl_drop-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "curl_drop-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "curl_partial-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 0,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 0,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 0
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "curl_partial-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "curl_partial-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "curl_elbow_drift-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "curl_elbow_drift-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "curl_elbow_drift-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.25
+    },
+    {
+      "id": "curl_swing-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.25
+    },
+    {
+      "id": "curl_swing-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "pp_soft_lockout-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.25
+    },
+    {
+      "id": "curl_swing-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "pp_soft_lockout-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4
+    },
+    {
+      "id": "pp_soft_lockout-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "pp_no_legs-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.25
+    },
+    {
+      "id": "pp_no_legs-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3
+    },
+    {
+      "id": "pp_no_legs-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "pp_dip_deep-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "pp_dip_deep-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 2.75
+    },
+    {
+      "id": "pp_chest_forward-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.25
+    },
+    {
+      "id": "pp_dip_deep-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "pp_chest_forward-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3
+    },
+    {
+      "id": "pp_chest_forward-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "rdl_fast-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "rdl_fast-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.5
+    },
+    {
+      "id": "rdl_fast-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "rdl_shallow-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "rdl_shallow-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.5
+    },
+    {
+      "id": "rdl_drift-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "rdl_shallow-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "rdl_drift-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 4.25
+    },
+    {
+      "id": "rdl_drift-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.25
+    },
+    {
+      "id": "rdl_knee_squat-first",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    },
+    {
+      "id": "rdl_knee_squat-fixed",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.25
+    },
+    {
+      "id": "rdl_knee_squat-persists",
+      "hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "previous_hard": {
+        "complete": 1,
+        "schema": 1,
+        "speech_expected": 1,
+        "fault_grounded": 1,
+        "no_unflagged_fault": 1,
+        "word_cap": 1,
+        "one_fault_per_line": 1,
+        "no_third_cue": 1,
+        "behavior": 1
+      },
+      "judge_average": 3.75
+    }
+  ]
+}

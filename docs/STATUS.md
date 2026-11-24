@@ -1,6 +1,29 @@
 # Jax status
 
-## M8 — PR #9 third review round: canonical questions; quality gate still FAILED
+## M8 — PR #9 fourth review round: acknowledgment-only prefix; quality gate still FAILED
+
+Confirmed starting HEAD **2317fe95ca13a19fb576f58639e18ca24045b920**. **Real finding:** the existing remembered-injury response “Welcome back. Last time you mentioned your left knee. Is that still the case? What would you like to work on today?” passed the canonical suffix check despite asking an additional question first. Regression failed first (`expected true to be false`).
+
+**a0f10f3** now locates the canonical suffix's original text boundary and rejects a question mark anywhere before it. Original token offsets preserve normalized case/punctuation/whitespace matching; tests include the exact knee example, pure acknowledgment pass, a no-space/case-normalized extra question, canonical-only pass, and Unicode case-normalization offset safety. No keyword logic or question-intent guessing. Existing instructions already forbid additional questions, so **instructions unchanged; no live calls, redeployment or new session simulation**.
+
+### Offline re-score of the existing live outputs
+
+[Original live experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/a7270ad2-149c-4b5b-a30e-cae163a6d860) · [offline hard-score artifact](../evals/results/m8/pr9-review4-offline.json).
+
+| Check | Result | Provenance / status |
+| --- | --- | --- |
+| Current hard examples | **64/78** | **FAIL**, offline re-score of the same 78 outputs (100% required) |
+| Haiku judge | **3.756410256**, 78/78 judged | **FAIL** ≥4; original live judgments unchanged, not rejudged |
+| Live calls this round | **0** | No model or deployed API requests for re-scoring |
+| Changed example | **remembered-injury** | behavior 1→0, previously credited extra question is now caught |
+
+The original LangSmith experiment retains its original **65/78** hard feedback; **64/78 is the new local offline re-score**, not a new live experiment. Only that one example changed; other hard scores and all judge scores are preserved in the artifact. Existing instructions remain SHA **58f07cd3c96d494b507d6759e74e7e5581549c6b89af9a2a0d1b4ce6c87d7867**. Repro script: `/home/ubuntu/jax-evidence/m8/pr9-review4-rescore.mts`; original raw outputs remain `/home/ubuntu/jax-evidence/m8/pr9-review3-coach/coach-results.json`.
+
+Final checks after the last edit: **lint exit0, web/agent/evals typechecks exit0, 270 tests / 29 files PASS; build compiled 423ms, 13/13 pages in 213ms**. Shared-copy inputs unchanged from the earlier passing check. Source diff reviewed and whitespace check clean. No app runtime, rubric, cue bank, threshold, Tier-B gate or bar changes. Client composition is still not runtime-enforced; this is the deterministic hard evaluator and existing agent instruction contract. **M8 remains incomplete.**
+
+Finding history below remains applicable; this fourth-round extra-question finding is **real, fixed in a0f10f3**, after canonical matching **65c3bcb**. No phone/visual verification this evaluator-only round.
+
+## M8 — PR #9 third review round (historical): canonical questions; quality gate still FAILED
 
 Confirmed starting HEAD **ad74a31c31cbe5b830ec23746c9a138c79bae558** before edits. The keyword approach was unreliable and is **deleted**, not patched again. **65c3bcb** replaces it with a nonempty, token-boundary **normalized exact suffix match** against the entire supplied `next_question` (case/punctuation/whitespace only, no number-word aliases). A brief acknowledgment can precede the canonical question; nothing may follow it. Both instruction source profiles and generated instructions require that exact contract, overriding legacy question copy. Six regression examples include all five reviewer phrasings plus the full “Would you like to start...” false-accept reproduction; paraphrases alone fail, acknowledgment + canonical copy passes. Tests also cover normalized spelling, trailing words, missing copy, empty input/expected and suffix word boundaries. Four tests failed before the root fix.
 
