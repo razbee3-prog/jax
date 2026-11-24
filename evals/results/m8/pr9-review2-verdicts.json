@@ -1,0 +1,42 @@
+{
+  "starting_head": "28b141f7a32a804b3bf1e16097846dee48ffcf13",
+  "code_head": "c61f0607919d7135b574bff4c7763165e043c6f9",
+  "questions_finding": {
+    "verdict": "real",
+    "wrong_cases": [
+      "What kind of dumbbells do you have? falsely passes equipment availability.",
+      "Would you prefer a 5-, 10-, or 20-minute workout? falsely fails duration choices."
+    ],
+    "failing_first": "Four parameterized cases failed before the fix: three expected false got true (kind, which, heavy/light), and the exact hyphenated-minute example expected true got false.",
+    "fix_commit": "c61f060",
+    "changes": "Match availability intent, reject kind/type/weight questions; support singular minute and hyphen-separated numbers while retaining every expected choice and requiring duration-selection intent.",
+    "tests": "Seven additional examples cover both exact reviewer cases, nearby weights availability, missing choices, equipment variants and unrelated rep-count questions."
+  },
+  "third_cue_repeat": {
+    "verdict": "already resolved at starting HEAD, no target change needed",
+    "original_fix_commit": "b99ed28",
+    "additional_verification_commit": "d48cc37",
+    "dataset": "All 15 generated third-cue inputs have required_prior_corrections mapping their fault to exactly 2.",
+    "target": "After history replay, coachTarget compares corrections counted from played queue outcomes with the required count and throws Invalid evaluation fixture before candidate/followup scoring on mismatch.",
+    "test": "Uses the generated input unchanged (manual precondition injection removed); absent/one-correction history rejects and two-correction history resolves.",
+    "deployed_evidence": "pr9-review-verdicts.json records actual prior played correction counts of 2 for all 15 cases in the prior deployed experiment."
+  },
+  "checks": {
+    "lint": "exit 0",
+    "typecheck": "exit 0, web/agent/evals",
+    "tests": "29 files, 269 tests passed",
+    "build": "Compiled successfully in 407ms; 13/13 pages in 202ms",
+    "shared": "Shared copies match."
+  },
+  "scope": "Evaluator and test changes only. No application runtime changes, redeployment or session-sim repeat needed. Prior full healthy/outage sessions remain applicable. Agent instructions, rubric, cue bank, detector thresholds, Tier-B gates and bars unchanged.",
+  "experiment": {
+    "url": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/977045cf-1d8a-41ca-9118-8b61a1ca6d43",
+    "hard_passed": 68,
+    "examples": 78,
+    "judge_average": 3.7987012987012987,
+    "judged": 77,
+    "missing_judge": "curl_elbow_drift-third: OUTPUT_PARSING_FAILURE, required explanation absent",
+    "target_errors": 0,
+    "third_preconditions": "All 15 actual prior played counts equal 2"
+  }
+}

@@ -1,6 +1,30 @@
 # Jax status
 
-## M8 — PR #9 review fixes; quality gate still FAILED
+## M8 — PR #9 second review round; quality gate still FAILED
+
+Confirmed starting HEAD **28b141f7a32a804b3bf1e16097846dee48ffcf13** before editing. **A was real**: “What kind of dumbbells do you have?” wrongly passed availability, while “Would you prefer a 5-, 10-, or 20-minute workout?” wrongly failed duration choices. Both exact examples reproduced failing-first, plus wrong which/heavy-light equipment questions (four failures total). **c61f060** adds availability-versus-detail intent checks and duration-selection intent, accepts singular/hyphenated minute choices, and still requires every expected choice. Seven additional cases cover both examples, related valid availability, missing choices and an unrelated rep-count question. Other hard checks unchanged.
+
+**B is already resolved at 28b141f by b99ed28**, not a remaining target bug. All 15 generated third-cue inputs declare two required played corrections. `uploadRows` uploads `row.inputs` unchanged; experiment dispatch passes those inputs to `coachTarget`, which compares actual played queue outcomes after history with the required count and throws **Invalid evaluation fixture** before the candidate on mismatch. Verification-only **d48cc37** removes the test's manual precondition injection, uses the generated row unchanged, checks all 15 declarations, and proves missing/one-correction histories reject while two corrections resolve. Both deployed review experiments also report exactly **2** prior played corrections for **all 15** third cases, with zero target errors. No additional product/target change was needed.
+
+Final checks after the last code edit: **lint exit0, all three typechecks exit0, 269 tests / 29 files passed; build compiled 407ms, 13/13 pages in 202ms; Shared copies match.** Source diff reviewed; no further scorer or agent edits during/after the run. [Second-round verdicts](../evals/results/m8/pr9-review2-verdicts.json).
+
+### Latest fresh coach-decisions rerun
+
+[Experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/977045cf-1d8a-41ca-9118-8b61a1ca6d43) · [scores](../evals/results/m8/pr9-review2-coach.json), **exit1**:
+
+| Check | Result | Required | Status |
+| --- | --- | --- | --- |
+| Aggregate hard examples | **68/78** | 100% | **FAIL** |
+| Haiku judge | **3.798701299**, **77/78** judged | ≥4, all judged | **FAIL** |
+| Dataset coverage | 78/78 | All 78 | PASS |
+
+All eight other coded hard metrics **78/78**; behavior **68/78**. All onboarding next-question cases pass. Remaining behavior failures: nine rest mentions (`pu_hip_sag`, `pu_shallow`, `pu_hip_pike`, `curl_drop`, `pp_no_legs`, `curl_swing`, `rdl_fast`, `pp_chest_forward`, `rdl_shallow`) plus `rdl_knee_squat-two-faults` priority. Finite fault-language coverage remains incomplete; nothing was waived or retuned.
+
+**Judge coverage also misses its bar:** `curl_elbow_drift-third` judge returned the four numeric scores but omitted required `explanation`; evaluator logged `OUTPUT_PARSING_FAILURE` / `Invalid input: expected string, received undefined` at path `["explanation"]`. Reported mean covers only 77 valid judgments; no replacement score, rubric relaxation or selective retry. Private full log: `/home/ubuntu/jax-evidence/m8/pr9-review2-coach.log`.
+
+This round changes **evaluators/tests only**, not app runtime: **no new web/agent deployment or repeat session simulation needed**. The previous review's web-only deployment and healthy/outage seven-gate PASS sessions remain applicable (see below). Agent instruction hash remains **73cc67f5574d41f2d879a0c428b46a0005817f0604bad2285b8832c23445ca17**; rubric, cue bank, detector thresholds, Tier-B gates and bars untouched. M8 remains incomplete; phone acoustic/real-detector validation still unverified.
+
+## M8 — PR #9 first review round (historical); quality gate still FAILED
 
 Confirmed starting HEAD **a93e5666bd1b83f3aed1e026e6fa8cc479f36c9b**. All four findings were real, reproduced failing-first, then fixed separately. This round fixes measurement/evaluation correctness only: **no agent instructions, rubric, cue bank, detector thresholds, Tier-B gates or pass bars changed**. No agent redeployment was needed. Full verdicts, original failures and the 15 live precondition counts are in [pr9-review-verdicts.json](../evals/results/m8/pr9-review-verdicts.json).
 
