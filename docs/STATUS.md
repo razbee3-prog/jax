@@ -23,6 +23,12 @@ Final checks after the last edit: **lint exit0, web/agent/evals typechecks exit0
 
 Finding history below remains applicable; this fourth-round extra-question finding is **real, fixed in a0f10f3**, after canonical matching **65c3bcb**. No phone/visual verification this evaluator-only round.
 
+### PR CI repair after the fourth round
+
+Bootstrap job **138129321470** failed in the real-camera framing browser test: `Error: strict mode violation: locator('.shell-bar') resolved to 2 elements`, expected `ON-DEVICE`. Logs list the outgoing S5 intro header and incoming S6 active header. `start()` waits for main data-screen=S6, while the intentional sync crossfade keeps S5 mounted for 250ms. **e4f126c** scopes both real/fake header assertions to `.screen-S6 .shell-bar`; no timeout, assertion, transition or application behavior changes.
+
+One unmodified local reproduction attempt **passed** (14.0s); this is not claimed as a deterministic local reproduction. CI DOM evidence plus the transition/dispatch code identifies the ambiguous selector. After the scope fix: lint/typechecks exit0 and the affected browser test **1 passed (13.6s)**. Other unit/application/scorer inputs are unchanged; earlier **270 unit tests passed**, build and offline scores remain applicable. CI is watched again on the repair commit after publication; its final result is reported in the handoff.
+
 ## M8 — PR #9 third review round (historical): canonical questions; quality gate still FAILED
 
 Confirmed starting HEAD **ad74a31c31cbe5b830ec23746c9a138c79bae558** before edits. The keyword approach was unreliable and is **deleted**, not patched again. **65c3bcb** replaces it with a nonempty, token-boundary **normalized exact suffix match** against the entire supplied `next_question` (case/punctuation/whitespace only, no number-word aliases). A brief acknowledgment can precede the canonical question; nothing may follow it. Both instruction source profiles and generated instructions require that exact contract, overriding legacy question copy. Six regression examples include all five reviewer phrasings plus the full “Would you like to start...” false-accept reproduction; paraphrases alone fail, acknowledgment + canonical copy passes. Tests also cover normalized spelling, trailing words, missing copy, empty input/expected and suffix word boundaries. Four tests failed before the root fix.
