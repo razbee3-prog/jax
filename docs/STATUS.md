@@ -1,5 +1,22 @@
 # Jax status
 
+## M9 — native invite input focus
+
+Branch `devin/1795484376-m9-iphone-qa`, based on M8 HEAD `721d4617649cc804471da4238cefb7292dc4369e`.
+
+**Reproduced defect:** `page.tsx` server-renders AppShell S0, whose hydration store returned false on the server and disabled both controls. The public deployed HTML also contained `<input ... disabled>` and a disabled submit button. Holding the application scripts reproduces the failure in touch-enabled WebKit: `Expected: enabled / Received: disabled`. A disabled native input cannot receive focus or open a keyboard, even though the rest of the invite screen is already visible. Removing the gate leaves the native input editable before, during and after hydration, including when scripts never run. No synthetic focus, autofocus, touch cancellation or overlay workaround was added.
+
+**Causality limit:** the old public deployment *did* focus the field after hydration in Linux WebKit (`focused: true, disabled: false`, hit target INPUT). This disproves an unconditional WebKit focus failure. Raz's real-device tap timing/hydration state is unavailable, so this is a verified reachable defect, not proof that his particular tap occurred before hydration completed. `page.tsx` has no gesture handler; S0's programmatic focus is restricted to rejected-code attempts, not the initial tap. Tests retain the exact input node, value and focus across hydration. No input gesture called preventDefault. The ElevenLabs browser SDK has its own iOS capture-phase audio-unlock listener; it resumes audio on the first gesture but does not cancel the event. Its presence was observed during test development, not changed or claimed as the hardware cause.
+
+The form now explicitly POSTs to `/api/invite`, names the native text input `code`, and disables only a busy submission. This also prevents an early submission becoming a GET containing the code. The route accepts native URL-encoded form bodies as well as the existing JSON contract; no-JS POSTs receive the existing JSON API responses and cookies (the workout itself still requires JavaScript). Jax's synchronous audio unlock remains in the submit handler. The touch regression checks the additional audio resume on submit, rather than incorrectly requiring that the SDK never resumes audio earlier.
+
+Checks: lint and all three typechecks exit 0; **274 tests / 29 files passed**; build compiled in **661ms**, generated **13/13 pages in 207ms**. Relevant browser checks passed across targeted runs: **three existing Chromium invite cases**, **two WebKit iPhone-touch cases** (Safari and Chrome user-agent profiles), and **one WebKit no-JS native POST case**. The latter checks the response's auth-cookie issuance, not cookie storage on insecure local HTTP: WebKit correctly refuses production Secure cookies there. Native form unit cases cover success, wrong code, empty code and missing code. Initial harness assertions incorrectly treated SDK audio unlock as Jax's submit unlock; the corrected assertions preserve zero canceled input gestures and verify one additional resume on submit.
+
+Focused input visually inspected at 390×844 CSS pixels; screenshots:
+`/home/ubuntu/jax-evidence/m9/invite-touch-safari-390x844.png` and
+`/home/ubuntu/jax-evidence/m9/invite-touch-chrome-390x844.png`.
+Linux WebKit emulation does **not** prove physical iPhone keyboard appearance or iOS audio routing. Safari and Chrome on Raz's phone still need retesting; macOS/iOS Simulator verification was offered but not started without approval. No detector, coach, cue bank, trace contract or agent deployment changed. Web-only rollout and public health results will be recorded after deployment.
+
 ## M8 — PR #9 fourth review round: acknowledgment-only prefix; quality gate still FAILED
 
 Confirmed starting HEAD **2317fe95ca13a19fb576f58639e18ca24045b920**. **Real finding:** the existing remembered-injury response “Welcome back. Last time you mentioned your left knee. Is that still the case? What would you like to work on today?” passed the canonical suffix check despite asking an additional question first. Regression failed first (`expected true to be false`).

@@ -1,16 +1,18 @@
 import { test, expect } from "@playwright/test";
-test("invite controls wait for hydration before accepting a submission", async ({ page }) => {
+test("invite controls remain editable before hydration", async ({ page }) => {
   let release = () => {};
   const scripts = new Promise<void>(resolve => { release = resolve; });
   await page.route("**/_next/static/**/*.js", async route => { await scripts; await route.continue().catch(() => {}); });
   try {
     await page.goto("/", { waitUntil: "commit" });
     await expect(page.getByRole("heading", { name: "Jax", exact: true })).toBeVisible();
-    await expect(page.getByLabel("Enter invite code to get started")).toBeDisabled();
-    await expect(page.getByRole("button", { name: "Get started" })).toBeDisabled();
+    await expect(page.getByLabel("Enter invite code to get started")).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Get started" })).toBeEnabled();
+    await page.getByLabel("Enter invite code to get started").fill("wrong");
     await page.screenshot({ path: "test-results/invite-hydrating-390x844.png" });
     release();
-    await page.getByLabel("Enter invite code to get started").fill("wrong");
+    await page.waitForFunction(() => document.documentElement.classList.contains("dark"));
+    await expect(page.getByLabel("Enter invite code to get started")).toHaveValue("wrong");
     const response = page.waitForResponse(response => response.url().endsWith("/api/invite") && response.request().method() === "POST");
     await page.getByRole("button", { name: "Get started" }).click();
     expect((await response).status()).toBe(401);
