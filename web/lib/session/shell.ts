@@ -24,7 +24,7 @@ export function shellReducer(s:ShellState,a:ShellAction):ShellState{
     case "permissions":return s.screen==="S1" ? {...s,screen:"S2"}:s;
     case "answer":{if(s.screen!=="S2" || !a.value.trim())return s;const answers=[...s.answers,a.value.trim()];return {...s,answers,question:Math.min(3,s.question+1),screen:s.question===3 ? "S3":"S2",holdMs:0};}
     case "continue":
-      if(s.screen==="S3" && (s.floor || s.holdMs>=1500))return s.floor ? {...s,screen:"S5",introMs:0}: {...s,screen:"S4"};
+      if(s.screen==="S3")return s.floor ? {...s,screen:"S5",introMs:0}: {...s,screen:"S4"};
       return s.screen==="S4" ? {...s,screen:"S5",introMs:0}:s;
     case "skip":return s.screen==="S6" ? finishSet(s) : s.screen==="S7" ? (s.exercise===2 ? {...s,restMs:0}:nextIntro(s)):s;
     case "floor":return s.screen==="S7" && s.exercise===2 && s.restMs===0 ? {...s,screen:"S3",exercise:3,floor:true,holdMs:0}:s;
