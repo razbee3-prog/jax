@@ -11,10 +11,11 @@ export class AudioSession {
   private silentElement?:HTMLAudioElement;
   private microphoneVersion=0;
   private muted=false;
+  private captureMode=false;
   private workletReady?:Promise<void>;
   constructor(){this.context=new AudioContext();this.gain=this.context.createGain();this.analyser=this.context.createAnalyser();this.analyser.fftSize=512;this.gain.connect(this.analyser);this.analyser.connect(this.context.destination);}
   async unlock(){
-    this.setType("playback");
+    this.setType(this.captureMode ? "play-and-record":"playback");
     const resume=this.context.resume();
     if(!(navigator as SessionNavigator).audioSession){
       if(!this.silentElement){this.silentElement=new Audio("/audio/silence.wav");this.silentElement.loop=true;this.silentElement.setAttribute("playsinline","");}
@@ -23,12 +24,13 @@ export class AudioSession {
     await resume;
   }
   private setType(type:"playback"|"play-and-record"){const session=(navigator as SessionNavigator).audioSession;if(session)session.type=type;}
+  prepareForCapture(){this.captureMode=true;this.setType("play-and-record");}
   volume(node:AnalyserNode|undefined){if(!node)return 0;const bytes=new Float32Array(node.fftSize);node.getFloatTimeDomainData(bytes);return Math.min(1,Math.sqrt(bytes.reduce((sum,x)=>sum+x*x,0)/bytes.length)*4);}
   getOutputVolume=()=>this.volume(this.analyser);
   getInputVolume=()=>this.volume(this.micAnalyser);
   muteMicrophone(muted:boolean){this.muted=muted;for(const track of this.microphone?.getAudioTracks()??[])track.enabled=!muted;}
   async startMicrophone(send:(base64:string)=>void){
-    this.stopMicrophone();const version=++this.microphoneVersion;this.setType("play-and-record");
+    this.stopMicrophone(false);const version=++this.microphoneVersion;this.prepareForCapture();
     try{
       const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}});
       if(version!==this.microphoneVersion){stream.getTracks().forEach(t=>t.stop());return;}
@@ -43,9 +45,9 @@ export class AudioSession {
       this.silentSink=this.context.createGain();this.silentSink.gain.value=0;
       this.micSource.connect(this.micAnalyser);this.micSource.connect(this.processor);this.processor.connect(this.silentSink);this.silentSink.connect(this.context.destination);
       await this.context.resume();
-    }catch(error){this.stopMicrophone();throw error;}
+    }catch(error){this.stopMicrophone(false);throw error;}
   }
-  stopMicrophone(){this.microphoneVersion++;this.microphone?.getTracks().forEach(t=>t.stop());this.microphone=undefined;this.micSource?.disconnect();this.micSource=undefined;this.processor?.disconnect();if(this.processor)this.processor.port.onmessage=null;this.processor=undefined;this.micAnalyser?.disconnect();this.micAnalyser=undefined;this.silentSink?.disconnect();this.setType("playback");}
+  stopMicrophone(releaseSession=true){this.microphoneVersion++;this.microphone?.getTracks().forEach(t=>t.stop());this.microphone=undefined;this.micSource?.disconnect();this.micSource=undefined;this.processor?.disconnect();if(this.processor)this.processor.port.onmessage=null;this.processor=undefined;this.micAnalyser?.disconnect();this.micAnalyser=undefined;this.silentSink?.disconnect();if(releaseSession)this.captureMode=false;this.setType(this.captureMode ? "play-and-record":"playback");}
 }
 let shared:AudioSession|undefined;
 export function getAudioSession(){return shared??=new AudioSession();}
