@@ -95,6 +95,9 @@
 .shell-summary>.shell-fine { margin:3px 0; }
 .shell-summary .shell-restart { background:none;color:#CADCFC;font-size:13px;font-weight:400;text-decoration:underline;text-underline-offset:4px;margin:0; }
 .shell-landscape { display:none; }
-@media (orientation:landscape) { .shell { max-width:none;height:100svh;min-height:0; }.shell-landscape { position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0B0B0F;padding:24px;text-align:center; }.shell-landscape>span { font-size:64px; }.shell-landscape h1 { font-size:30px; } }
+.shell[data-landscape="true"] { max-width:none;height:100svh;min-height:0; }
+.shell[data-landscape="true"] .shell-landscape { position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0B0B0F;padding:24px;text-align:center; }
+.shell-landscape>span { font-size:64px; }
+.shell-landscape h1 { font-size:30px; }
 @media (prefers-reduced-motion:reduce) { .shell * { animation:none!important;transition:none!important;scroll-behavior:auto!important; } }
-@media (max-height:740px) and (orientation:portrait) { .shell-call .shell-caption { margin-top:338px;font-size:16px; }.shell-self:not(.large) { height:105px;width:76px;bottom:12px; }.shell-centered { padding-top:165px; }.shell-invite { margin-top:160px; } }
+@media (max-device-height:740px) { .shell[data-landscape="false"] .shell-call .shell-caption { margin-top:338px;font-size:16px; }.shell[data-landscape="false"] .shell-self:not(.large) { height:105px;width:76px;bottom:12px; }.shell[data-landscape="false"] .shell-centered { padding-top:165px; }.shell[data-landscape="false"] .shell-invite { margin-top:160px; } }

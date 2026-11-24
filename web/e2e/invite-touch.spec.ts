@@ -4,6 +4,43 @@ test.use({...devices["iPhone 13"],viewport:{width:390,height:844},browserName:"w
 
 type InviteWindow=typeof window & {inviteEvents:string[]};
 
+test("keyboard viewport resize keeps portrait focus; physical rotation blocks the stage",async({page})=>{
+  await page.addInitScript(()=>{
+    const orientation=Object.assign(new EventTarget(),{type:"portrait-primary"});
+    Object.defineProperty(screen,"orientation",{configurable:true,value:orientation});
+  });
+  await page.goto("/");
+  await page.waitForFunction(()=>document.documentElement.classList.contains("dark"));
+  const input=page.getByLabel("Enter invite code to get started"),overlay=page.locator(".shell-landscape"),stage=page.locator(".shell-stage");
+  await input.tap();
+  await expect(input).toBeFocused();
+  const margin=await page.locator(".shell-invite").evaluate(element=>getComputedStyle(element).marginTop);
+  await page.setViewportSize({width:390,height:300});
+  expect(await page.evaluate(()=>matchMedia("(orientation: landscape)").matches)).toBe(true);
+  await expect(overlay).toBeHidden();
+  expect(await stage.evaluate(element=>element.inert)).toBe(false);
+  await expect(input).toBeFocused();
+  expect(await page.locator(".shell-invite").evaluate(element=>getComputedStyle(element).marginTop)).toBe(margin);
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:"test-results/invite-keyboard-portrait-390x844.png"});
+  await page.evaluate(()=>{
+    Object.defineProperty(screen.orientation,"type",{configurable:true,value:"landscape-primary"});
+    screen.orientation.dispatchEvent(new Event("change"));
+  });
+  await expect(overlay).toBeVisible();
+  expect(await stage.evaluate(element=>element.inert)).toBe(true);
+  await expect(input).not.toBeFocused();
+  await page.screenshot({path:"test-results/invite-device-landscape-390x844.png"});
+  await page.evaluate(()=>{
+    Object.defineProperty(screen.orientation,"type",{configurable:true,value:"portrait-primary"});
+    screen.orientation.dispatchEvent(new Event("change"));
+  });
+  await expect(overlay).toBeHidden();
+  expect(await stage.evaluate(element=>element.inert)).toBe(false);
+  await input.tap();
+  await expect(input).toBeFocused();
+});
+
 for(const browser of ["Safari","Chrome"]){
   test.describe(browser,()=>{
   test.use({userAgent:browser==="Chrome" ? devices["iPhone 13"].userAgent.replace(/Version\/\S+/,"CriOS/131.0.6778.154"):devices["iPhone 13"].userAgent});

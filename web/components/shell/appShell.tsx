@@ -13,6 +13,7 @@ import { holdWakeLock } from "../../lib/pose/wakeLock";
 import { EXERCISES } from "../../lib/pose/exercises/config";
 import { initialShell,previewState,shellReducer,caption,MOVES,FLOOR,kcal,type ShellState,type Screen } from "../../lib/session/shell";
 import { useShellTrace } from "../../lib/session/trace";
+import {isLandscape,subscribeOrientation} from "../../lib/session/orientation";
 import {useSessionCoach} from "../../lib/coach/useSessionCoach";
 import type {CueSource} from "../../lib/coach/hybrid";
 import {useSessionPose} from "../../lib/pose/useSessionPose";
@@ -23,8 +24,6 @@ import {CUES} from "../../../shared/cues";
 import "./shell.css";
 export const ORB_COLORS:[string,string]=["#CADCFC","#A0B9D1"];
 function Thumb({down=false}:{down?:boolean}){return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" style={{transform:down ? "rotate(180deg)":undefined}} aria-hidden="true"><path d="M8 10H4v10h4zM8 10l5-7c2-1 3 1 2 4l-1 3h5c2 0 2 2 1 4l-2 6H8z"/></svg>;}
-const subscribe=(notify:()=>void)=>{const query=window.matchMedia("(orientation: landscape)");query.addEventListener("change",notify);return()=>query.removeEventListener("change",notify);};
-const landscapeSnapshot=()=>window.matchMedia("(orientation: landscape)").matches;
 const widthSnapshot=()=>Math.min(480,window.innerWidth);
 const subscribeWidth=(notify:()=>void)=>{window.addEventListener("resize",notify);return()=>window.removeEventListener("resize",notify);};
 function Demo({exercise,reduce}:{exercise:number;reduce:boolean}){const video=useRef<HTMLVideoElement>(null);useEffect(()=>{if(reduce)video.current?.pause();else void video.current?.play().catch(()=>{});},[reduce,exercise]);return <video ref={video} className="shell-demo" key={exercise} src={`/videos/${MOVES[exercise].id}.mp4`} poster={`/images/${MOVES[exercise].id}-poster.jpg`} autoPlay={!reduce} loop muted playsInline aria-label={`${EXERCISES[MOVES[exercise].id].label} demonstration`}/>;}
@@ -33,7 +32,7 @@ export default function AppShell({sessionId,fake,simulateDenial=false,preview,po
   const router=useRouter();
   const [s,dispatch]=useReducer(shellReducer,preview,previewState),[error,setError]=useState(""),[busy,setBusy]=useState(false),[attempt,setAttempt]=useState(0),[denied,setDenied]=useState(!!preview && simulateDenial),[camera,setCamera]=useState<MediaStream|null>(null),[talking,setTalking]=useState(false),[repeat,setRepeat]=useState(""),[pulse,setPulse]=useState(""),[feedback,setFeedback]=useState(""),[rating,setRating]=useState<number|null>(null);
   const audio=useRef<AudioSession|null>(null),queue=useRef<SpeechQueue|null>(null),capture=useRef<MediaStream|null>(null),permissionVersion=useRef(0),denials=useRef(0),input=useRef<HTMLInputElement>(null),previous=useRef<ShellState>(initialShell),introFallback=useRef(false);
-  const {emit,finish,audit,auditState,receipt,acknowledged,emitted}=useShellTrace(sessionId),reduce=!!useReducedMotion(),landscape=useSyncExternalStore(subscribe,landscapeSnapshot,()=>false);
+  const {emit,finish,audit,auditState,receipt,acknowledged,emitted}=useShellTrace(sessionId),reduce=!!useReducedMotion(),landscape=useSyncExternalStore(subscribeOrientation,isLandscape,()=>false);
   const questionKey=`${s.screen}-${s.question}`,hasSession=s.screen!=="S0",compact=["S3","S5","S6","S7"].includes(s.screen);
   const wakeEnabled=hasSession && s.screen!=="S8";
   const width=useSyncExternalStore(subscribeWidth,widthSnapshot,()=>390);
@@ -53,7 +52,7 @@ export default function AppShell({sessionId,fake,simulateDenial=false,preview,po
   const poseError=useSessionPose(camera,s,!fake && !["S0","S1","S2","S8"].includes(s.screen),poseDelegate,dispatch,coach.report,poseStatus,poseFrame,emit);
   useEffect(()=>{const root=document.documentElement,wasDark=root.classList.contains("dark");root.classList.add("dark");return()=>{if(!wasDark)root.classList.remove("dark");};},[]);
   useEffect(()=>{if(!attempt)return;const element=input.current;element?.focus();if(reduce)return;const animation=element?.animate([{transform:"translateX(0)"},{transform:"translateX(-5px)"},{transform:"translateX(5px)"},{transform:"translateX(-5px)"},{transform:"translateX(0)"}],{duration:300,easing:"ease-in-out"});return()=>animation?.cancel();},[attempt,reduce]);
-  useEffect(()=>{if(preview)return;let last=performance.now();const timer=setInterval(()=>{const now=performance.now(),ms=now-last;last=now;if(document.visibilityState==="visible" && !landscapeSnapshot())dispatch({type:"tick",ms,introClock:fake || introFallback.current});},100);const hide=()=>{if(document.visibilityState!=="visible")dispatch({type:"pause"});};document.addEventListener("visibilitychange",hide);return()=>{clearInterval(timer);document.removeEventListener("visibilitychange",hide);};},[preview,fake]);
+  useEffect(()=>{if(preview)return;let last=performance.now();const timer=setInterval(()=>{const now=performance.now(),ms=now-last;last=now;if(document.visibilityState==="visible" && !isLandscape())dispatch({type:"tick",ms,introClock:fake || introFallback.current});},100);const hide=()=>{if(document.visibilityState!=="visible")dispatch({type:"pause"});};document.addEventListener("visibilitychange",hide);return()=>{clearInterval(timer);document.removeEventListener("visibilitychange",hide);};},[preview,fake]);
   useEffect(()=>{if(!wakeEnabled)return;const release=holdWakeLock();return()=>{void release.then(stop=>stop());};},[wakeEnabled]);
   useEffect(()=>()=>{permissionVersion.current++;capture.current?.getTracks().forEach(track=>track.stop());queue.current?.close();},[]);
   useEffect(()=>{if(s.screen==="S3"){capture.current?.getAudioTracks().forEach(track=>track.stop());audio.current?.stopMicrophone();}if(s.screen==="S8")capture.current?.getTracks().forEach(track=>track.stop());},[s.screen]);
@@ -86,7 +85,7 @@ export default function AppShell({sessionId,fake,simulateDenial=false,preview,po
   function restart(){if(finalizing)return;router.push(fake ? "/?fake=1":"/");router.refresh();}
   async function rate(score:number){if(!receipt){setFeedback("Feedback is not connected yet. Please try again.");return;}setFeedback("Sending feedback…");try{const response=await fetch("/api/session/feedback",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({thread_id:sessionId,...receipt,score})});if(!response.ok)throw new Error("Not recorded");setRating(score);setFeedback("Thanks for your feedback.");}catch{setFeedback("Feedback was not recorded. Please try again.");}}
   const next=Math.min(3,s.exercise+1),total=s.reps.reduce((a,b)=>a+b,0),countdown=COUNTDOWN[Math.min(4,Math.floor(s.introMs/1000))];
-  return <MotionConfig reducedMotion="user"><main className={`shell ${compact ? "is-compact":""}`} data-screen={s.screen} data-testid="app-shell">
+  return <MotionConfig reducedMotion="user"><main className={`shell ${compact ? "is-compact":""}`} data-landscape={landscape} data-screen={s.screen} data-testid="app-shell">
     <div className="shell-landscape" role="alertdialog" aria-modal="true" aria-labelledby="portrait-title"><span aria-hidden="true">↻</span><h1 id="portrait-title">Turn your phone upright</h1><p>Jax works in portrait. Your workout is waiting.</p></div>
     <div className="shell-stage" inert={landscape} aria-hidden={landscape}>
       <motion.div id="jax-orb" initial={false} animate={{x:compact ? 20-(width-260)/2:(260-orbSize)/2,y:orbY,scale:orbSize/260}} style={{originX:0,originY:0}} transition={{duration:reduce ? 0:0.5,ease:"easeInOut"}} className="shell-orb" role="img" aria-label="Jax voice orb"><Orb colors={ORB_COLORS} agentState={talking ? "talking":s.screen==="S2" ? "listening":null} volumeMode="manual" getOutputVolume={()=>audio.current?.getOutputVolume()??0} getInputVolume={()=>audio.current?.getInputVolume()??0}/></motion.div>

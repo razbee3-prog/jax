@@ -3,6 +3,7 @@ import {useEffect,useRef,useState} from "react";
 import type {Dispatch,RefObject} from "react";
 import type {RepReport} from "../../../shared/rep-report";
 import {MOVES,type ShellAction,type ShellState} from "../session/shell";
+import {isLandscape} from "../session/orientation";
 import {Landmarker} from "./landmarker";
 import {PosePipeline} from "./pipeline";
 import {RepReporter} from "./repReport";
@@ -26,7 +27,7 @@ export function useSessionPose(stream:MediaStream|null,state:ShellState,enabled:
       if(!detector || video.readyState<2 || video.currentTime===lastVideoTime)return;
       lastVideoTime=video.currentTime;
       if(s.screen==="S3" && s.floor){if(frameRef)frameRef.current=null;if(!s.inFrame)dispatch({type:"frame",value:true});return;}
-      if(!["S3","S6"].includes(s.screen) || document.visibilityState!=="visible" || window.matchMedia("(orientation: landscape)").matches){screen=s.screen;return;}
+      if(!["S3","S6"].includes(s.screen) || document.visibilityState!=="visible" || isLandscape()){screen=s.screen;return;}
       if(s.paused){
         pipeline=undefined;
         try{
