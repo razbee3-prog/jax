@@ -26,6 +26,7 @@ describe("M8 decision coverage",()=>{
 });
 describe("M8 hard code checks",()=>{
   it.each([
+    ["How much time do you have: 5, 10, or 20 minutes?","Start in 5, 10, or 20 mins?"],
     ["How much time do you have: 5, 10, or 20 minutes?","Would you like to start in 5, 10, or 20 mins?"],
     ["How much time do you have: 5, 10, or 20 minutes?","How about 5, 10, or 20 minutes?"],
     ["Do you have dumbbells with you?","Do you have dumbbells of any kind?"],

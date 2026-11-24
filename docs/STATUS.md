@@ -1,6 +1,40 @@
 # Jax status
 
-## M8 — PR #9 second review round; quality gate still FAILED
+## M8 — PR #9 third review round: canonical questions; quality gate still FAILED
+
+Confirmed starting HEAD **ad74a31c31cbe5b830ec23746c9a138c79bae558** before edits. The keyword approach was unreliable and is **deleted**, not patched again. **65c3bcb** replaces it with a nonempty, token-boundary **normalized exact suffix match** against the entire supplied `next_question` (case/punctuation/whitespace only, no number-word aliases). A brief acknowledgment can precede the canonical question; nothing may follow it. Both instruction source profiles and generated instructions require that exact contract, overriding legacy question copy. Six regression examples include all five reviewer phrasings plus the full “Would you like to start...” false-accept reproduction; paraphrases alone fail, acknowledgment + canonical copy passes. Tests also cover normalized spelling, trailing words, missing copy, empty input/expected and suffix word boundaries. Four tests failed before the root fix.
+
+**Implementation choice:** instructions + hard check, **not runtime client composition**. The decision schema has no separate acknowledgment field; extracting one from free-form text would reintroduce guessing. Client speech remains agent `decision.text`, which is exactly what the suffix check scores. This does not claim runtime enforcement or guarantee the model follows instructions.
+
+Synced and redeployed the existing dedicated agent **10c5b11d-e461-4f54-b75f-cd956a2f4bed**; CLI exit0, status **DEPLOYED**. Instruction SHA **58f07cd3c96d494b507d6759e74e7e5581549c6b89af9a2a0d1b4ce6c87d7867**. Private redacted deployment evidence: `/home/ubuntu/jax-evidence/m8/pr9-review3-deploy-agent.log`. No app runtime/client edits, so **no jax-web redeployment or repeat session simulation** this round. Earlier sessions below were on the earlier prompt, not newly validated against this agent revision. New prompt responses were API-evaluated, not visually/iPhone rechecked.
+
+Final checks after the final test edit: **lint exit0, all three typechecks exit0, 269 tests / 29 files PASS; build compiled 447ms, 13/13 pages in 215ms**. Shared copies match (inputs unchanged since the prior passing check). Source diff including the additional literal “Start in...” regression reviewed; no scorer/prompt edits during or after the experiment.
+
+### Latest experiment
+
+[Coach experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/a7270ad2-149c-4b5b-a30e-cae163a6d860) · [scores](../evals/results/m8/pr9-review3-coach.json) · [verdicts](../evals/results/m8/pr9-review3-verdicts.json), **exit1**:
+
+| Check | Result | Required | Status |
+| --- | --- | --- | --- |
+| Aggregate hard examples | **65/78** | 100% | **FAIL** |
+| Haiku judge | **3.756410256**, **78/78 judged** | ≥4, all judged | **FAIL** |
+| Coverage | 78/78 | All 78 | PASS |
+| Canonical onboarding suffix | **5/5 supplied-question evaluated turns** | Exact normalized suffix | PASS |
+
+Zero target errors. All **15 third-cue cases** again had **two actual prior played corrections**. Seven other hard metrics are 78/78, no-unflagged-fault 76/78, behavior 65/78. Thirteen failures: nine rest mentions (`pu_hip_sag`, `pu_shallow`, `pu_hip_pike`, `curl_drop`, `pp_soft_lockout`, `pp_no_legs`, `curl_swing`, `rdl_fast`, `pp_chest_forward`), `injury-brief`, `quality-view`, `pu_hip_pike-persists` and `curl_partial-persists`. The latter two also fail the coded no-unflagged-language check. No matcher aliases, safety gate, rubric, cue bank, threshold, Tier-B gate or bar was changed/waived. Quality-view is a raw-agent failure; the existing client quality guard remains tested. The remembered-injury answer ends correctly but also asks an extra confirmation before the canonical question: suffix correctness is not a blanket claim of perfect dialog quality. **M8 remains incomplete.**
+
+### Finding history across all three review rounds
+
+| Finding | Verdict and fix |
+| --- | --- |
+| Tick counted as speech onset | Real; private cue analysers, **1f50e21** |
+| Rest credits discarded text | Real; score client `restSpeech`, **464d89e** |
+| Third-cue precondition | Real; assert played history, **b99ed28**. Repeated finding at 28b141f was already resolved; generated-input/no-injected-precondition proof **d48cc37**, all 15 fresh counts =2 |
+| Missing onboarding question | Real; initial check **4a9a15f**, equipment-weight follow-up **c3937b2**; final canonical contract **65c3bcb** |
+| Round-two keyword intent/choices cases | Real; **c61f060** addressed those examples, now superseded by canonical matching |
+| Round-three keyword false accepts/rejects | Real root problem; **65c3bcb** deletes intent logic and deploys canonical-copy instructions; tests cover all reviewer examples |
+
+## M8 — PR #9 second review round (historical); quality gate still FAILED
 
 Confirmed starting HEAD **28b141f7a32a804b3bf1e16097846dee48ffcf13** before editing. **A was real**: “What kind of dumbbells do you have?” wrongly passed availability, while “Would you prefer a 5-, 10-, or 20-minute workout?” wrongly failed duration choices. Both exact examples reproduced failing-first, plus wrong which/heavy-light equipment questions (four failures total). **c61f060** adds availability-versus-detail intent checks and duration-selection intent, accepts singular/hyphenated minute choices, and still requires every expected choice. Seven additional cases cover both examples, related valid availability, missing choices and an unrelated rep-count question. Other hard checks unchanged.
 

@@ -1,0 +1,149 @@
+{
+  "starting_head": "ad74a31c31cbe5b830ec23746c9a138c79bae558",
+  "fix_commit": "65c3bcb",
+  "verdict": "real: keyword interpretation replaced, not extended",
+  "contract": "Supplied next_question is the complete canonical suffix of spoken decision.text, normalized for case/punctuation/whitespace only; no trailing words, no synonym/number-word substitutions.",
+  "runtime_composition": false,
+  "reason": "No separate acknowledgment field; chose instructed verbatim copy plus deterministic hard checking rather than heuristic acknowledgment extraction.",
+  "deployment": {
+    "id": "10c5b11d-e461-4f54-b75f-cd956a2f4bed",
+    "status": "DEPLOYED",
+    "instructions_sha256": "58f07cd3c96d494b507d6759e74e7e5581549c6b89af9a2a0d1b4ce6c87d7867",
+    "web_changed": false
+  },
+  "checks": {
+    "lint": "exit 0",
+    "typecheck": "web/agent/evals exit 0",
+    "tests": "269 passed / 29 files",
+    "build": "447ms compile, 13/13 pages 215ms",
+    "shared": "Shared copies match (unchanged inputs)"
+  },
+  "experiment": {
+    "id": "a7270ad2-149c-4b5b-a30e-cae163a6d860",
+    "examples": 78,
+    "hard_passed": 65,
+    "judge_average": 3.7564102564102564,
+    "judged": 78,
+    "target_errors": 0
+  },
+  "canonical_turns": [
+    {
+      "id": "remembered-injury",
+      "expected": "What would you like to work on today?",
+      "spoken_text": "Welcome back. Last time you mentioned your left knee. Is that still the case? What would you like to work on today?"
+    },
+    {
+      "id": "healed-injury",
+      "expected": "Last one: do you have a pair of dumbbells with you?",
+      "spoken_text": "Great news that your left knee is healed, and I've noted it as resolved. Last one: do you have a pair of dumbbells with you?"
+    },
+    {
+      "id": "messy-duration_min",
+      "expected": "Any injuries or anything you'd like me to be careful with?",
+      "spoken_text": "Ten minutes, got it. Any injuries or anything you'd like me to be careful with?"
+    },
+    {
+      "id": "messy-injuries",
+      "expected": "Last one: do you have a pair of dumbbells with you?",
+      "spoken_text": "Thanks for telling me about your left knee. I'll keep things gentle around it. Last one: do you have a pair of dumbbells with you?"
+    },
+    {
+      "id": "messy-focus",
+      "expected": "Got it. How much time do you have: 5, 10, or 20 minutes?",
+      "spoken_text": "Got it. How much time do you have: 5, 10, or 20 minutes?"
+    }
+  ],
+  "third_preconditions": [
+    {
+      "id": "pu_hip_sag-third",
+      "prior_played": {
+        "pu_hip_sag": 2
+      }
+    },
+    {
+      "id": "pu_shallow-third",
+      "prior_played": {
+        "pu_shallow": 2
+      }
+    },
+    {
+      "id": "pu_hip_pike-third",
+      "prior_played": {
+        "pu_hip_pike": 2
+      }
+    },
+    {
+      "id": "curl_drop-third",
+      "prior_played": {
+        "curl_drop": 2
+      }
+    },
+    {
+      "id": "curl_partial-third",
+      "prior_played": {
+        "curl_partial": 2
+      }
+    },
+    {
+      "id": "curl_elbow_drift-third",
+      "prior_played": {
+        "curl_elbow_drift": 2
+      }
+    },
+    {
+      "id": "pp_soft_lockout-third",
+      "prior_played": {
+        "pp_soft_lockout": 2
+      }
+    },
+    {
+      "id": "pp_no_legs-third",
+      "prior_played": {
+        "pp_no_legs": 2
+      }
+    },
+    {
+      "id": "curl_swing-third",
+      "prior_played": {
+        "curl_swing": 2
+      }
+    },
+    {
+      "id": "rdl_fast-third",
+      "prior_played": {
+        "rdl_fast": 2
+      }
+    },
+    {
+      "id": "pp_chest_forward-third",
+      "prior_played": {
+        "pp_chest_forward": 2
+      }
+    },
+    {
+      "id": "pp_dip_deep-third",
+      "prior_played": {
+        "pp_dip_deep": 2
+      }
+    },
+    {
+      "id": "rdl_knee_squat-third",
+      "prior_played": {
+        "rdl_knee_squat": 2
+      }
+    },
+    {
+      "id": "rdl_drift-third",
+      "prior_played": {
+        "rdl_drift": 2
+      }
+    },
+    {
+      "id": "rdl_shallow-third",
+      "prior_played": {
+        "rdl_shallow": 2
+      }
+    }
+  ],
+  "limits": "No client runtime enforcement, fresh session-sim, visual or iPhone check this round. Earlier healthy/outage sessions used earlier instructions. Quality bars still fail. No safety gate/rubric/cue bank/Tier-B/threshold changes."
+}
