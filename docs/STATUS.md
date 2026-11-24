@@ -15,7 +15,9 @@ Checks: lint and all three typechecks exit 0; **274 tests / 29 files passed**; b
 Focused input visually inspected at 390×844 CSS pixels; screenshots:
 `/home/ubuntu/jax-evidence/m9/invite-touch-safari-390x844.png` and
 `/home/ubuntu/jax-evidence/m9/invite-touch-chrome-390x844.png`.
-Linux WebKit emulation does **not** prove physical iPhone keyboard appearance or iOS audio routing. Safari and Chrome on Raz's phone still need retesting; macOS/iOS Simulator verification was offered but not started without approval. No detector, coach, cue bank, trace contract or agent deployment changed. Web-only rollout and public health results will be recorded after deployment.
+Linux WebKit emulation does **not** prove physical iPhone keyboard appearance or iOS audio routing. Safari and Chrome on Raz's phone still need retesting; macOS/iOS Simulator verification was offered but not started without approval. No detector, coach, cue bank, trace contract or agent deployment changed.
+
+**Deployment:** runtime source **7611271d1d42f4370d8f42ccce0e13495e144fd1** committed and pushed, then `jax-web` rebuilt/recreated only. Other container IDs unchanged; only APP_VERSION changed in the environment and credentials/webhook/mode600 were preserved. **Jax public health HTTP 200; strongr HTTP 200.** Follow-up public checks verified the server-rendered input has no disabled/readOnly/autofocus attribute and the form has POST/action attributes. On the actual HTTPS deployment, WebKit with JavaScript disabled successfully focused the input, submitted a native POST (200), and stored the Secure HttpOnly invite cookie. Evidence: `/home/ubuntu/jax-evidence/m9/deploy.log`, `deploy-result.txt`, and `deployed-verification.txt`. This follow-up is browser verification, not a real iPhone keyboard check. This final status-only update does not change deployed runtime code.
 
 ## M8 — PR #9 fourth review round: acknowledgment-only prefix; quality gate still FAILED
 
