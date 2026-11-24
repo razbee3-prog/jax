@@ -18,6 +18,7 @@ it("enters play-and-record before S1 capture, preserves it through onboarding, a
   audio.stopMicrophone(false);await audio.unlock();expect(type.type).toBe("play-and-record");
   audio.stopMicrophone();expect(type.type).toBe("playback");
 });
+it("reacquires video only after onboarding, without enabling or retrying microphone capture",async()=>{const audio=new AudioSession(),video=stream(),get=vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(video as unknown as MediaStream);expect(await requestPermissions(audio,()=>{},()=>true,false)).toBe(video);expect(get).toHaveBeenCalledWith({video:{facingMode:"user"},audio:false});expect(type.type).toBe("playback");get.mockClear().mockRejectedValue(new DOMException("busy","NotReadableError"));await expect(requestPermissions(audio,()=>{},()=>true,false)).rejects.toMatchObject({name:"NotReadableError"});expect(get).toHaveBeenCalledOnce();});
 it.each(["NotAllowedError","SecurityError"])("does not retry a permission denial (%s)",async name=>{
   const error=new DOMException("denied",name),get=vi.mocked(navigator.mediaDevices.getUserMedia).mockRejectedValue(error),retry=vi.fn();
   await expect(requestPermissions(new AudioSession(),retry)).rejects.toBe(error);expect(get).toHaveBeenCalledOnce();expect(retry).not.toHaveBeenCalled();

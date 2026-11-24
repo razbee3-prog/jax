@@ -96,7 +96,7 @@ test("full scripted session at 390x844: all screens, pauses, rest, floor setup a
     await page.getByRole("button",{name:"Thumbs up"}).click();await expect(page.getByRole("status").filter({hasText:"Thanks for your feedback."})).toHaveText("Thanks for your feedback.");await shot(page,"S8");
     const shifts=await page.evaluate(()=>(window as typeof window & {shellShifts:{value:number;time:number;recent:boolean}[]}).shellShifts);
     const result={orbMoveCLS:moveShifts,totalLayoutShift:shifts.reduce((sum,s)=>sum+s.value,0),cls:shifts.filter(s=>!s.recent).reduce((sum,s)=>sum+s.value,0),shifts};writeFileSync(resolve(folder,"layout-shift.json"),JSON.stringify(result,null,2));console.log("SHELL CLS "+JSON.stringify(result));
-    await page.getByRole("button",{name:"Start another preview"}).click();await screen(page,"S0");
+    await page.getByRole("button",{name:"Start another preview"}).click();await screen(page,"S1");
   }finally{await context.close();await browser.close();}
 });
 async function screenEventually(page:Page,name:string,timeout=10000){await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen",name,{timeout});}

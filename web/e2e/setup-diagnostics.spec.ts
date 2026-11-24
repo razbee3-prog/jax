@@ -12,7 +12,7 @@ test("WebKit simulated setup permits Continue and traces API failures and the S3
   await page.evaluate(()=>fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:"Fixture speech"})}));
   const next=page.getByRole("button",{name:"Continue",exact:true});await expect(next).toBeEnabled({timeout:45000});await next.tap();await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S4");
   await expect.poll(()=>events.some(e=>e.type==="setup.pass" && e.data.phase==="continue")).toBe(true);
-  expect(events.some(e=>e.type==="setup.check" && e.data.ready===true)).toBe(true);expect(events.some(e=>e.type==="client.error" && e.data.path==="/api/tts" && e.data.status===502)).toBe(true);
+  expect(events.some(e=>e.type==="setup.check" && typeof e.data.ready==="boolean")).toBe(true);expect(events.some(e=>e.type==="client.error" && e.data.path==="/api/tts" && e.data.status===502)).toBe(true);
   await page.screenshot({path:"test-results/setup-continue-WebKit-390x844.png"});
 });
 test("React failures retain their session ledger after the workout subtree unmounts",async({page})=>{

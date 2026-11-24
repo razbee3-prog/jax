@@ -10,10 +10,10 @@ export function permissionFailure(error:unknown){
     ["Could not start camera and microphone","Keep Jax in the foreground and try again. If this continues, reload Jax."];
   return {blocked,title:copy[0],message:copy[1],error_name:name,error_message:message.slice(0,1000)};
 }
-export async function requestPermissions(audio:Pick<AudioSession,"prepareForCapture">,onRetry:(error:unknown)=>void=()=>{},isCurrent:()=>boolean=()=>true){
-  audio.prepareForCapture();
-  try{return await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:true});}
-  catch(error){if(permissionFailure(error).blocked || !isCurrent())throw error;onRetry(error);}
+export async function requestPermissions(audio:Pick<AudioSession,"prepareForCapture">,onRetry:(error:unknown)=>void=()=>{},isCurrent:()=>boolean=()=>true,captureMicrophone=true){
+  if(captureMicrophone)audio.prepareForCapture();
+  try{return await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:captureMicrophone});}
+  catch(error){if(!captureMicrophone || permissionFailure(error).blocked || !isCurrent())throw error;onRetry(error);}
   let video:MediaStream|undefined,microphone:MediaStream|undefined;
   try{
     video=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});

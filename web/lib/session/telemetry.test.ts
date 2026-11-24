@@ -1,7 +1,7 @@
 import {it,expect,vi,afterEach} from "vitest";
 import {SessionLedger} from "./ledger";
 import {landmarkSeries,LANDMARK_IDS} from "./landmarks";
-import {eventSchema} from "./events";
+import {eventSchema,runName,type TraceEvent} from "./events";
 import {compareLedger,pollAudit} from "./audit.server";
 import type {Client} from "langsmith";
 afterEach(()=>{vi.useRealTimers();vi.unstubAllGlobals();});
@@ -15,7 +15,12 @@ it("batches events, waits for flush, preserves IDs and signs off with the comple
 });
 it("keeps failed posts in the ledger and failed beacons available for normal flush",async()=>{
   const send=vi.fn<typeof fetch>().mockRejectedValueOnce(new Error("offline")).mockResolvedValue(Response.json({acknowledged:[]})),ledger=new SessionLedger(thread,send);
-  ledger.emit("session.start");ledger.beacon(()=>false);await ledger.flush();expect(ledger.events).toHaveLength(1);expect(ledger.acknowledged.size).toBe(0);ledger.emit("session.end");await ledger.flush();expect(send).toHaveBeenCalledTimes(2);expect(JSON.parse(send.mock.calls[1][1]!.body as string).events[0].data.manifest).toHaveLength(2);
+  ledger.emit("session.start");ledger.beacon(()=>false);await ledger.flush();expect(ledger.events).toHaveLength(1);expect(ledger.acknowledged.size).toBe(0);ledger.emit("session.end");await ledger.flush();expect(send).toHaveBeenCalledTimes(2);const events=JSON.parse(send.mock.calls[1][1]!.body as string).events;expect(events.map((e:TraceEvent)=>e.type)).toEqual(["session.start","session.end"]);expect(events[1].data.manifest).toHaveLength(2);
+});
+it("restores acknowledged and in-flight progress, retries only unacknowledged IDs and audits a resume",async()=>{
+  const recorded=new Map<string,TraceEvent>(),send=vi.fn<typeof fetch>(async(_url,init)=>{const events=JSON.parse(init!.body as string).events as TraceEvent[];for(const event of events)recorded.set(event.event_id,event);const end=events.find(e=>e.type==="session.end");return Response.json({acknowledged:events.map(e=>e.event_id),...(end ? {run_id:end.event_id,receipt:"signed"}:{})});});
+  const original=new SessionLedger(thread,send);original.emit("session.start");await original.flush();original.emit("rep.detected",{count:3});const saved=JSON.parse(JSON.stringify(original.checkpoint())),restored=new SessionLedger(thread,send,saved);expect(restored.events).toEqual(original.events);expect(restored.acknowledged.size).toBe(1);restored.emit("session.resume",{reason:"reload",screen:"S6",reps:"[3,0,0,0]",paused:true});restored.emit("session.end");await restored.flush();const events=JSON.parse(send.mock.calls[1][1]!.body as string).events as TraceEvent[];expect(events.every(e=>eventSchema.safeParse(e).success)).toBe(true);expect(events.map(e=>e.type)).toEqual(["rep.detected","session.resume","session.end"]);expect(events.every(e=>e.thread_id===thread)).toBe(true);expect(events.at(-1)?.data.manifest).toEqual(restored.events);expect(restored.checkpoint().pending).toEqual([]);expect(restored.receipt?.receipt).toBe("signed");
+  const runs=[...recorded.values()].map(e=>({id:e.event_id,name:runName(e.type),outputs:e.data}));expect(compareLedger(thread,restored.events,runs)).toMatchObject({pass:true,expected:4,recorded:4});expect(compareLedger(thread,restored.events,runs.filter(r=>r.name!=="session.resume")).missing).toEqual(restored.events.filter(e=>e.type==="session.resume"));
 });
 it("does not send empty batches, and bounds ordinary beacon batch size",async()=>{
   const send=vi.fn<typeof fetch>(),ledger=new SessionLedger(thread,send);await ledger.flush();expect(send).not.toHaveBeenCalled();for(let i=0;i<20;i++)ledger.emit("screen.view",{text:"x".repeat(6000)});const blobs:Blob[]=[];ledger.beacon((_url,blob)=>{blobs.push(blob);return true;});expect(blobs.length).toBeGreaterThan(1);expect(blobs.every(b=>b.size<=48000)).toBe(true);

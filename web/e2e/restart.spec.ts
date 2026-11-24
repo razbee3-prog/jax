@@ -11,7 +11,7 @@ test("restart waits for the final coach turn and completed trace audit",async()=
     await page.goto("/");await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();await page.getByRole("button",{name:"End",exact:true}).click();
     const restart=page.getByRole("button",{name:"Start another workout"});await expect(restart).toBeDisabled();expect(events.some(e=>e.type==="session.end")).toBe(false);
     await expect(page.locator(".shell-screen")).toHaveCount(1);await expect(page.locator(".screen-S8")).toHaveCSS("opacity","1");await page.screenshot({path:"test-results/restart-finalizing.png"});releaseSummary();await expect.poll(()=>auditStarted).toBe(true);await expect(restart).toBeDisabled();expect(events.filter(e=>e.type==="session.end")).toHaveLength(1);
-    releaseAudit();await expect(restart).toBeEnabled();await restart.click();await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S0");
+    releaseAudit();await expect(restart).toBeEnabled();await restart.click();await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S1");
   }finally{releaseSummary();releaseAudit();await browser.close();}
 });
 for(const fake of [false,true])test(`restart preserves ${fake ? "fake":"live"} mode`,async()=>{
@@ -22,6 +22,6 @@ for(const fake of [false,true])test(`restart preserves ${fake ? "fake":"live"} m
     await page.goto(fake ? "/?fake=1&preview=S8":"/?poseDelegate=CPU");
     if(!fake){await page.getByLabel("Enter invite code to get started").fill("e2e-invite");await page.getByRole("button",{name:"Get started"}).click();await page.getByRole("button",{name:"Turn on camera and mic"}).click();await page.getByRole("button",{name:"End",exact:true}).click();}
     await page.getByRole("button",{name:fake ? "Start another preview":"Start another workout"}).click();
-    await expect.poll(()=>new URL(page.url()).searchParams.get("fake")).toBe(fake ? "1":null);await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen","S0");await expect(page.getByRole("link",{name:fake ? "Scripted preview · no camera or agent":"Try a scripted session",exact:true})).toBeVisible();
+    await expect.poll(()=>new URL(page.url()).searchParams.get("fake")).toBe(fake ? "1":null);await expect(page.getByTestId("app-shell")).toHaveAttribute("data-screen",fake ? "S0":"S1");if(fake)await expect(page.getByRole("link",{name:"Scripted preview · no camera or agent",exact:true})).toBeVisible();else await expect(page.locator("#invite")).toHaveCount(0);
   }finally{await browser.close();}
 });

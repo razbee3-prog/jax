@@ -131,6 +131,7 @@ describe("cue bank and correction loop",()=>{
     const first=r(1)!,reminder=r(2)!;expect(first.kind).toBe("first");expect(reminder.kind).toBe("reminder");expect(first.text).not.toBe(reminder.text);
     expect(r(3)).toBeNull();p.reset();expect(r(1)?.kind).toBe("first");
   });
+  it("preserves the two-cue budget across a serialized reload but resets on the next set",()=>{const first=new CuePolicy();first.next({report:make(1),observations:[]});const restored=new CuePolicy();restored.restore(JSON.parse(JSON.stringify(first.checkpoint())));expect(restored.next({report:make(2),observations:[]})?.kind).toBe("reminder");const twice=new CuePolicy();twice.restore(JSON.parse(JSON.stringify(restored.checkpoint())));expect(twice.next({report:make(3),observations:[]})).toBeNull();twice.reset();expect(twice.next({report:make(1),observations:[]})?.kind).toBe("first");const empty=new CuePolicy();empty.restore(JSON.parse(JSON.stringify(new CuePolicy().checkpoint())));expect(empty.next({report:make(1,[]),observations:[]})).toBeNull();});
   it("acknowledges a cleared fault and suppresses low-quality form claims",()=>{
     const p=new CuePolicy();p.next({report:make(1),observations:[]});
     expect(p.next({report:make(2,[]),observations:[]})?.kind).toBe("fixed");

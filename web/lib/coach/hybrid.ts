@@ -19,7 +19,8 @@ export class HybridCoach {
   private outage=false;
   private qualityOk=false;
   constructor(readonly serial:SerialCoach,private enqueue:(line:SpeechLine)=>void,private clearFault:(id:string,at:number)=>void,private log:(data:{rep:number;source:CueSource;latency_ms:number;reason:string})=>void,private now=()=>performance.now()){}
-  start(setId:string){this.setId=setId;this.policy.reset();this.active.clear();this.eligible.clear();this.epochs.clear();this.guidance=undefined;this.qualityOk=false;}
+  checkpoint(){return {setId:this.setId,policy:this.policy.checkpoint()};}
+  start(setId:string,saved?:ReturnType<HybridCoach["checkpoint"]>){this.setId=setId;this.policy.reset();if(saved?.setId===setId)this.policy.restore(saved.policy);this.active.clear();this.eligible.clear();this.epochs.clear();this.guidance=undefined;this.qualityOk=false;}
   end(){this.setId="";this.guidance=undefined;}
   contact(result:CoachResult){this.outage=result.source==="fallback";if(this.outage)this.guidance=undefined;}
   private stamp(){return [...this.active].sort().map(id=>`${id}:${this.epochs.get(id)??0}`).join("|");}

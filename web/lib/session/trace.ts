@@ -1,10 +1,10 @@
 "use client";
 import { useCallback,useEffect,useState } from "react";
-import {SessionLedger} from "./ledger";
+import {SessionLedger,type LedgerCheckpoint} from "./ledger";
 import type {TraceData} from "./events";
 import type {AuditResult} from "./audit.server";
-export function useShellTrace(thread_id:string){
-  const [ledger]=useState(()=>new SessionLedger(thread_id)),[snapshot,setSnapshot]=useState({receipt:ledger.receipt,acknowledged:0,emitted:0}),[audit,setAudit]=useState<AuditResult|null>(null),[auditState,setAuditState]=useState("pending");
+export function useShellTrace(thread_id:string,saved?:LedgerCheckpoint){
+  const [ledger]=useState(()=>new SessionLedger(thread_id,undefined,saved)),[snapshot,setSnapshot]=useState({receipt:ledger.receipt,acknowledged:ledger.acknowledged.size,emitted:ledger.events.length}),[audit,setAudit]=useState<AuditResult|null>(null),[auditState,setAuditState]=useState("pending");
   useEffect(()=>{
     const unsubscribe=ledger.subscribe(()=>setSnapshot({receipt:ledger.receipt,acknowledged:ledger.acknowledged.size,emitted:ledger.events.length}));
     const interval=setInterval(()=>void ledger.flush(),2000);
@@ -14,10 +14,11 @@ export function useShellTrace(thread_id:string){
   },[ledger]);
   const emit=useCallback((type:string,data:TraceData={})=>ledger.emit(type,data),[ledger]);
   const flush=useCallback(()=>ledger.flush(),[ledger]);
+  const checkpoint=useCallback(()=>ledger.checkpoint(),[ledger]);
   const finish=useCallback(async()=>{
     setAuditState("checking");await ledger.flush();
     try{if(!ledger.receipt)throw new Error("Telemetry flush failed");const response=await fetch("/api/session/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({thread_id,...ledger.receipt,ledger:ledger.events}),signal:AbortSignal.timeout(80000)});if(!response.ok)throw new Error("Audit unavailable");const result:AuditResult=await response.json();setAudit(result);setAuditState(result.pass ? "pass":"fail");}
     catch{setAuditState("error");setAudit(null);}
   },[thread_id,ledger]);
-  return {emit,flush,finish,audit,auditState,...snapshot};
+  return {emit,flush,checkpoint,finish,audit,auditState,...snapshot};
 }

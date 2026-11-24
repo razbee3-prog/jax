@@ -2,12 +2,15 @@ import { CUES } from "../../../shared/cues";
 import { FAULTS, type FaultId } from "../../../shared/faults";
 import type { RepReport } from "../../../shared/rep-report";
 import type { Observation } from "./faults";
+export type CueCheckpoint={cues:Partial<Record<FaultId,number>>;active?:FaultId;lastRep:number;exercise?:string};
 export class CuePolicy {
   private cues: Partial<Record<FaultId,number>> = {};
   private active?: FaultId;
   private lastRep = 0;
   private exercise?: string;
   reset() { this.cues = {}; this.active = undefined; this.lastRep = 0; this.exercise = undefined; }
+  checkpoint():CueCheckpoint{return {cues:{...this.cues},active:this.active,lastRep:this.lastRep,exercise:this.exercise};}
+  restore(saved:CueCheckpoint){this.cues={...saved.cues};this.active=saved.active;this.lastRep=saved.lastRep;this.exercise=saved.exercise;}
   next({ report, observations, quiet=false }: { report: RepReport; observations: Observation[]; quiet?:boolean }) {
     if (this.exercise !== report.exercise || report.rep <= this.lastRep) this.reset();
     this.exercise = report.exercise; this.lastRep = report.rep;
