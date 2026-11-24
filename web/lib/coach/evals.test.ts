@@ -26,15 +26,23 @@ describe("M8 decision coverage",()=>{
 });
 describe("M8 hard code checks",()=>{
   it.each([
-    ["Do you have dumbbells with you?","What kind of dumbbells do you have?",false],
-    ["How much time do you have: 5, 10, or 20 minutes?","Would you prefer a 5-, 10-, or 20-minute workout?",true],
-    ["Do you have dumbbells with you?","Which dumbbells do you have?",false],
-    ["Do you have dumbbells with you?","Do you have heavy or light dumbbells?",false],
-    ["Do you have dumbbells with you?","Have you got weights nearby?",true],
-    ["How much time do you have: 5, 10, or 20 minutes?","How many reps are in a 5-, 10-, or 20-minute workout?",false],
-    ["How much time do you have: 5, 10, or 20 minutes?","Would you prefer a 5- or 20-minute workout?",false],
-  ])("matches onboarding intent and choices: %s / %s",(expected,text,result)=>{
-    expect(asksExpectedQuestion(text,expected)).toBe(result);
+    ["How much time do you have: 5, 10, or 20 minutes?","Would you like to start in 5, 10, or 20 mins?"],
+    ["How much time do you have: 5, 10, or 20 minutes?","How about 5, 10, or 20 minutes?"],
+    ["Do you have dumbbells with you?","Do you have dumbbells of any kind?"],
+    ["Do you have dumbbells with you?","What kind of dumbbells do you have?"],
+    ["How much time do you have: 5, 10, or 20 minutes?","Would you prefer a 5-, 10-, or 20-minute workout?"],
+  ])("requires canonical copy instead of interpreting %s / %s",(expected,paraphrase)=>{
+    expect(asksExpectedQuestion(paraphrase,expected)).toBe(false);
+    expect(asksExpectedQuestion("Got it. "+expected,expected)).toBe(true);
+  });
+  it("matches only a normalized complete canonical question suffix",()=>{
+    const expected="Do you have dumbbells with you?";
+    expect(asksExpectedQuestion("Thanks! DO you have dumbbells, with   you?!",expected)).toBe(true);
+    expect(asksExpectedQuestion(expected+" Thanks.",expected)).toBe(false);
+    expect(asksExpectedQuestion("Do you have dumbbells?",expected)).toBe(false);
+    expect(asksExpectedQuestion("",expected)).toBe(false);
+    expect(asksExpectedQuestion("Anything?","")).toBe(false);
+    expect(asksExpectedQuestion("anything","thing")).toBe(false);
   });
   it("requires the expected next onboarding question, not just correct slots and nonempty speech",()=>{
     const check=(next_question:string,text:string)=>hardChecks(turn({event:{type:"onboarding_answer",question:"injuries",transcript:"No injuries",next_question},decision:{...quiet,speak:true,kind:"question",guidance:null,text,slots:{focus:null,duration_min:null,injuries:[],has_dumbbells:null}}}),{speak:true,slot:{name:"injuries",value:[]}}).behavior;
@@ -44,11 +52,11 @@ describe("M8 hard code checks",()=>{
     expect(check(dumbbells,"How heavy are your dumbbells?")).toBe(0);
     expect(check(dumbbells,"")).toBe(0);
     expect(check(dumbbells,dumbbells)).toBe(1);
-    expect(check(dumbbells,"Thanks for letting me know. Are your weights available?")).toBe(1);
+    expect(check(dumbbells,"Thanks for letting me know. Are your weights available?")).toBe(0);
     expect(check("How much time do you have: 5, 10, or 20 minutes?","How much time do you have?")).toBe(0);
-    expect(check("How much time do you have: 5, 10, or 20 minutes?","Would five, ten, or twenty minutes work for you?")).toBe(1);
-    expect(check("Any injuries or anything you'd like me to be careful with?","Is there any pain I should know about?")).toBe(1);
-    expect(check("What would you like to work on today?","What workout would you like today?")).toBe(1);
+    expect(check("How much time do you have: 5, 10, or 20 minutes?","Would five, ten, or twenty minutes work for you?")).toBe(0);
+    expect(check("Any injuries or anything you'd like me to be careful with?","Is there any pain I should know about?")).toBe(0);
+    expect(check("What would you like to work on today?","What workout would you like today?")).toBe(0);
   });
   it("credits rest fault mentions only in the note the client actually speaks",()=>{
     const event={type:"set_end" as const,reports:[contractReport("rdl",3,["rdl_knee_squat"])]};
