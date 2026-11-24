@@ -1,5 +1,5 @@
 import { SpeechGovernor,SpeechDropped,type SpeechLine,type SpeechEvent } from "../coach/governor";
-export type Playback={ttfa_ms:number;cache:string};
+export type Playback={ttfa_ms:number;cache:string;audio_started_at_ms?:number};
 export class SpeechQueue {
   private pending?:SpeechLine;
   private active=false;

@@ -1,0 +1,707 @@
+{
+  "label": "iteration-2-all",
+  "suite": "all",
+  "created_at": "2026-11-23T21:49:08.640Z",
+  "links": {
+    "counting": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/e8b8693e-3c8d-4217-9bc4-d9a90e5aa72c",
+    "faults": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/e2257196-001c-430d-bad8-52911a641b5f",
+    "coach": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/93300d56-0f2f-4b75-8326-8fd89fe41ab7",
+    "sessions": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/a10c433f-7642-4ced-a173-1775db5b8567"
+  },
+  "table": [
+    {
+      "check": "Perception fixtures",
+      "value": "passed",
+      "bar": "existing M3 gates",
+      "pass": true
+    },
+    {
+      "check": "Coach hard checks",
+      "value": "75/78",
+      "bar": "100%",
+      "pass": false
+    },
+    {
+      "check": "Haiku judge",
+      "value": "3.702 (78/78)",
+      "bar": "average ≥4; all judged",
+      "pass": false
+    },
+    {
+      "check": "Decision coverage",
+      "value": "78/78",
+      "bar": "all 78 examples",
+      "pass": true
+    },
+    {
+      "check": "Session forty_reps",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    },
+    {
+      "check": "Session talk_ratio",
+      "value": "2/2",
+      "bar": "25–55% in every set",
+      "pass": true
+    },
+    {
+      "check": "Session rep_latency",
+      "value": "2/2",
+      "bar": "browser meter p95 ≤2500 ms",
+      "pass": true
+    },
+    {
+      "check": "Session speech_gap",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    },
+    {
+      "check": "Session trace_complete",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    },
+    {
+      "check": "Session thumbs_feedback",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    },
+    {
+      "check": "Session expected_mode",
+      "value": "2/2",
+      "bar": "100%",
+      "pass": true
+    }
+  ],
+  "details": {
+    "perception": {
+      "suite": "m3-perception-v2",
+      "created_at": "2026-11-23T21:14:39.211Z",
+      "urls": {
+        "counting": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/e8b8693e-3c8d-4217-9bc4-d9a90e5aa72c",
+        "faults": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/e2257196-001c-430d-bad8-52911a641b5f"
+      },
+      "counting": {
+        "examples": 16,
+        "exact_matches": 16,
+        "absolute_error": 0
+      },
+      "faults": {
+        "examples": 24,
+        "real_labeled_clips": 0,
+        "table": [
+          {
+            "id": "rdl_back_round",
+            "synthetic": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 0.5,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          },
+          {
+            "id": "rdl_knee_squat",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "rdl_drift",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "rdl_shallow",
+            "synthetic": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 0.5,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          },
+          {
+            "id": "rdl_fast",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_chest_forward",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_dip_deep",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_no_legs",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_soft_lockout",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_lean_back",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          },
+          {
+            "id": "pp_press_early",
+            "synthetic": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 0.5,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          },
+          {
+            "id": "curl_swing",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "curl_elbow_drift",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "curl_partial",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "curl_drop",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pu_hip_sag",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pu_hip_pike",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pu_shallow",
+            "synthetic": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 1,
+            "recall": 1,
+            "real_precision": null,
+            "status": "provisional",
+            "speech_eligible": false
+          },
+          {
+            "id": "pu_head_drop",
+            "synthetic": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 0
+            },
+            "real": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0
+            },
+            "precision": 0.5,
+            "recall": 1,
+            "real_precision": null,
+            "status": "locked",
+            "speech_eligible": false
+          }
+        ]
+      }
+    },
+    "coach": {
+      "examples": 78,
+      "hard_passed": 75,
+      "judge_average": 3.701923076923077,
+      "judged": 78,
+      "failures": [
+        {
+          "id": "quality-view",
+          "failed": [
+            "hard_fault_grounded",
+            "hard_no_unflagged_fault",
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "pp_dip_deep-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        },
+        {
+          "id": "rdl_knee_squat-third",
+          "failed": [
+            "hard_behavior"
+          ]
+        }
+      ],
+      "instructions_sha256": "8d1a1040d421d628e487cb09bbb3300ab0856d4298a3a299c0f18a348f34bdc0"
+    },
+    "sessions": [
+      {
+        "id": "healthy-agent",
+        "scores": [
+          {
+            "key": "forty_reps",
+            "score": 1,
+            "sourceRunId": "01a20a62-5cdf-7000-8000-015e4a4ea01e"
+          },
+          {
+            "key": "talk_ratio",
+            "score": 1,
+            "sourceRunId": "01a20a62-5cdf-7000-8000-015e4a4ea01e"
+          },
+          {
+            "key": "rep_latency",
+            "score": 1,
+            "sourceRunId": "01a20a62-5cdf-7000-8000-015e4a4ea01e"
+          },
+          {
+            "key": "speech_gap",
+            "score": 1,
+            "sourceRunId": "01a20a62-5cdf-7000-8000-015e4a4ea01e"
+          },
+          {
+            "key": "trace_complete",
+            "score": 1,
+            "sourceRunId": "01a20a62-5cdf-7000-8000-015e4a4ea01e"
+          },
+          {
+            "key": "thumbs_feedback",
+            "score": 1,
+            "sourceRunId": "01a20a62-5cdf-7000-8000-015e4a4ea01e"
+          },
+          {
+            "key": "expected_mode",
+            "score": 1,
+            "sourceRunId": "01a20a62-5cdf-7000-8000-015e4a4ea01e"
+          }
+        ],
+        "output": {
+          "thread_id": "01a20a57-31b6-70a8-9802-4091914c8dd4",
+          "run_id": "2b33f11f-1480-4cf1-a4ce-9860cb4e7768",
+          "trace": {
+            "url": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/01a1fb80-0ac8-7811-8ba3-fb4377f4e01d/trace/2b33f11f-1480-4cf1-a4ce-9860cb4e7768/run/2b33f11f-1480-4cf1-a4ce-9860cb4e7768"
+          },
+          "metrics": {
+            "reps": 40,
+            "per_set": [
+              {
+                "exercise": "rdl",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "push-press",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "curl",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "push-up",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              }
+            ],
+            "played_inset_lines": 12,
+            "measured_inset_lines": 12,
+            "rep_to_audio": {
+              "n": 12,
+              "p50_ms": 64.09999999403954,
+              "p95_ms": 98.09999999403954,
+              "max_ms": 98.09999999403954
+            },
+            "ttfa": {
+              "n": 12,
+              "p50_ms": 64.09999999403954,
+              "p95_ms": 98.09999999403954,
+              "max_ms": 98.09999999403954
+            },
+            "local_decision": {
+              "n": 40,
+              "p50_ms": 0,
+              "p95_ms": 0.09999999403953552,
+              "max_ms": 0.20000001788139343
+            },
+            "background_guidance": {
+              "n": 39,
+              "p50_ms": 2109.9000000059605,
+              "p95_ms": 2942.199999988079,
+              "max_ms": 3500.800000011921
+            },
+            "fallback_rep_turns": 1,
+            "min_gap_ms": 6330.700000017881,
+            "talk_ratio_pass": true,
+            "latency_pass": true,
+            "gap_pass": true,
+            "measurement": "browser output-volume meter; not iPhone acoustic latency"
+          },
+          "audit": {
+            "thread_id": "01a20a57-31b6-70a8-9802-4091914c8dd4",
+            "pass": true,
+            "expected": 282,
+            "recorded": 282,
+            "missing": []
+          },
+          "feedback_pass": true,
+          "mode_pass": true,
+          "trace_pass": true,
+          "iphone_latency_verified": false
+        }
+      },
+      {
+        "id": "agent-outage",
+        "scores": [
+          {
+            "key": "forty_reps",
+            "score": 1,
+            "sourceRunId": "01a20a62-5ce5-7000-8000-009f28c603df"
+          },
+          {
+            "key": "talk_ratio",
+            "score": 1,
+            "sourceRunId": "01a20a62-5ce5-7000-8000-009f28c603df"
+          },
+          {
+            "key": "rep_latency",
+            "score": 1,
+            "sourceRunId": "01a20a62-5ce5-7000-8000-009f28c603df"
+          },
+          {
+            "key": "speech_gap",
+            "score": 1,
+            "sourceRunId": "01a20a62-5ce5-7000-8000-009f28c603df"
+          },
+          {
+            "key": "trace_complete",
+            "score": 1,
+            "sourceRunId": "01a20a62-5ce5-7000-8000-009f28c603df"
+          },
+          {
+            "key": "thumbs_feedback",
+            "score": 1,
+            "sourceRunId": "01a20a62-5ce5-7000-8000-009f28c603df"
+          },
+          {
+            "key": "expected_mode",
+            "score": 1,
+            "sourceRunId": "01a20a62-5ce5-7000-8000-009f28c603df"
+          }
+        ],
+        "output": {
+          "thread_id": "01a20a5d-57a3-73cf-a2bb-a759ae1886f6",
+          "run_id": "32ad9752-42d1-4932-9999-226556d1410d",
+          "trace": {
+            "url": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/01a1fb80-0ac8-7811-8ba3-fb4377f4e01d/trace/32ad9752-42d1-4932-9999-226556d1410d/run/32ad9752-42d1-4932-9999-226556d1410d"
+          },
+          "metrics": {
+            "reps": 40,
+            "per_set": [
+              {
+                "exercise": "rdl",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "push-press",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "curl",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              },
+              {
+                "exercise": "push-up",
+                "reps": 10,
+                "spoken_reps": 3,
+                "talk_ratio": 0.3
+              }
+            ],
+            "played_inset_lines": 12,
+            "measured_inset_lines": 12,
+            "rep_to_audio": {
+              "n": 12,
+              "p50_ms": 57.599999994039536,
+              "p95_ms": 151.09999999403954,
+              "max_ms": 151.09999999403954
+            },
+            "ttfa": {
+              "n": 12,
+              "p50_ms": 57.5,
+              "p95_ms": 151.09999999403954,
+              "max_ms": 151.09999999403954
+            },
+            "local_decision": {
+              "n": 40,
+              "p50_ms": 0,
+              "p95_ms": 0.19999998807907104,
+              "max_ms": 0.20000001788139343
+            },
+            "background_guidance": null,
+            "fallback_rep_turns": 40,
+            "min_gap_ms": 6604.199999988079,
+            "talk_ratio_pass": true,
+            "latency_pass": true,
+            "gap_pass": true,
+            "measurement": "browser output-volume meter; not iPhone acoustic latency"
+          },
+          "audit": {
+            "thread_id": "01a20a5d-57a3-73cf-a2bb-a759ae1886f6",
+            "pass": true,
+            "expected": 282,
+            "recorded": 282,
+            "missing": []
+          },
+          "feedback_pass": true,
+          "mode_pass": true,
+          "trace_pass": true,
+          "iphone_latency_verified": false
+        }
+      }
+    ]
+  },
+  "iphone_acoustic_latency": "unverified"
+}

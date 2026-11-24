@@ -1,5 +1,223 @@
 # Jax status
 
+## M8 — PR #9 fourth review round: acknowledgment-only prefix; quality gate still FAILED
+
+Confirmed starting HEAD **2317fe95ca13a19fb576f58639e18ca24045b920**. **Real finding:** the existing remembered-injury response “Welcome back. Last time you mentioned your left knee. Is that still the case? What would you like to work on today?” passed the canonical suffix check despite asking an additional question first. Regression failed first (`expected true to be false`).
+
+**a0f10f3** now locates the canonical suffix's original text boundary and rejects a question mark anywhere before it. Original token offsets preserve normalized case/punctuation/whitespace matching; tests include the exact knee example, pure acknowledgment pass, a no-space/case-normalized extra question, canonical-only pass, and Unicode case-normalization offset safety. No keyword logic or question-intent guessing. Existing instructions already forbid additional questions, so **instructions unchanged; no live calls, redeployment or new session simulation**.
+
+### Offline re-score of the existing live outputs
+
+[Original live experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/a7270ad2-149c-4b5b-a30e-cae163a6d860) · [offline hard-score artifact](../evals/results/m8/pr9-review4-offline.json).
+
+| Check | Result | Provenance / status |
+| --- | --- | --- |
+| Current hard examples | **64/78** | **FAIL**, offline re-score of the same 78 outputs (100% required) |
+| Haiku judge | **3.756410256**, 78/78 judged | **FAIL** ≥4; original live judgments unchanged, not rejudged |
+| Live calls this round | **0** | No model or deployed API requests for re-scoring |
+| Changed example | **remembered-injury** | behavior 1→0, previously credited extra question is now caught |
+
+The original LangSmith experiment retains its original **65/78** hard feedback; **64/78 is the new local offline re-score**, not a new live experiment. Only that one example changed; other hard scores and all judge scores are preserved in the artifact. Existing instructions remain SHA **58f07cd3c96d494b507d6759e74e7e5581549c6b89af9a2a0d1b4ce6c87d7867**. Repro script: `/home/ubuntu/jax-evidence/m8/pr9-review4-rescore.mts`; original raw outputs remain `/home/ubuntu/jax-evidence/m8/pr9-review3-coach/coach-results.json`.
+
+Final checks after the last edit: **lint exit0, web/agent/evals typechecks exit0, 270 tests / 29 files PASS; build compiled 423ms, 13/13 pages in 213ms**. Shared-copy inputs unchanged from the earlier passing check. Source diff reviewed and whitespace check clean. No app runtime, rubric, cue bank, threshold, Tier-B gate or bar changes. Client composition is still not runtime-enforced; this is the deterministic hard evaluator and existing agent instruction contract. **M8 remains incomplete.**
+
+Finding history below remains applicable; this fourth-round extra-question finding is **real, fixed in a0f10f3**, after canonical matching **65c3bcb**. No phone/visual verification this evaluator-only round.
+
+### PR CI repair after the fourth round
+
+Bootstrap job **138129321470** failed in the real-camera framing browser test: `Error: strict mode violation: locator('.shell-bar') resolved to 2 elements`, expected `ON-DEVICE`. Logs list the outgoing S5 intro header and incoming S6 active header. `start()` waits for main data-screen=S6, while the intentional sync crossfade keeps S5 mounted for 250ms. **e4f126c** scopes both real/fake header assertions to `.screen-S6 .shell-bar`; no timeout, assertion, transition or application behavior changes.
+
+One unmodified local reproduction attempt **passed** (14.0s); this is not claimed as a deterministic local reproduction. CI DOM evidence plus the transition/dispatch code identifies the ambiguous selector. After the scope fix: lint/typechecks exit0 and the affected browser test **1 passed (13.6s)**. Other unit/application/scorer inputs are unchanged; earlier **270 unit tests passed**, build and offline scores remain applicable. CI is watched again on the repair commit after publication; its final result is reported in the handoff.
+
+## M8 — PR #9 third review round (historical): canonical questions; quality gate still FAILED
+
+Confirmed starting HEAD **ad74a31c31cbe5b830ec23746c9a138c79bae558** before edits. The keyword approach was unreliable and is **deleted**, not patched again. **65c3bcb** replaces it with a nonempty, token-boundary **normalized exact suffix match** against the entire supplied `next_question` (case/punctuation/whitespace only, no number-word aliases). A brief acknowledgment can precede the canonical question; nothing may follow it. Both instruction source profiles and generated instructions require that exact contract, overriding legacy question copy. Six regression examples include all five reviewer phrasings plus the full “Would you like to start...” false-accept reproduction; paraphrases alone fail, acknowledgment + canonical copy passes. Tests also cover normalized spelling, trailing words, missing copy, empty input/expected and suffix word boundaries. Four tests failed before the root fix.
+
+**Implementation choice:** instructions + hard check, **not runtime client composition**. The decision schema has no separate acknowledgment field; extracting one from free-form text would reintroduce guessing. Client speech remains agent `decision.text`, which is exactly what the suffix check scores. This does not claim runtime enforcement or guarantee the model follows instructions.
+
+Synced and redeployed the existing dedicated agent **10c5b11d-e461-4f54-b75f-cd956a2f4bed**; CLI exit0, status **DEPLOYED**. Instruction SHA **58f07cd3c96d494b507d6759e74e7e5581549c6b89af9a2a0d1b4ce6c87d7867**. Private redacted deployment evidence: `/home/ubuntu/jax-evidence/m8/pr9-review3-deploy-agent.log`. No app runtime/client edits, so **no jax-web redeployment or repeat session simulation** this round. Earlier sessions below were on the earlier prompt, not newly validated against this agent revision. New prompt responses were API-evaluated, not visually/iPhone rechecked.
+
+Final checks after the final test edit: **lint exit0, all three typechecks exit0, 269 tests / 29 files PASS; build compiled 447ms, 13/13 pages in 215ms**. Shared copies match (inputs unchanged since the prior passing check). Source diff including the additional literal “Start in...” regression reviewed; no scorer/prompt edits during or after the experiment.
+
+### Latest experiment
+
+[Coach experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/a7270ad2-149c-4b5b-a30e-cae163a6d860) · [scores](../evals/results/m8/pr9-review3-coach.json) · [verdicts](../evals/results/m8/pr9-review3-verdicts.json), **exit1**:
+
+| Check | Result | Required | Status |
+| --- | --- | --- | --- |
+| Aggregate hard examples | **65/78** | 100% | **FAIL** |
+| Haiku judge | **3.756410256**, **78/78 judged** | ≥4, all judged | **FAIL** |
+| Coverage | 78/78 | All 78 | PASS |
+| Canonical onboarding suffix | **5/5 supplied-question evaluated turns** | Exact normalized suffix | PASS |
+
+Zero target errors. All **15 third-cue cases** again had **two actual prior played corrections**. Seven other hard metrics are 78/78, no-unflagged-fault 76/78, behavior 65/78. Thirteen failures: nine rest mentions (`pu_hip_sag`, `pu_shallow`, `pu_hip_pike`, `curl_drop`, `pp_soft_lockout`, `pp_no_legs`, `curl_swing`, `rdl_fast`, `pp_chest_forward`), `injury-brief`, `quality-view`, `pu_hip_pike-persists` and `curl_partial-persists`. The latter two also fail the coded no-unflagged-language check. No matcher aliases, safety gate, rubric, cue bank, threshold, Tier-B gate or bar was changed/waived. Quality-view is a raw-agent failure; the existing client quality guard remains tested. The remembered-injury answer ends correctly but also asks an extra confirmation before the canonical question: suffix correctness is not a blanket claim of perfect dialog quality. **M8 remains incomplete.**
+
+### Finding history across all three review rounds
+
+| Finding | Verdict and fix |
+| --- | --- |
+| Tick counted as speech onset | Real; private cue analysers, **1f50e21** |
+| Rest credits discarded text | Real; score client `restSpeech`, **464d89e** |
+| Third-cue precondition | Real; assert played history, **b99ed28**. Repeated finding at 28b141f was already resolved; generated-input/no-injected-precondition proof **d48cc37**, all 15 fresh counts =2 |
+| Missing onboarding question | Real; initial check **4a9a15f**, equipment-weight follow-up **c3937b2**; final canonical contract **65c3bcb** |
+| Round-two keyword intent/choices cases | Real; **c61f060** addressed those examples, now superseded by canonical matching |
+| Round-three keyword false accepts/rejects | Real root problem; **65c3bcb** deletes intent logic and deploys canonical-copy instructions; tests cover all reviewer examples |
+
+## M8 — PR #9 second review round (historical); quality gate still FAILED
+
+Confirmed starting HEAD **28b141f7a32a804b3bf1e16097846dee48ffcf13** before editing. **A was real**: “What kind of dumbbells do you have?” wrongly passed availability, while “Would you prefer a 5-, 10-, or 20-minute workout?” wrongly failed duration choices. Both exact examples reproduced failing-first, plus wrong which/heavy-light equipment questions (four failures total). **c61f060** adds availability-versus-detail intent checks and duration-selection intent, accepts singular/hyphenated minute choices, and still requires every expected choice. Seven additional cases cover both examples, related valid availability, missing choices and an unrelated rep-count question. Other hard checks unchanged.
+
+**B is already resolved at 28b141f by b99ed28**, not a remaining target bug. All 15 generated third-cue inputs declare two required played corrections. `uploadRows` uploads `row.inputs` unchanged; experiment dispatch passes those inputs to `coachTarget`, which compares actual played queue outcomes after history with the required count and throws **Invalid evaluation fixture** before the candidate on mismatch. Verification-only **d48cc37** removes the test's manual precondition injection, uses the generated row unchanged, checks all 15 declarations, and proves missing/one-correction histories reject while two corrections resolve. Both deployed review experiments also report exactly **2** prior played corrections for **all 15** third cases, with zero target errors. No additional product/target change was needed.
+
+Final checks after the last code edit: **lint exit0, all three typechecks exit0, 269 tests / 29 files passed; build compiled 407ms, 13/13 pages in 202ms; Shared copies match.** Source diff reviewed; no further scorer or agent edits during/after the run. [Second-round verdicts](../evals/results/m8/pr9-review2-verdicts.json).
+
+### Latest fresh coach-decisions rerun
+
+[Experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/977045cf-1d8a-41ca-9118-8b61a1ca6d43) · [scores](../evals/results/m8/pr9-review2-coach.json), **exit1**:
+
+| Check | Result | Required | Status |
+| --- | --- | --- | --- |
+| Aggregate hard examples | **68/78** | 100% | **FAIL** |
+| Haiku judge | **3.798701299**, **77/78** judged | ≥4, all judged | **FAIL** |
+| Dataset coverage | 78/78 | All 78 | PASS |
+
+All eight other coded hard metrics **78/78**; behavior **68/78**. All onboarding next-question cases pass. Remaining behavior failures: nine rest mentions (`pu_hip_sag`, `pu_shallow`, `pu_hip_pike`, `curl_drop`, `pp_no_legs`, `curl_swing`, `rdl_fast`, `pp_chest_forward`, `rdl_shallow`) plus `rdl_knee_squat-two-faults` priority. Finite fault-language coverage remains incomplete; nothing was waived or retuned.
+
+**Judge coverage also misses its bar:** `curl_elbow_drift-third` judge returned the four numeric scores but omitted required `explanation`; evaluator logged `OUTPUT_PARSING_FAILURE` / `Invalid input: expected string, received undefined` at path `["explanation"]`. Reported mean covers only 77 valid judgments; no replacement score, rubric relaxation or selective retry. Private full log: `/home/ubuntu/jax-evidence/m8/pr9-review2-coach.log`.
+
+This round changes **evaluators/tests only**, not app runtime: **no new web/agent deployment or repeat session simulation needed**. The previous review's web-only deployment and healthy/outage seven-gate PASS sessions remain applicable (see below). Agent instruction hash remains **73cc67f5574d41f2d879a0c428b46a0005817f0604bad2285b8832c23445ca17**; rubric, cue bank, detector thresholds, Tier-B gates and bars untouched. M8 remains incomplete; phone acoustic/real-detector validation still unverified.
+
+## M8 — PR #9 first review round (historical); quality gate still FAILED
+
+Confirmed starting HEAD **a93e5666bd1b83f3aed1e026e6fa8cc479f36c9b**. All four findings were real, reproduced failing-first, then fixed separately. This round fixes measurement/evaluation correctness only: **no agent instructions, rubric, cue bank, detector thresholds, Tier-B gates or pass bars changed**. No agent redeployment was needed. Full verdicts, original failures and the 15 live precondition counts are in [pr9-review-verdicts.json](../evals/results/m8/pr9-review-verdicts.json).
+
+| Finding | Concrete wrong case and fix | Commit |
+| --- | --- | --- |
+| Tick contaminates speech onset | A rep tick remains audible after the 30ms gate while cue PCM is delayed/silent; shared RMS falsely calls onAudio. Per-play and countdown analysers now receive ONLY cue buffers upstream of the shared gain, read cue RMS and disconnect in finally. Regression keeps the global meter loud while cue audio is absent/zero, then verifies real cue onset. | `1f50e21` |
+| Unspoken rest text gets mention credit | `decision.text="Too much knee bend."`, `next_time="Rest for a moment."` used to pass although rest discards text. Mention checks now reuse client `restSpeech`; tests also cover selected/unselected went_well fallback and empty notes. | `464d89e` |
+| Third-cue setup unverified | First reply requests quiet; second correction never plays, yet final quiet was credited after only one correction. All 15 third inputs now declare exactly two required played corrections; target checks actual queue outcomes after history and throws **Invalid evaluation fixture** on missing/insufficient history before scoring a candidate. | `b99ed28` |
+| Missing next onboarding question passes | Correct injury slots plus “Have a great day” passed despite a supplied dumbbell question. Onboarding/session_start now require the supplied next question or a matching interrogative intent with its choices. Tests reject unrelated/empty speech, wrong equipment-weight questions and missing choices, while accepting exact/paraphrased questions. | `4a9a15f` |
+
+Follow-up **c3937b2** strengthens equipment availability versus weight-amount negatives and fixes the readonly AudioContext clock test mock caught by the first full typecheck (`TS2540`). Final code checks **after the last edit**: lint exit0, all three typechecks exit0, **261 tests / 29 files passed**, build compiled **1816ms**, **13/13 pages in 241ms**, **Shared copies match.** No code/scorer edits during or after the experiments; later changes are results/docs only.
+
+Deployed **jax-web only**, source **c3937b240f8436fccc610130e7f98fa1ed08cd69**. Other container IDs unchanged; only APP_VERSION changed, all other env bytes/credentials/webhook and mode600 preserved. **Container health HTTP200; Jax public health HTTP 200; strongr HTTP 200.** Private deployment log: `/home/ubuntu/jax-evidence/m8/pr9-review-deploy-web.log`.
+
+### Fresh deployed experiments after the review fixes
+
+[Coach experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/c070eb09-8dc6-41a7-9ff8-f01e773aae1b), [machine-readable scores](../evals/results/m8/pr9-review-coach.json), **exit1**:
+
+| Check | Result | Bar | Status |
+| --- | --- | --- | --- |
+| Aggregate hard examples | **68/78** | 100% | **FAIL** |
+| Haiku judge | **3.801282051**, 78/78 judged | ≥4 and all judged | **FAIL** |
+| Dataset coverage | 78/78 | All 78 | PASS |
+
+Zero target errors; **all 15 third-cue cases actually had two prior played corrections**, not just two submitted reports. All eight other coded hard metrics are **78/78**, behavior **68/78**. All onboarding next-question cases pass the stronger check. Remaining behavior failures: eight rest mentions (`pu_shallow`, `pu_hip_pike`, `curl_drop`, `pp_soft_lockout`, `pp_no_legs`, `curl_swing`, `rdl_fast`, `pp_chest_forward`), `summary` (structured summary null), `rdl_knee_squat-two-faults` (wrong priority). Finite keyword coverage still misses clear phrases such as “hips rose into a pike” and “legs didn't drive”; no aliases were changed or failures waived in this review round. These tightened evaluators are not a like-for-like comparison to older runs; the unchanged agent's judge variation is not an instruction improvement.
+
+[Session experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/25adf329-7a30-4eca-95f1-ff84dc3497d6), [machine-readable scores](../evals/results/m8/pr9-review-sessions.json), **exit0**, rerun because the cue-only meter changed web code. **All seven gates PASS 2/2**:
+
+| Case | Reps | Talk ratio each set | Cue-only rep→audio p50 / p95 | Min gap | Audit | Fallback rep turns |
+| --- | --- | --- | --- | --- | --- | --- |
+| Healthy | 40 | 30%, 30%, 30%, 30% | 64.3 / 152.5ms | 6128.7ms | PASS 281/281 | 0 |
+| Outage | 40 | 30%, 30%, 30%, 30% | 63.5 / 146.2ms | 6321.4ms | PASS 282/282 | 40 |
+
+Each case has **12/12 played in-set lines measured** with the isolated cue meter, persisted Helpful feedback and correct source mode. Healthy background guidance n=40 p50 **2263.7ms**, p95 **2968.9ms**, max **3643.8ms**. Trace end runs: healthy **50fc779c-a79d-4c4a-b0a9-c3670535d0b8**, outage **aefaa0be-4768-40a6-988a-3998dc959768**.
+
+Both **390×844** summaries viewed: Helpful confirmation and recorded counts visible; healthy 40 reps/4:45/20kcal, outage 40 reps/4:26/18kcal and fallback explanation. Screenshots: `/home/ubuntu/jax-evidence/m8/pr9-review-sessions/sessions/{healthy-agent,agent-outage}/summary.png`. Visual review also exposes remaining agent copy imprecision: healthy narrative calls it a session “in ten minutes” while the measured timer is 4:45; not retuned in this CI/measurement round. Screenshots verify summary state, not audio-source isolation (proved by graph/regression tests). **iPhone acoustic latency and real detector validation remain UNVERIFIED.**
+
+## M8 — iteration 3 (historical); quality gate FAILED
+
+**M8 is not complete.** The requested one additional round is finished: **67/78 hard examples**, **3.814102564 judge average (78/78 judged)**, both below **100% / ≥4**. Both redeployed full-session simulations pass. No fourth instruction round or after-run scorer edits were made; stopping and reporting as requested. Current machine-readable results: [coach](../evals/results/m8/iteration-3-coach.json), [sessions](../evals/results/m8/iteration-3-sessions.json). Iteration 2's full `npm run evals` also exited 1; perception inputs have not changed and were not rerun.
+
+### Iteration 3 — one requested final round
+
+- **Quality guard:** instructions now short-circuit `view_ok=false` or visibility <0.8 BEFORE considering fault IDs, validation, streaks or memory, always returning exact quiet guidance. Both `quality-view` and visibility cases now pass. The prior client `CuePolicy.next` already suppressed poor-quality form speech, but **`HybridCoach` did not discard the background guidance itself**. Fixed that retention gap: clear stored guidance on quality loss, reject replies from poor-quality reports and reject otherwise-valid replies while current tracking is poor. Nine new tests cover focus/reminder/ack/quiet, both quality gates, recovery, stored and in-flight replies. No counting/quality threshold was changed.
+- **Mention matcher:** `evals/evaluators/fault-language.ts::FAULT_LANGUAGE` is the single per-fault definition of diagnostic claims and mention vocabulary for all 19 faults. Rest mention checks no longer require an exact cue-bank sentence; rep reminder/ack approval still DOES. Original claim patterns remain, with additive synonyms also detecting unflagged paraphrases. Nineteen tests cover accepted paraphrases, all other fault lines as negatives, generic/empty prose, Tier-B and unflagged claims. The previously rejected deep-dip and excess-knee-bend paraphrases now pass. No schema, word-cap, one-fault, grounding, Tier-B or third-cue rule was relaxed.
+- **Lowest 15 reviewed:** [full prior judge reasons](../evals/results/m8/iteration-3-lowest-review.json): seven rest responses, seven immutable local-cue responses, one required Tier-B silence. Actual rest issues were generic completion/visibility praise, vague external targets and missing specific observations. Both instruction profiles now request a specific, honest completion acknowledgment plus one plain observed issue and one concrete object/path target; rest wording may be natural rather than an exact bank copy. Fixed rest/sign-off text and silence remain authoritative. No extra speech was added to compensate for silence scores; **rubric, bars and cue bank unchanged**.
+- **Deployment:** synced `agent/instructions.md`; existing dedicated agent **10c5b11d-e461-4f54-b75f-cd956a2f4bed** reached **DEPLOYED**, managed-deepagents **0.10.5**. Source/runtime commit **b14bb05276507269b84ef1b708a9cfb213ff818e**. Because the client guard changed, rebuilt/recreated **jax-web only**, other container IDs unchanged, credentials/webhook preserved, env mode600 retained, only APP_VERSION changed. **Jax public health HTTP 200; strongr HTTP 200.**
+- **Checks after final code edit:** lint and all three typechecks exit 0; **257 tests / 29 files passed**; local build compiled **744ms**, **13/13 pages in 222ms**; **Shared copies match.** No runtime changes after these checks or during either experiment. Later edits are results/documentation only.
+
+[Coach experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/9571ae11-9a7a-4e45-9300-f776c01468bd), `iteration-3-coach`, **exit 1**:
+
+| Check | Result | Bar | Status |
+| --- | --- | --- | --- |
+| Aggregate hard examples | 67/78 | 100% | FAIL |
+| Haiku judge | 3.814102564, 78/78 judged | ≥4, complete coverage | FAIL |
+| Decision coverage | 78/78 | All 78 | PASS |
+
+All **eight other coded hard metrics are 78/78**; only behavior is 67/78. Hard totals are not directly comparable to the old 75/78: the old matcher admitted generic exact bank sentences as mentions. An **offline replay of the unchanged R2 outputs** with this round's matcher yields **69/78**, versus this new model run's **67/78**. This replay was not another model run or a replacement experiment; old results were not rescored in LangSmith.
+
+The eleven remaining behavior failures are `rdl_knee_squat-two-faults` (picked `rdl_drift` instead of the lower-priority-number knee fault) plus ten third/rest rows: `pu_shallow`, `pu_hip_pike`, `pu_hip_sag`, `curl_drop`, `curl_swing`, `pp_soft_lockout`, `pp_no_legs`, `pp_chest_forward`, `rdl_fast`, `rdl_shallow`. **Keyword coverage remains incomplete**: clear phrases such as “legs didn't drive”, “chest drifted forward” and “arms finished a little soft” are still missed. Other failures are genuinely vague/wrong descriptions: hip-pike feedback says hips “dipped out of line”, and body-swing feedback describes the upper arms instead. They are retained as FAIL; ambiguous descriptions were not aliased to multiple faults just to pass. Future matcher work needs adversarial negatives as well as these positive phrases.
+
+Judge dimension means moved from warmth **3.2564→3.4231**, external focus **3.2949→3.5513**, fit **4.0000→4.0385**, restraint **4.2564→4.2436**. Measured mean improved **3.7019→3.8141**, but the bar still misses. Rest acknowledgments also often repeat the new “Three reps in the bank” template; not every intended style change was followed. No further tuning was done.
+
+[Fresh session experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/7a0358eb-862e-445c-ba05-6351cdc227f1), `iteration-3-sessions`, **exit 0**:
+
+| Case | Reps | Talk ratio each set | Rep→audio p50 / p95 | Min gap | Audit | Fallback rep turns |
+| --- | --- | --- | --- | --- | --- | --- |
+| Healthy | 40 | 30%, 30%, 30%, 30% | 63.9 / 109.9ms | 6334.6ms | PASS 282/282 | 0 |
+| Outage | 40 | 30%, 30%, 30%, 30% | 67.3 / 170.6ms | 6404.2ms | PASS 282/282 | 40 |
+
+All seven session gates **2/2 PASS**; each has **12/12 played lines measured**, expected source mode and persisted Helpful feedback. Healthy background guidance n=40 p50 **2157.8ms**, p95 **2546.0ms**, max **2860.8ms**. Separate SDK readback confirms `trace_complete=1` and `coaching_helpful=1` on both end runs: healthy **56093915-f809-4a85-8492-f981b2b74327**, outage **46a2d086-bf0f-4e68-a1bd-c1949c00df29** ([feedback evidence](../evals/results/m8/iteration-3-feedback-readback.json)).
+
+Both **390×844** summaries visually checked once: Helpful confirmation, **282/282 recorded**, healthy 40 reps/4:47/20kcal, outage 40 reps/4:26/19kcal and the fallback explanation. Screenshots under `/home/ubuntu/jax-evidence/m8/iteration-3-sessions/sessions/{healthy-agent,agent-outage}/summary.png`. Client guard behavior is unit-verified, not live validated on real faults. Desktop meter timing **does not verify iPhone acoustic latency**; demo/counterfactual evidence does not validate detectors. No new LangSmith outage occurred and no further online-evaluator creation was attempted.
+
+### Scope and invariant gates
+
+- `jax-coach-decisions`: **78 synthetic counterfactual contract examples** across all 15 potential Tier-A faults, every Tier-B fault, provisional/poor tracking, two faults, corrected/persistent/third-cue cases, injury-aware briefs, messy onboarding and cross-session healed-injury memory. They authenticate through the deployed app's invite/coach path, replay the actual hybrid policy/governor and close/audit each thread. They are **not real detector-validation evidence**.
+- `jax-session-sim`: healthy-agent and deliberately intercepted HTTP-502-outage whole-client sessions, chips with STT disabled, demo clips through MediaPipe, 40 actual camera-counted reps, real ElevenLabs, telemetry/audit and automated thumbs-click/readback. No framing, counting, detector evidence, thresholds or Tier-B gates changed. Local cue bank and written judge rubric also remain unchanged.
+- **Requested PLAN deviation:** coach and four-dimension 1–5 judge both use **`claude-haiku-5-5`**, not the stronger judge proposed in §11.3. The same-family judge is less independent; its bar remains ≥4 with all examples judged.
+- Runner executes perception, coach and session experiments, prints all bars and exits nonzero on failure. Nightly/on-demand guards require `LANGSMITH_API_KEY`, `ANTHROPIC_API_KEY`, `INVITE_CODE`, `JAX_BASE_URL`; GitHub secret provisioning remains unverified (M7 permission probe was 403). Local credentials are present and never printed.
+
+### Audit recovery and deployment
+
+Historical container logs around 19:40–20:10 UTC were empty. The original deployed audit exception **cannot be recovered**, so a transient LangSmith timeout remains a hypothesis, not a confirmed diagnosis. The initial independent SDK metadata call did time out; after service recovery it succeeded in **256ms**. The historical deployment had no `ALERT_WEBHOOK_URL`, ruling out that optional branch.
+
+Commit **e057546** adds server-only audit exception logging (name/status/message/cause class, configured-secret and URL redaction) plus **one 250ms-backoff retry for transient project metadata reads only**; feedback mutations are not blindly retried. Tests cover redaction, timeout recovery, authentication rejection and exhaustion. Deployed **jax-web only**; other container IDs unchanged, environment preserved except APP_VERSION and still mode600. **Jax health HTTP 200; strongr HTTP 200.** The diagnostic image also ships the M8 browser timing instrumentation.
+
+No audit 502 or LangSmith timeout recurred in the resumed completed experiments, so the requested further timeout-retry window was not needed. The baseline's one separate coach HTTP 502 was a semantic response failure: production `coach.request` **01a20a0f-9b5c-7000-8000-00b471465118** records **`Error: Speech and text disagree`** from decision parsing, not audit infrastructure. The judge now rejects an absent candidate explicitly instead of throwing a secondary undefined-property error; failed targets are not awarded scores.
+
+### Instruction iterations
+
+Both source profiles were edited, synchronized into `agent/instructions.md` and redeployed to dedicated server **10c5b11d-e461-4f54-b75f-cd956a2f4bed**, using **managed-deepagents 0.10.5**, status **DEPLOYED**. Iteration 3 instruction SHA256: `73cc67f5574d41f2d879a0c428b46a0005817f0604bad2285b8832c23445ca17`.
+
+| Run | Change and reason | Hard examples | Judge average / coverage |
+| --- | --- | --- | --- |
+| [Resumed baseline](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/7b821d35-bf42-4ed1-a34c-f05644d8f883) | Existing instructions; 18 completed-output failures plus one speech/text semantic 502 | 59/78 FAIL | 3.779220779, 77/78 FAIL |
+| [Iteration 1](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/b0964ecb-c545-4297-9ba2-bbbd03a2df3e) | Explicit non-null quiet guidance, blank focus text, lowest eligible priority, two-directive cap, spoken memory-write answers, exact grounded rest cue; address baseline shape/priority/repeated-fault errors | 72/78 FAIL | 3.682692308, 78/78 FAIL |
+| [Iteration 2](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/93300d56-0f2f-4b75-8326-8fd89fe41ab7) | Conservative quiet at eligible-fault streak ≥3, explicit cleared-fault reason, one plain-language rest observation plus exact reminder, completion-count praise rather than invented form improvement | 75/78 FAIL | 3.701923077, 78/78 FAIL |
+| [Iteration 3](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/9571ae11-9a7a-4e45-9300-f776c01468bd) | Quality-first quiet; client guidance retention guard; keyword-based rest mentions; specific warmth/external targets after reviewing lowest 15; new matcher comparable R2 replay 69/78 | 67/78 FAIL | 3.814102564, 78/78 FAIL |
+
+No model target failed in iterations 1 or 2. Iteration 2's historical hard metrics were schema/speech/word-cap/one-fault/no-third-cue **78/78**, grounded/no-unflagged **77/78**, behavior **75/78**. Remaining rows at that stage:
+
+- **quality-view:** `view_ok=false`, but raw guidance proposed `focus/curl_swing` rather than quiet. This is a real guidance-eligibility violation. No local form line was played in that fixture.
+- **pp_dip_deep-third**, **rdl_knee_squat-third:** rep guidance was correctly quiet; the behavior mention matcher rejects the rest paraphrases (“dip went deeper than the target”, “knees bent a little more than the hinge needed”) and non-exact bank wording. These are review-needed lexical rejections, retained as FAIL rather than waived or rescored. Further evaluator synonym coverage needs both grounded-positive and unflagged-negative regression cases.
+- The unchanged judge's dimension means are warmth **3.2564**, external focus **3.2949**, fit **4.0000**, restraint **4.2564**. First/persistent/fixed groups average **3.7667 / 3.6000 / 3.7333**; those immediate lines are selected synchronously from the shared bank before the same-rep agent response, so agent-only prompt changes cannot rewrite them. Persistent-third/rest rows are lower still (**3.4833**), so local wording is not the sole issue: agent rest feedback also needs work. Further cue-wording/evaluator-calibration work is open; no rubric, dataset or bar was weakened to manufacture ≥4.
+
+### Iteration 2 full-session results (historical)
+
+Iteration 1's two session cases failed before reps because the fixture initializer, serialized under TSX/esbuild, referenced an undefined `__name`. Actual browser evidence: **`PAGEERROR __name is not defined`**, `getUserMedia` override absent, default Chromium green-camera feed, correctly disabled framing gate. The helper now installs standalone JavaScript text without compiler-closure dependencies. Post-fix actual TSX browser: **`DEMO OVERRIDE true`**, no page error; microphone-off/on unit cases and the existing real-framing Playwright regression pass. Framing/pose gates were not relaxed.
+
+[Final session experiment](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/a10c433f-7642-4ced-a173-1775db5b8567), dataset **e6cd6f06-a7ad-4f37-b3a2-5942c8085bfa**:
+
+| Case | Reps | Played-rep ratio, each set | Rep→audio p50 / p95 | Minimum speech gap | Audit |
+| --- | --- | --- | --- | --- | --- |
+| [Healthy](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/01a1fb80-0ac8-7811-8ba3-fb4377f4e01d/trace/2b33f11f-1480-4cf1-a4ce-9860cb4e7768/run/2b33f11f-1480-4cf1-a4ce-9860cb4e7768) | 40 | 30%, 30%, 30%, 30% | 64.1 / 98.1ms | 6330.7ms | PASS 282/282 |
+| [Outage](https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/projects/p/01a1fb80-0ac8-7811-8ba3-fb4377f4e01d/trace/32ad9752-42d1-4932-9999-226556d1410d/run/32ad9752-42d1-4932-9999-226556d1410d) | 40 | 30%, 30%, 30%, 30% | 57.6 / 151.1ms | 6604.2ms | PASS 282/282 |
+
+Both have **12/12 played in-set lines measured**, independent ledger readback complete, expected agent/fallback mode correct and automated Helpful click persisted. Separate readback verifies **`trace_complete=1` and `coaching_helpful=1` on each session.end run**; committed [feedback evidence](../evals/results/m8/feedback-readback.json). Healthy background guidance n=39: p50 **2109.9ms**, p95 **2942.2ms**; one healthy rep turn reached its four-second deadline and was traced as fallback. Outage has **40 fallback rep turns**. These timings are not the deterministic counting path.
+
+All seven session gates pass **2/2**, perception fixtures pass, and decision coverage is **78/78**. Only aggregate coach hard checks and judge mean fail the final printed table. Browser output-meter latency **does not verify iPhone acoustic latency** (PLAN §2 criterion 4); phone routing/silent switch/Bluetooth/permissions/framing remain unverified. Demo replays do not validate real detectors.
+
+### Iteration 2 checks, visuals and online attachment (historical)
+
+Iteration 2 code checks, after adding explicit normal/empty audit-read coverage: lint/typecheck exit 0, **229 tests / 28 files passed**, build compiled **443ms**, **13/13 pages in 226ms**. Existing real-framing E2E: **1 passed (14.3s)**. Shared copies matched; their source inputs have not changed. Later edits are documentation/results only, so these checks were not needlessly repeated. Node **22.23.3**, LangSmith **0.13.1**, managed-deepagents **0.10.5** verified loaded; the legacy `readSession` emits the pinned SDK's `listRuns` deprecation, not an environment/authentication failure.
+
+Both **390×844** final summaries were visually inspected: Helpful confirmation and **“Trace check: 282 of 282 recorded”** are visible. Evidence under `/home/ubuntu/jax-evidence/m8/iteration-2-all/sessions/`: `healthy-agent/summary.png`, `agent-outage/summary.png`, plus events/results. Healthy shows **40 reps, 4:32, 19kcal**; outage **40 reps, 4:26, 18kcal**, with the visible local-coaching fallback explanation. Feedback readback is under the same run root.
+
+Online setup listing succeeded, but initial creation and the **one requested retry** both returned **HTTP 400**, exactly **`{"detail":"Failed to create code evaluator"}`**. No permissions cause or successful attachment is claimed. Self-contained evaluator code, documented payload and setup script remain committed; no further creation attempts were made. Retry log: `/home/ubuntu/jax-evidence/m8/online-retry.log`.
+
+
 ## M6 — coach loop integration (desktop done-when sessions passed)
 
 ### PR #7 review follow-up

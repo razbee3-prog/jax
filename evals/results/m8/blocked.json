@@ -1,0 +1,20 @@
+{
+  "historical": true,
+  "superseded_by": "iteration-2-all.json",
+  "status": "blocked",
+  "dataset": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/datasets/a7bd9620-4846-466e-849e-ed091e4a1c72",
+  "partial_experiment": "https://smith.langchain.com/o/af88c6e7-5dd5-44fb-b02b-c6cfdf6fd53c/datasets/a7bd9620-4846-466e-849e-ed091e4a1c72/compare?selectedSessions=cd44ebbd-1a68-49ad-9283-84559b1b2d10",
+  "errors": ["Evaluation trace audit HTTP 502", "DOMException [TimeoutError]: The operation was aborted due to timeout"],
+  "server_root_cause": "unverified; route suppresses underlying exception; webhook branch ruled out by absent configuration",
+  "bars": [
+    {"check":"Coach hard checks","bar":"100%","status":"not completed"},
+    {"check":"Haiku judge","bar":"average >=4","status":"not completed"},
+    {"check":"Session talk ratio","bar":"25-55% per set","status":"not run"},
+    {"check":"Rep-to-audio latency","bar":"p95 <=2500ms","status":"not run; iPhone unverified"},
+    {"check":"Full-session audit and thumb readback","bar":"100%","status":"not run"},
+    {"check":"Online attachment","status":"blocked","http_status":400,"message":"Failed to create code evaluator"}
+  ],
+  "instruction_iterations": [],
+  "agent_deployed": false,
+  "web_deployed": false
+}
